@@ -13,48 +13,55 @@ public class Bond extends MasonScheduledContracts {
     private State currentState;
     private Agent issuer;
     private Agent holder;
-    private Double principal;
+    private Double faceValue;
+    private Double issuePrice;
     private Double rate;
     private Integer numCoupons;
     private Double couponFrequency;
 
-    public Bond(String name, SimState state, ContractHandler handler, Agent issuer, Agent holder, Double principal,
-                     Double rate, Integer numCoupons, Double couponFrequency) {
+    public Bond(String name, SimState state, ContractHandler handler, Agent issuer, Agent holder, Double faceValue,
+                     Double issuePrice, Double rate, Integer numCoupons, Double couponFrequency) {
 
         super(name, state, handler);
 
         currentState = State.PRINCIPAL;
         this.issuer  = issuer;
         this.holder = holder;
-        this.principal=principal;
+        this.faceValue = faceValue;
+        this.issuePrice = issuePrice;
         this.rate=rate;
         this.numCoupons=numCoupons;
         this.couponFrequency=couponFrequency;
+    }
 
+    public void start(SimState state) {
         this.scheduleEvent(requestNextObligation(state), state);
     }
+
 
     @Override
     public ScheduledObligation requestNextObligation(SimState state) {
 
         Obligation o = null;
-        Double time = gapBetweenCoupons;
+        Double time = null;
 
         switch (this.currentState) {
 
             case PRINCIPAL:
-                o = new Obligation(this.seller, this.buyer, new Good(this.goodName, principalPayment));
-                time = new Double(1.0);
+                o = new Obligation(this.issuer, this.holder, new GBP(issuePrice));
+                time = state.schedule.getSteps()+1.0;
                 break;
             case COUPON:
-                o = new Obligation(this.buyer, this.seller, new Good(this.goodName, this.couponAmount));
+                o = new Obligation(this.holder, this.issuer, new GBP(faceValue*this.rate));
+                time = state.schedule.getSteps()+couponFrequency;
                 break;
             case MATURED:
-                o = new Obligation(this.buyer, this.seller, new Good(this.goodName, this.principalPayment));
+                o = new Obligation(this.holder, this.issuer, new GBP(faceValue));
+                time = state.schedule.getSteps()+1.0;
                 break;
         }
 
-        return (new ScheduledObligation(o, state.schedule.getSteps() + time));
+        return (new ScheduledObligation(o, time));
     }
 
     @Override
@@ -108,8 +115,8 @@ public class Bond extends MasonScheduledContracts {
         }
         System.out.println("The current state is: " + this.currentState + ". Therefore, " + from.getName() + " gave "
                 + to.getName() + " " + quantity + " of " + what);
-        System.out.println("FinancialInstitution " + from.getName() + " has $" + from.getInventory().getAllGoodEntries().get("cash"));
-        System.out.println("FinancialInstitution " + to.getName() + " has $" + to.getInventory().getAllGoodEntries().get("cash"));
+        System.out.println("FinancialInstitution " + from.getName() + " has $" + from.getInventory().getAllGoodEntries().get("GBP"));
+        System.out.println("FinancialInstitution " + to.getName() + " has $" + to.getInventory().getAllGoodEntries().get("GBP"));
 
     }
 

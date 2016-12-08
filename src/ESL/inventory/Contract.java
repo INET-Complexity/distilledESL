@@ -14,12 +14,12 @@ public class Contract extends Item {
 	super(name);
     }
 
-    public Double valutation(Map<Object, Object> parameters,
+    public Double valuation(Map<Object, Object> parameters,
 	    Map<Contract, BiFunction<Contract, Map, Double>> value_functions) {
 	return value_functions.get(this.getClass()).apply(this, parameters);
     }
 
-    public Double valutation(Map<Object, Object> parameters, BiFunction<Contract, Map, Double> value_function) {
+    public Double valuation(Map<Object, Object> parameters, BiFunction<Contract, Map, Double> value_function) {
 	return value_function.apply(this, parameters);
     }
 

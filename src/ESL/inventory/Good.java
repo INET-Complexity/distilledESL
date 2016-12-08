@@ -15,10 +15,10 @@ public class Good extends Item {
         this.quantity = quantity;
     }
 
-    public Double valutation(Map<Object, Object> parameters, Map<Contract, BiFunction<Contract, Map, Double>> value_functions) {
+    public Double valuation(Map<Object, Object> parameters, Map<Contract, BiFunction<Contract, Map, Double>> value_functions) {
         return (Double) parameters.get("price_" + this.getName()) * quantity;
     }
-    public Double valutation(Map<Object, Object> parameters, BiFunction<Contract, Map, Double> value_function) {
+    public Double valuation(Map<Object, Object> parameters, BiFunction<Contract, Map, Double> value_function) {
         return (Double) parameters.get("price_" + this.getName()) * quantity;
     }
     
