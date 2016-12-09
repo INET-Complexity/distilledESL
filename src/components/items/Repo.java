@@ -43,7 +43,7 @@ public class Repo extends MasonScheduledContracts {
 
     @Override
     public void handleResponse(ObligationResponse response) {
-
+ // blah blah blah
     }
 
     private void printObligation(Obligation o) {
