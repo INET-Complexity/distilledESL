@@ -1,12 +1,17 @@
-package components;
+package test;
 
 import ESL.contract.handler.AutomaticContractHandler;
+import components.items.Bond;
+import components.FinancialInstitution;
+import components.items.GBP;
 import sim.engine.SimState;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class TestBondRun extends SimState {
+    public int NUMBER_OF_GOVERNMENTS=2;
+    public int NUMBER_OF_BUYERS=2;
 
     public TestBondRun(long seed)
     {
@@ -20,13 +25,13 @@ public class TestBondRun extends SimState {
         List<FinancialInstitution> governments = new ArrayList<>();
         List<FinancialInstitution> buyers = new ArrayList<>();
 
-        for (int i = 1; i <= 2; i++) {
+        for (int i = 1; i <= NUMBER_OF_GOVERNMENTS; i++) {
             FinancialInstitution a = new FinancialInstitution("Government " + i);
             a.getInventory().add(new GBP(1000000.0));
             governments.add(a);
         }
 
-        for (int i = 1; i <= 2; i++) {
+        for (int i = 1; i <= NUMBER_OF_BUYERS; i++) {
             FinancialInstitution a = new FinancialInstitution("Buyer " + i);
             a.getInventory().add(new GBP(10000.0));
             buyers.add(a);

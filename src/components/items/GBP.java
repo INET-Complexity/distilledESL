@@ -1,4 +1,4 @@
-package components;
+package components.items;
 
 import ESL.inventory.Contract;
 

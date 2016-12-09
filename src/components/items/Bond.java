@@ -1,4 +1,4 @@
-package components;
+package components.items;
 
 import ESL.agent.Agent;
 import ESL.contract.MasonScheduledContracts;
@@ -115,13 +115,14 @@ public class Bond extends MasonScheduledContracts {
         }
         System.out.println("The current state is: " + this.currentState + ". Therefore, " + from.getName() + " gave "
                 + to.getName() + " " + quantity + " of " + what);
-        System.out.println("FinancialInstitution " + from.getName() + " has $" + from.getInventory().getAllGoodEntries().get("GBP"));
-        System.out.println("FinancialInstitution " + to.getName() + " has $" + to.getInventory().getAllGoodEntries().get("GBP"));
+        System.out.println("FinancialInstitution " + from.getName() + " has £" + from.getInventory().getAllGoodEntries().get("GBP"));
+        System.out.println("FinancialInstitution " + to.getName() + " has £" + to.getInventory().getAllGoodEntries().get("GBP"));
 
     }
 
     private enum State {
         PRINCIPAL, COUPON, DEFAULT, MATURED, TERMINATED
+        //TODO: Add a rollover mechanism
     }
 }
 
