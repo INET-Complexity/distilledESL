@@ -3,6 +3,7 @@ package components;
 import ESL.agent.Agent;
 import ESL.inventory.Contract;
 import ESL.inventory.Good;
+import ESL.inventory.Inventory;
 import components.behaviour.Action;
 import components.behaviour.Behaviour;
 
@@ -14,10 +15,10 @@ public class FinancialInstitution extends Agent {
     public FinancialInstitution(String name) {
         super(name);
     }
+
     public FinancialInstitution() {
         this("");
     }
-
 
     public void add(Contract contract) {
         try {
@@ -40,8 +41,13 @@ public class FinancialInstitution extends Agent {
         this.behaviour=behaviour;
     }
 
+    /**
+     *
+     * @return all available actions that do NOT break any constraints or regulations
+     */
     public ArrayList<Action> getAvailableActions() {
         // TODO: Define my available actions
+
         return null;
     }
 }

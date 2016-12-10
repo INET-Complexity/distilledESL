@@ -1,10 +1,11 @@
 package components.items;
 
-import ESL.inventory.Good;
+/**
+ * This is the interface for operations that are specific to cash, which might be relevant
+ * if we ever include foreign currency.
+ *
+ * @author rafa
+ */
+public interface Cash {
 
-public abstract class Cash extends Good {
-
-    public Cash(String name, double amount) {
-        super(name, amount);
-    }
 }

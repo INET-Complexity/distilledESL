@@ -20,6 +20,7 @@ public class Repo extends MasonScheduledContracts {
     private Double loanSize;
     private Double maturity;
     private Boolean matchedBook;
+
     private List<Item> collateral;
 
     public Repo(String name, SimState state, ContractHandler handler, Agent reverseRepoParty, Agent repoParty,
