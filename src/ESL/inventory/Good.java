@@ -25,4 +25,5 @@ public class Good extends Item {
     public double getQuantity() {
     	return this.quantity;
     }
+    public double getValue() {return 0.0;}
 }

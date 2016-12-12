@@ -6,32 +6,24 @@ import ESL.inventory.Good;
 import java.util.Map;
 import java.util.function.BiFunction;
 
-/**
- * Cash in GBP, dealt with as a good.
- *
- * @author rafa
- */
-public class GBP extends Good implements Cash {
+public class SampleLiability extends Good {
 
-    public GBP(double amount) {
-        super("GBP", amount);
-
+    public SampleLiability(double amount) {
+        super("SampleLiability", amount);
     }
 
-    // The valuation of GBP is just the amount
     @Override
     public Double valuation(Map<Object, Object> parameters, BiFunction<Contract, Map, Double> value_function) {
-        return getQuantity();
+        return -1.0*getQuantity();
     }
 
     @Override
     public Double valuation(Map<Object, Object> parameters, Map<Contract, BiFunction<Contract, Map, Double>> value_functions) {
-        return getQuantity();
+        return -1.0*getQuantity();
     }
 
     @Override
     public double getValue() {
-        return getQuantity();
+        return -1.0*getQuantity();
     }
 }
-
