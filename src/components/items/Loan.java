@@ -15,12 +15,6 @@ import sim.engine.SimState;
  * @author rafa
  */
 public class Loan extends MasonScheduledContracts implements Collateral {
-    private State currentState;
-    private Agent issuer;
-    private Agent holder;
-    private Double principal;
-    private Double rate;
-
     /**
      * Constructor allowing for an issue price different to the face value.
      * @param name name of the bond
@@ -100,7 +94,6 @@ public class Loan extends MasonScheduledContracts implements Collateral {
 
     }
 
-
     private void printObligation(Obligation o) {
 
         if (o == null) {
@@ -121,9 +114,35 @@ public class Loan extends MasonScheduledContracts implements Collateral {
 
     }
 
+    @Override
+    public void setEncumbered() {
+        if (this.encumbered) {
+            System.out.println("Strange: I'm setting this as encumbered but it already is.");
+        }
+        this.encumbered=true;
+    }
+
+    @Override
+    public void setUnencumbered() {
+        this.encumbered=false;
+    }
+
+    @Override
+    public boolean isEncumbered() {
+        return this.encumbered;
+    }
+
     private enum State {
         PRINCIPAL, DEFAULT, MATURED, TERMINATED
     }
+
+    private State currentState;
+    private Agent issuer;
+    private Agent holder;
+    private Double principal;
+    private Double rate;
+
+    private Boolean encumbered;
 }
 
 

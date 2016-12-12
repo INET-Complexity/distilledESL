@@ -22,7 +22,7 @@ import sim.engine.SimState;
  *
  * @author rafa
  */
-public class Bond extends MasonScheduledContracts {
+public class Bond extends MasonScheduledContracts implements Collateral {
     private State currentState;
     private Agent issuer;
     private Agent holder;
@@ -151,6 +151,24 @@ public class Bond extends MasonScheduledContracts {
         this.numCoupons = numCoupons;
     }
 
+    @Override
+    public void setEncumbered() {
+        if (this.encumbered) {
+            System.out.println("Strange: I'm setting this as encumbered but it already is.");
+        }
+        this.encumbered=true;
+    }
+
+    @Override
+    public void setUnencumbered() {
+        this.encumbered=false;
+    }
+
+    @Override
+    public boolean isEncumbered() {
+        return this.encumbered;
+    }
+
 
     private void printObligation(Obligation o) {
 
@@ -175,5 +193,7 @@ public class Bond extends MasonScheduledContracts {
     private enum State {
         PRINCIPAL, COUPON, DEFAULT, MATURED, TERMINATED
     }
+
+    private boolean encumbered;
 }
 
