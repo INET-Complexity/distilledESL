@@ -110,7 +110,7 @@ public class Repo extends MasonScheduledContracts {
             if (item instanceof Contract) {
                 value += value_functions.get(item.getClass()).apply((Contract)item, parameters);
             } else if (item instanceof Good) {
-                //TODO: how shall I value goods?
+                value += ((Good) item).valuation(parameters, value_functions);
             }
         }
         return value;
