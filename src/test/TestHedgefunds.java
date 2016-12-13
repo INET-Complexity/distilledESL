@@ -2,10 +2,7 @@ package test;
 
 import ESL.contract.handler.AutomaticContractHandler;
 import components.FinancialInstitution;
-import components.items.Bond;
-import components.items.GBP;
-import components.items.SampleLiability;
-import components.items.Stock;
+import components.items.*;
 import components.markets.StockMarket;
 import sim.engine.SimState;
 import sim.engine.Steppable;
@@ -18,6 +15,8 @@ public class TestHedgefunds extends SimState implements Steppable {
 
     private int NUMBER_OF_HEDGEFUNDS=1;
     private ArrayList<FinancialInstitution> hedgefunds;
+    private int NUMBER_OF_CASHPROVIDERS=1;
+    private ArrayList<FinancialInstitution> cashproviders;
     private StockMarket stockMarket;
     private int NSTEPS = 10;
     private int nstep;
@@ -35,6 +34,8 @@ public class TestHedgefunds extends SimState implements Steppable {
 
         hedgefunds = new ArrayList<>();
 
+        cashproviders = new ArrayList<>();
+
         for (int i=0; i < NUMBER_OF_HEDGEFUNDS; i++) {
             FinancialInstitution newHedgeFund = new FinancialInstitution("Hedgefund "+i);
             newHedgeFund.setStockMarket(stockMarket);
@@ -42,6 +43,15 @@ public class TestHedgefunds extends SimState implements Steppable {
 
             hedgefunds.add(newHedgeFund);
         }
+
+        for (int i = 0; i < NUMBER_OF_CASHPROVIDERS; i++) {
+            FinancialInstitution cashprovider = new FinancialInstitution("Cash Provider " + i);
+            cashprovider.add(new GBP(1000000.0));
+            cashproviders.add(cashprovider);
+
+        }
+
+        //getFunding(cashproviders, hedgefunds);
 
         initialCreditShock();
 
@@ -95,23 +105,22 @@ public class TestHedgefunds extends SimState implements Steppable {
     private void initialCreditShock() {
 
         System.out.println("Attention! A shock has arrived!");
-        Stock.setPrice(0.95);
+        stockMarket.setPrice(0.95);
     }
 
-    private void purchaseBonds(List<FinancialInstitution> governments, List<FinancialInstitution> buyers) {
+    private void getFunding(List<FinancialInstitution> cashproviders, List<FinancialInstitution> hedgefunds) {
 
         AutomaticContractHandler handler = new AutomaticContractHandler();
 
-        for (FinancialInstitution government : governments) {
-            for (FinancialInstitution buyer : buyers) {
-                Bond bondContract = new Bond("bond", this, handler,
-                        government, buyer, 1000.0, 1000.0, 0.05,
-                        24, 1.0);
+        for (FinancialInstitution cashprovider : cashproviders) {
+            for (FinancialInstitution hedgefund : hedgefunds) {
+                Bond funding = new Bond("funding", this, handler,
+                        cashprovider, hedgefund, 1000.0, 1000.0, 0.05, 0,0.0);
 
-                government.add(bondContract);
-                buyer.add(bondContract);
+                cashprovider.add(funding);
+                hedgefund.add(funding);
 
-                bondContract.start(this);
+                funding.start(this);
             }
         }
 

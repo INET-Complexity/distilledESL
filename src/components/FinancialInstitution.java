@@ -65,6 +65,12 @@ public class FinancialInstitution extends Agent {
 
     }
 
+    public void getFreeFunding(double amount){
+        System.out.println("i'm getting+ "+amount+" of funding");
+        getInventory().add(new GBP(amount));
+        getInventory().add(new SampleLiability(amount));
+    }
+
     public void payLiabilityWithStock(double amount) {
         try {
             getInventory().remove(new Stock(amount));
@@ -75,6 +81,16 @@ public class FinancialInstitution extends Agent {
             e.printStackTrace();
         }
 
+    }
+
+    public void buyStockWithCash(double amount){
+        try{
+            getInventory().add(new Stock(amount));
+            stockMarket.putForBuy(amount);
+            getInventory().remove(new GBP(amount*stockMarket.getPrice()));
+        } catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     public void triggerDefault() {
@@ -90,6 +106,7 @@ public class FinancialInstitution extends Agent {
 
     public void step() {
         behaviour.checkLeverageAndAct();
+
     }
 
 

@@ -26,22 +26,47 @@ public class Behaviour {
 
     public void checkLeverageAndAct() {
         double currentLeverage = getLeverage();
+        double cash = agent.getInventory().getAllGoodEntries().get("GBP");
         System.out.println(agent.getName()+" is checking its leverage target.");
         System.out.println("I'm checking leverage with this stockprice"+Stock.getPrice());
         agent.printBalanceSheet();
         System.out.println("My current leverage is "+currentLeverage*100.0+"%");
+        double sizeOfAction = getSizeOfAction();
 
         if (checkForDefault()) {
             triggerDefault();
-        } else if (currentLeverage <= LEVERAGE_BUFFER) {
-            getBackOnTarget(getSizeOfAction());
+        } else if (sizeOfAction>0) {
+            deLever(sizeOfAction);
             currentLeverage = getLeverage();
             System.out.println("After action, my new leverage is :"+currentLeverage*100+"%");
+        } else if (sizeOfAction<0){
+            if((-sizeOfAction)>cash){
+                System.out.println("I'm trying to lever up by an amount: £" +sizeOfAction+"and I have £"+cash+" cash");
+                agent.getFreeFunding(-(sizeOfAction+cash));
+            leverUp(-sizeOfAction);}
+            else{
+                leverUp(-sizeOfAction);
+                }
         }
-
     }
 
-    public void getBackOnTarget(double sizeOfAction) {
+    public void leverUp(double sizeOfAction){
+        System.out.println("I'm trying to lever up by an amount: £"+sizeOfAction);
+        double stockValue = Stock.getPrice();
+        double numberToBuy = 1.0*sizeOfAction/stockValue;
+        double cash = agent.getInventory().getAllGoodEntries().get("GBP");
+        if (sizeOfAction<=cash){
+            System.out.println("I have "+cash+" cash");
+            System.out.println("I should be removing "+1.0*sizeOfAction/stockValue+" of cash");
+            agent.buyStockWithCash(1.0*sizeOfAction/stockValue);
+        } else if (cash>0){
+            System.out.println("I have"+cash+"cash");
+            agent.buyStockWithCash(1.0*cash/stockValue);
+        }
+        }
+
+
+    public void deLever(double sizeOfAction) {
         System.out.println("I'm trying to get back on target by delevering an amount: £"+sizeOfAction);
         switch (behaviouralChoice) {
 
@@ -58,7 +83,7 @@ public class Behaviour {
                 // I have some cash but not enough
                 else if (cash > 0) {
                     agent.payLiabilityWithCash(cash);
-                    getBackOnTarget(sizeOfAction-cash);
+                    deLever(sizeOfAction-cash);
                 }
 
                 // I have no cash!
@@ -69,7 +94,7 @@ public class Behaviour {
                         agent.payLiabilityWithStock(1.0*sizeOfAction/Stock.getPrice());
                     } else if (stockValue > 0) {
                         agent.payLiabilityWithStock(1.0*stockValue/Stock.getPrice());
-                        getBackOnTarget(sizeOfAction-1.0*stockValue/Stock.getPrice());
+                        deLever(sizeOfAction-1.0*stockValue/Stock.getPrice());
                     } else {
                         if(checkForDefault()) {
                             triggerDefault();
