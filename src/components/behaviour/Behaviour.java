@@ -2,6 +2,7 @@ package components.behaviour;
 
 import components.FinancialInstitution;
 import components.items.Stock;
+import components.markets.StockMarket;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -26,6 +27,7 @@ public class Behaviour {
     public void checkLeverageAndAct() {
         double currentLeverage = getLeverage();
         System.out.println(agent.getName()+" is checking its leverage target.");
+        System.out.println("I'm checking leverage with this stockprice"+Stock.getPrice());
         agent.printBalanceSheet();
         System.out.println("My current leverage is "+currentLeverage*100.0+"%");
 
