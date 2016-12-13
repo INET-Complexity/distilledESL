@@ -32,6 +32,11 @@ public class StockMarket {
         totalSupply=0;
     }
 
+    public void setPrice(double amount) {
+        Stock.setPrice(amount);
+        prices.put("price_Stock",Stock.getPrice());
+    }
+
     public void putForSale(double amount) {
         totalSupply += amount;
     }
