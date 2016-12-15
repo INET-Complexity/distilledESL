@@ -6,19 +6,20 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class StockMarket {
-    private final double PRICE_IMPACT = 5.0/100;
+    private final double PRICE_IMPACT = 0.05/100;
     public Map<Object, Object> prices = new HashMap<>();
 
     public StockMarket() {
         totalSupply = 0;
-        prices.put("price_Stock",Stock.getPrice());
+        prices.put("price_Stock",getPrice());
         prices.put("price_GBP", 1.0);
         prices.put("price_SampleLiability", -1.0);
     }
 
     public void step() {
-        Stock.setPrice(Stock.getPrice()*(1.0 - PRICE_IMPACT * totalSupply));
-        prices.put("price_Stock",Stock.getPrice());
+        Stock.setPrice(getPrice()*(1.0 - PRICE_IMPACT * totalSupply));
+        prices.put("price_Stock",getPrice());
+        System.out.println("Price of stock is: "+getPrice());
         totalSupply=0;
     }
 

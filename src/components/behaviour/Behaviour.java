@@ -21,6 +21,8 @@ public class Behaviour {
         this.behaviouralChoice = BehaviouralChoices.CASH_FIRST;
     }
 
+
+
     // TODO Here we need a constructor where we can set our behavioural choice
 
     public void checkLeverageAndAct() {
@@ -34,7 +36,7 @@ public class Behaviour {
         } else if (currentLeverage <= LEVERAGE_BUFFER) {
             getBackOnTarget(getSizeOfAction());
             currentLeverage = getLeverage();
-            System.out.println("After action, my new leverage is :"+currentLeverage*100+"%");
+            System.out.println("After action, my new leverage is: "+currentLeverage*100+"%");
         }
 
     }
@@ -50,11 +52,13 @@ public class Behaviour {
 
                 // I have enough cash to clear the whole thing
                 if (cash >= sizeOfAction ) {
+                    System.out.println("I can hit the target with cash alone");
                     agent.payLiabilityWithCash(sizeOfAction);
                 }
 
                 // I have some cash but not enough
                 else if (cash > 0) {
+                    System.out.println("I will use cash but I will need to use the stock too");
                     agent.payLiabilityWithCash(cash);
                     getBackOnTarget(sizeOfAction-cash);
                 }
@@ -62,16 +66,19 @@ public class Behaviour {
                 // I have no cash!
                 else {
                     double stockValue = agent.getInventory().getAllGoodEntries().get("Stock")*Stock.getPrice();
+                    System.out.println("I have £"+stockValue+" worth of stock.");
 
                     if (stockValue >= sizeOfAction) {
+                        System.out.println("I can hit the target by selling stock");
                         agent.payLiabilityWithStock(1.0*sizeOfAction/Stock.getPrice());
                     } else if (stockValue > 0) {
+                        System.out.println("I can sell some stock but it won't be enough");
                         agent.payLiabilityWithStock(1.0*stockValue/Stock.getPrice());
                         getBackOnTarget(sizeOfAction-1.0*stockValue/Stock.getPrice());
                     } else {
                         if(checkForDefault()) {
                             triggerDefault();
-                        };
+                        }
                     }
 
                 }

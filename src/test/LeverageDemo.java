@@ -31,7 +31,8 @@ public class LeverageDemo extends SimState implements Steppable {
 
         super.start(); // reuse the SimState start method
 
-        stockMarket = new StockMarket();
+        stockMarket = new
+                StockMarket();
 
 
         banks = new ArrayList<>();
@@ -62,7 +63,6 @@ public class LeverageDemo extends SimState implements Steppable {
 
         for (FinancialInstitution bank : banks) {
             bank.step();
-            //bank.getBehaviour().checkLeverageAndAct();
         }
 
         stockMarket.step();
@@ -86,7 +86,7 @@ public class LeverageDemo extends SimState implements Steppable {
 
 
     private void initialiseInventory(FinancialInstitution agent) {
-        agent.add(new GBP(100.0));
+        agent.add(new GBP(0));
         agent.add(new Stock(100.0));
         agent.add(new SampleLiability(agent.getInventory().asset_value(stockMarket.prices, null)*
                 (1.0-agent.getBehaviour().LEVERAGE_TARGET)));
@@ -96,7 +96,7 @@ public class LeverageDemo extends SimState implements Steppable {
     private void initialCreditShock() {
 
         System.out.println("Attention! A shock has arrived!");
-        Stock.setPrice(0.95);
+        Stock.setPrice(0.98);
     }
 
     private void purchaseBonds(List<FinancialInstitution> governments, List<FinancialInstitution> buyers) {
