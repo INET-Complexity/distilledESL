@@ -136,6 +136,12 @@ public class Loan extends MasonScheduledContracts implements Collateral {
         PRINCIPAL, DEFAULT, MATURED, TERMINATED
     }
 
+    @Override
+    public Double default_valuation(Agent agent) {
+        // TODO: Write a valuation here!
+        return
+    }
+
     private State currentState;
     private Agent issuer;
     private Agent holder;

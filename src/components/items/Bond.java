@@ -197,6 +197,12 @@ public class Bond extends MasonScheduledContracts implements Collateral {
         PRINCIPAL, COUPON, DEFAULT, MATURED, TERMINATED
     }
 
+    @Override
+    public Double default_valuation(Agent agent) {
+        // TODO: Value a bond!
+        return
+    }
+
     private boolean encumbered;
 }
 

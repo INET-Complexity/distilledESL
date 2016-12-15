@@ -2,13 +2,15 @@ package ESL.inventory;
 
 //import com.sun.org.apache.xpath.internal.functions.Function;
 
+import ESL.agent.Agent;
+
 import java.util.Map;
 import java.util.function.BiFunction;
 
 /**
  * Created by taghawi on 10/21/16.
  */
-public class Contract extends Item {
+public abstract class Contract extends Item {
 
     public Contract(String name) {
 	super(name);
@@ -21,6 +23,10 @@ public class Contract extends Item {
 
     public Double valuation(Map<Object, Object> parameters, BiFunction<Contract, Map, Double> value_function) {
 	return value_function.apply(this, parameters);
+    }
+
+    public Double default_valuation(Agent agent) {
+        return null;
     }
 
 }

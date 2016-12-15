@@ -1,5 +1,7 @@
 package ESL.inventory;
 
+import ESL.agent.Agent;
+
 import java.util.*;
 import java.util.function.BiFunction;
 
@@ -61,6 +63,27 @@ public class Inventory {
                 nv += value;
             }
         }
+        for (Map.Entry<String, Double> entry : this.goods.entrySet()) {
+            double value = entry.getValue() * (Double)parameters.get("price_" + entry.getKey());
+            if (value > 0) {
+                nv += value;
+            }
+        }
+        return nv;
+    }
+
+    /**
+     * This is the new valuation function
+     */
+    public double asset_value(Map<Object, Object> parameters, Agent agent) {
+        Double nv = 0.0;
+        for (Contract contract : this.contracts) {
+            double value = contract.default_valuation(agent);
+            if (value > 0) {
+                nv += value;
+            }
+        }
+
         for (Map.Entry<String, Double> entry : this.goods.entrySet()) {
             double value = entry.getValue() * (Double)parameters.get("price_" + entry.getKey());
             if (value > 0) {
