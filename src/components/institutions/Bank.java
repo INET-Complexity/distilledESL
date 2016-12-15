@@ -1,40 +1,38 @@
-package components;
+package components.institutions;
 
 import ESL.agent.Agent;
 import ESL.inventory.Contract;
 import ESL.inventory.Good;
-import ESL.inventory.Inventory;
 import components.behaviour.Action;
-import components.behaviour.Behaviour;
+import components.behaviour.BankBehaviour;
+import components.behaviour.HedgefundBehaviour;
 import components.items.GBP;
 import components.items.SampleLiability;
 import components.items.Stock;
+import components.markets.Market;
 import components.markets.StockMarket;
 
 import java.util.ArrayList;
 
-public class FinancialInstitution extends Agent {
-    private Behaviour behaviour;
+public class Bank extends FinancialInstitution {
+    private BankBehaviour bankBehaviour;
     public StockMarket stockMarket;
     public boolean alive;
 
-    public FinancialInstitution(String name) {
+    public Bank(String name) {
         super(name);
-        this.behaviour = new Behaviour(this);
         this.alive = true;
+        setBehaviour(new BankBehaviour(this));
     }
 
-    public Behaviour getBehaviour() {
-        return this.behaviour;
-    }
 
     public void setStockMarket(StockMarket stockMarket) {
         this.stockMarket = stockMarket;
     }
 
-    public FinancialInstitution() {
-        this("");
-    }
+    public StockMarket getStockMarket(){return this.stockMarket;}
+
+
 
     public void add(Contract contract) {
         try {
@@ -105,14 +103,11 @@ public class FinancialInstitution extends Agent {
     }
 
     public void step() {
-        behaviour.checkLeverageAndAct();
+        ((BankBehaviour) getBehaviour()).checkLeverageAndAct();
 
     }
 
 
-    public void setBehaviour(Behaviour behaviour) {
-        this.behaviour=behaviour;
-    }
 
     /**
      *

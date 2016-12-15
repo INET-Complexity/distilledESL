@@ -1,7 +1,11 @@
 package test;
 
 import ESL.contract.handler.AutomaticContractHandler;
-import components.FinancialInstitution;
+import ESL.inventory.Contract;
+import components.behaviour.HedgefundBehaviour;
+import components.institutions.Bank;
+import components.institutions.CashProvider;
+import components.institutions.HedgeFund;
 import components.items.*;
 import components.markets.StockMarket;
 import sim.engine.SimState;
@@ -9,17 +13,21 @@ import sim.engine.Steppable;
 import sim.engine.Stoppable;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.BiFunction;
 
 public class TestHedgefunds extends SimState implements Steppable {
 
     private int NUMBER_OF_HEDGEFUNDS=1;
-    private ArrayList<FinancialInstitution> hedgefunds;
+    private ArrayList<HedgeFund> hedgefunds;
     private int NUMBER_OF_CASHPROVIDERS=1;
-    private ArrayList<FinancialInstitution> cashproviders;
+    private ArrayList<CashProvider> cashproviders;
     private StockMarket stockMarket;
     private int NSTEPS = 10;
     private int nstep;
+
 
     public TestHedgefunds(long seed)
     {
@@ -33,25 +41,26 @@ public class TestHedgefunds extends SimState implements Steppable {
         stockMarket = new StockMarket();
 
         hedgefunds = new ArrayList<>();
-
         cashproviders = new ArrayList<>();
 
+
         for (int i=0; i < NUMBER_OF_HEDGEFUNDS; i++) {
-            FinancialInstitution newHedgeFund = new FinancialInstitution("Hedgefund "+i);
+            HedgeFund newHedgeFund = new HedgeFund("Hedgefund "+i);
             newHedgeFund.setStockMarket(stockMarket);
             initialiseInventory(newHedgeFund);
-
             hedgefunds.add(newHedgeFund);
         }
 
-        for (int i = 0; i < NUMBER_OF_CASHPROVIDERS; i++) {
-            FinancialInstitution cashprovider = new FinancialInstitution("Cash Provider " + i);
-            cashprovider.add(new GBP(1000000.0));
-            cashproviders.add(cashprovider);
-
+        for (int i=0; i < NUMBER_OF_CASHPROVIDERS; i++) {
+            CashProvider newCashProvider = new CashProvider("CashProvider "+i);
+            newCashProvider.setStockMarket(stockMarket);
+            newCashProvider.add(new GBP(1000000000));
+            cashproviders.add(newCashProvider);
+            newCashProvider.printBalanceSheet();
         }
 
-        //getFunding(cashproviders, hedgefunds);
+
+       //getFunding(cashproviders, hedgefunds);
 
         initialCreditShock();
 
@@ -69,9 +78,8 @@ public class TestHedgefunds extends SimState implements Steppable {
         System.out.println("Simulation step "+nstep);
         System.out.println("------------------");
 
-        for (FinancialInstitution hedgefund : hedgefunds) {
+        for (HedgeFund hedgefund : hedgefunds) {
             hedgefund.step();
-            //bank.getBehaviour().checkLeverageAndAct();
         }
 
         stockMarket.step();
@@ -86,7 +94,7 @@ public class TestHedgefunds extends SimState implements Steppable {
 
     private boolean isEveryoneAlive() {
         boolean everyoneAlive = true;
-        for (FinancialInstitution hedgefund : hedgefunds) {
+        for (HedgeFund hedgefund : hedgefunds) {
             everyoneAlive = everyoneAlive && hedgefund.alive;
         }
 
@@ -94,11 +102,11 @@ public class TestHedgefunds extends SimState implements Steppable {
     }
 
 
-    private void initialiseInventory(FinancialInstitution agent) {
+    private void initialiseInventory(HedgeFund agent) {
         agent.add(new GBP(100.0));
         agent.add(new Stock(160.0));
         agent.add(new SampleLiability(agent.getInventory().asset_value(stockMarket.prices, null)*
-                (1.0-agent.getBehaviour().LEVERAGE_TARGET)));
+                (1.0-((HedgefundBehaviour) agent.getBehaviour()).LEVERAGE_TARGET)));
         agent.printBalanceSheet();
     }
 
@@ -108,20 +116,22 @@ public class TestHedgefunds extends SimState implements Steppable {
         stockMarket.setPrice(0.95);
     }
 
-    private void getFunding(List<FinancialInstitution> cashproviders, List<FinancialInstitution> hedgefunds) {
+    private void getFunding(List<CashProvider> cashproviders, List<HedgeFund> hedgefunds) {
 
         AutomaticContractHandler handler = new AutomaticContractHandler();
 
-        for (FinancialInstitution cashprovider : cashproviders) {
-            for (FinancialInstitution hedgefund : hedgefunds) {
+        for (CashProvider cashprovider : cashproviders) {
+            for (HedgeFund hedgefund : hedgefunds) {
                 Bond funding = new Bond("funding", this, handler,
-                        cashprovider, hedgefund, 1000.0, 1000.0, 0.05, 0,0.0);
+                        cashprovider, hedgefund, 1000.0, 1000.0, 0.05, 3,2.0);
 
                 cashprovider.add(funding);
                 hedgefund.add(funding);
 
                 funding.start(this);
+
             }
+
         }
 
     }
@@ -132,6 +142,8 @@ public class TestHedgefunds extends SimState implements Steppable {
         doLoop(TestHedgefunds.class, args);
         System.exit(0);
     }
+
+
 
 
 

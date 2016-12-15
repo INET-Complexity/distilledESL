@@ -109,8 +109,8 @@ public class Loan extends MasonScheduledContracts implements Collateral {
         }
         System.out.println("The current state is: " + this.currentState + ". Therefore, " + from.getName() + " gave "
                 + to.getName() + " " + quantity + " of " + what);
-        System.out.println("FinancialInstitution " + from.getName() + " has £" + from.getInventory().getAllGoodEntries().get("GBP"));
-        System.out.println("FinancialInstitution " + to.getName() + " has £" + to.getInventory().getAllGoodEntries().get("GBP"));
+        System.out.println("Bank " + from.getName() + " has £" + from.getInventory().getAllGoodEntries().get("GBP"));
+        System.out.println("Bank " + to.getName() + " has £" + to.getInventory().getAllGoodEntries().get("GBP"));
 
     }
 

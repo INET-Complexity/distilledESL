@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-public class StockMarket {
+public class StockMarket extends Market {
     private final double ELASTICITY_DEMAND = 0.001/100;
     private final double VARIANCE_EXOGENOUS_SHOCKS = 1.0/100;
     public Map<Object, Object> prices = new HashMap<>();
