@@ -38,6 +38,7 @@ public class TestBondRun extends SimState {
         for (int i = 0; i < NUMBER_OF_GOVERNMENTS; i++) {
             Bank government = new Bank("Government " + i);
             government.add(new GBP(1000000.0));
+          //  government.add(new Stock(100.0));
             governments.add(government);
 
         }
@@ -68,7 +69,7 @@ public class TestBondRun extends SimState {
 
                 bondContract.start(this);
             }
-         //   System.out.println("Valuation is "+government.getInventory().asset_value(prices, standardValuationFunctions));
+            System.out.println("Valuation is "+government.getInventory().asset_value(prices, government));
         }
 
     }

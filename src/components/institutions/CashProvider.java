@@ -95,8 +95,8 @@ public class CashProvider extends FinancialInstitution {
 
     public void printBalanceSheet() {
         System.out.println("My name is "+getName());
-        System.out.println("Total ASSET value: "+this.getInventory().asset_value(stockMarket.prices,null));
-        System.out.println("Total LIABILITY value: "+this.getInventory().liability_value(stockMarket.prices, null));
+        System.out.println("Total ASSET value: "+this.getInventory().asset_value(stockMarket.prices,this));
+        System.out.println("Total LIABILITY value: "+this.getInventory().liability_value(stockMarket.prices, this));
         System.out.println();
     }
 

@@ -199,9 +199,15 @@ public class Bond extends MasonScheduledContracts implements Collateral {
 
     @Override
     public Double default_valuation(Agent agent) {
-        // TODO: Value a bond!
-        return
-    }
+        // TODO: Value a bond! this is temporary solution
+        if (issuer==agent){
+            return -getFaceValue();}
+            else if(holder==agent){
+                return getFaceValue();
+            }
+            else return 0.0;
+        }
+
 
     private boolean encumbered;
 }

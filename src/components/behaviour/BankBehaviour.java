@@ -105,13 +105,13 @@ public class BankBehaviour extends Behaviour {
     }
 
     private double getSizeOfAction() {
-        double assetValue = agent.getInventory().asset_value(agent.stockMarket.prices,null);
-        double liabilityValue = -1.0*agent.getInventory().liability_value(agent.stockMarket.prices,null);
+        double assetValue = agent.getInventory().asset_value(agent.stockMarket.prices,agent);
+        double liabilityValue = -1.0*agent.getInventory().liability_value(agent.stockMarket.prices,agent);
         return assetValue - 1.0*(assetValue-liabilityValue)/LEVERAGE_TARGET;
     }
     private double getLeverage() {
-        double assetValue = agent.getInventory().asset_value(agent.stockMarket.prices,null);
-        double liabilityValue = -1.0*agent.getInventory().liability_value(agent.stockMarket.prices,null);
+        double assetValue = agent.getInventory().asset_value(agent.stockMarket.prices,agent);
+        double liabilityValue = -1.0*agent.getInventory().liability_value(agent.stockMarket.prices,agent);
         return  (assetValue-liabilityValue)/assetValue;
     }
 

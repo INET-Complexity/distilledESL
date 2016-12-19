@@ -60,7 +60,12 @@ public class TestHedgefunds extends SimState implements Steppable {
         }
 
 
-       //getFunding(cashproviders, hedgefunds);
+       getFunding(cashproviders, hedgefunds);
+
+        for (HedgeFund hedgefund: hedgefunds) {
+            hedgefund.add(new SampleLiability(hedgefund.getInventory().asset_value(stockMarket.prices, hedgefund) *
+                    (1.0 - ((HedgefundBehaviour) hedgefund.getBehaviour()).LEVERAGE_TARGET)+hedgefund.getInventory().liability_value(stockMarket.prices, hedgefund)));
+        }
 
         initialCreditShock();
 
@@ -105,8 +110,7 @@ public class TestHedgefunds extends SimState implements Steppable {
     private void initialiseInventory(HedgeFund agent) {
         agent.add(new GBP(100.0));
         agent.add(new Stock(160.0));
-        agent.add(new SampleLiability(agent.getInventory().asset_value(stockMarket.prices, null)*
-                (1.0-((HedgefundBehaviour) agent.getBehaviour()).LEVERAGE_TARGET)));
+
         agent.printBalanceSheet();
     }
 
@@ -122,12 +126,12 @@ public class TestHedgefunds extends SimState implements Steppable {
 
         for (CashProvider cashprovider : cashproviders) {
             for (HedgeFund hedgefund : hedgefunds) {
-                Bond funding = new Bond("funding", this, handler,
-                        cashprovider, hedgefund, 1000.0, 1000.0, 0.05, 3,2.0);
+                Loan funding = new Loan("funding", this, handler,
+                        hedgefund, cashprovider, 1000.0, 0.0, 0.0);
 
                 cashprovider.add(funding);
                 hedgefund.add(funding);
-
+                hedgefund.add(new GBP(funding.getPrincipal()));
                 funding.start(this);
 
             }

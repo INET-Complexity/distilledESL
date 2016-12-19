@@ -54,10 +54,6 @@ public class Inventory {
     public double asset_value(Map<Object, Object> parameters, HashMap<Class<?>, BiFunction<Contract, Map, Double>> value_functions) {
         Double nv = 0.0;
         for (Contract contract : this.contracts) {
-            System.out.println(contract.getClass());
-            System.out.println(contract);
-            System.out.println(parameters);
-            System.out.println(value_functions.get(contract.getClass()).apply(contract, parameters));
             double value = value_functions.get(contract.getClass()).apply(contract, parameters);
             if (value > 0) {
                 nv += value;
@@ -101,6 +97,24 @@ public class Inventory {
                 nv += value;
             }
         }
+        for (Map.Entry<String, Double> entry : this.goods.entrySet()) {
+            double value = entry.getValue() * (Double)parameters.get("price_" + entry.getKey());
+            if (value < 0) {
+                nv += value;
+            }
+        }
+        return nv;
+    }
+
+    public double liability_value(Map<Object, Object> parameters, Agent agent) {
+        Double nv = 0.0;
+        for (Contract contract : this.contracts) {
+            double value = contract.default_valuation(agent);
+            if (value < 0) {
+                nv += value;
+            }
+        }
+
         for (Map.Entry<String, Double> entry : this.goods.entrySet()) {
             double value = entry.getValue() * (Double)parameters.get("price_" + entry.getKey());
             if (value < 0) {

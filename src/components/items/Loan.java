@@ -138,8 +138,17 @@ public class Loan extends MasonScheduledContracts implements Collateral {
 
     @Override
     public Double default_valuation(Agent agent) {
-        // TODO: Write a valuation here!
-        return
+        // TODO: Write a valuation here! this is temporary
+        if (issuer==agent){
+            return -principal;}
+        else if(holder==agent){
+            return principal;
+        }
+        else return 0.0;
+    }
+
+    public double getPrincipal(){
+        return this.principal;
     }
 
     private State currentState;
