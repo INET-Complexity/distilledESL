@@ -58,6 +58,8 @@ public class HedgefundBehaviour extends Behaviour {
         }
     }
 
+    //this is a change
+
     public void leverUp(double sizeOfAction){
         System.out.println("I'm trying to lever up by an amount: £"+sizeOfAction);
         double stockValue = Stock.getPrice();
