@@ -54,7 +54,7 @@ public class TestHedgefunds extends SimState implements Steppable {
         for (int i=0; i < NUMBER_OF_CASHPROVIDERS; i++) {
             CashProvider newCashProvider = new CashProvider("CashProvider "+i);
             newCashProvider.setStockMarket(stockMarket);
-            newCashProvider.add(new GBP(1000000000));
+            newCashProvider.add(new GBP(1000000));
             cashproviders.add(newCashProvider);
             newCashProvider.printBalanceSheet();
         }
@@ -84,7 +84,7 @@ public class TestHedgefunds extends SimState implements Steppable {
         System.out.println("------------------");
 
         for (HedgeFund hedgefund : hedgefunds) {
-            hedgefund.step();
+            hedgefund.step(simState);
         }
 
         stockMarket.step();
@@ -127,12 +127,13 @@ public class TestHedgefunds extends SimState implements Steppable {
         for (CashProvider cashprovider : cashproviders) {
             for (HedgeFund hedgefund : hedgefunds) {
                 Loan funding = new Loan("funding", this, handler,
-                        hedgefund, cashprovider, 1000.0, 0.0, 0.0);
+                        hedgefund, cashprovider, 1.0, 0.0, 0.0);
 
                 cashprovider.add(funding);
                 hedgefund.add(funding);
                 hedgefund.add(new GBP(funding.getPrincipal()));
                 funding.start(this);
+                hedgefund.setCashProvider(cashprovider);
 
             }
 

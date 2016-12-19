@@ -11,12 +11,14 @@ import components.items.SampleLiability;
 import components.items.Stock;
 import components.markets.Market;
 import components.markets.StockMarket;
+import sim.engine.SimState;
 
 import java.util.ArrayList;
 
 public class HedgeFund extends FinancialInstitution {
     //private HedgefundBehaviour hedgefundBehaviour;
     public StockMarket stockMarket;
+    private CashProvider cashProvider;
     public boolean alive;
 
     public HedgeFund(String name) {
@@ -28,6 +30,11 @@ public class HedgeFund extends FinancialInstitution {
     public Market getMarket() {
         return this.stockMarket;
     }
+
+    public CashProvider getCashProvider(){ return this.cashProvider;}
+
+    public void setCashProvider(CashProvider cashprovider){this.cashProvider=cashprovider;
+    cashProvider.hedgeFund=this;}
 
 
     public void setStockMarket(StockMarket stockMarket) {
@@ -104,8 +111,8 @@ public class HedgeFund extends FinancialInstitution {
         System.out.println();
     }
 
-    public void step() {
-        ((HedgefundBehaviour) getBehaviour()).checkLeverageAndAct();
+    public void step(SimState simState) {
+        ((HedgefundBehaviour) getBehaviour()).checkLeverageAndAct(simState);
 
     }
 

@@ -5,6 +5,7 @@ import components.institutions.Bank;
 import components.institutions.HedgeFund;
 import components.items.Bond;
 import components.items.Stock;
+import sim.engine.SimState;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,9 +29,17 @@ public class HedgefundBehaviour extends Behaviour {
         this.behaviouralChoice = BehaviouralChoices.CASH_FIRST;
     }
 
+
+    public void requestLoan(double amount, SimState simState){
+      ((CashProviderBehaviour) this.agent.getCashProvider().getBehaviour()).loanRequest(amount, simState);
+      }
+
+
     // TODO Here we need a constructor where we can set our behavioural choice
 
-    public void checkLeverageAndAct() {
+    // TODO we need to split this checkleverageandact up
+
+    public void checkLeverageAndAct(SimState simState) {
         initialisePrices();
         initialiseValuationFunctions();
         double currentLeverage = getLeverage();
@@ -50,7 +59,7 @@ public class HedgefundBehaviour extends Behaviour {
         } else if (sizeOfAction<0){
             if((-sizeOfAction)>cash){
                 System.out.println("I'm trying to lever up by an amount: £" +sizeOfAction+"and I have £"+cash+" cash");
-                agent.getFreeFunding(-(sizeOfAction+cash));
+                requestLoan(-(sizeOfAction+cash), simState);
             leverUp(-sizeOfAction);}
             else{
                 leverUp(-sizeOfAction);
@@ -58,7 +67,6 @@ public class HedgefundBehaviour extends Behaviour {
         }
     }
 
-    //this is a change
 
     public void leverUp(double sizeOfAction){
         System.out.println("I'm trying to lever up by an amount: £"+sizeOfAction);

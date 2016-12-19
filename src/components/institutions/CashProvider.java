@@ -15,6 +15,7 @@ import java.util.ArrayList;
 public class CashProvider extends FinancialInstitution {
     private CashProviderBehaviour cashProviderBehaviour;
     public StockMarket stockMarket;
+    public HedgeFund hedgeFund;
     public boolean alive;
 
     public CashProvider(String name) {

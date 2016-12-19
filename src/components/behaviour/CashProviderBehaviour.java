@@ -1,8 +1,12 @@
 package components.behaviour;
 
+import ESL.contract.handler.AutomaticContractHandler;
 import components.institutions.Bank;
 import components.institutions.CashProvider;
+import components.items.GBP;
+import components.items.Loan;
 import components.items.Stock;
+import sim.engine.SimState;
 
 import java.util.ArrayList;
 
@@ -11,6 +15,9 @@ public class CashProviderBehaviour extends Behaviour {
     private final double MINIMUM_LEVERAGE=5.5/100;
     private final double LEVERAGE_BUFFER=7.0/100;
     public final double LEVERAGE_TARGET=8.5/100;
+    public double MAX_LOAN_WILLING = 100000.0;
+    private CashProvider agent;
+
 
     public BehaviouralChoices behaviouralChoice;
 
@@ -18,7 +25,25 @@ public class CashProviderBehaviour extends Behaviour {
 
     public CashProviderBehaviour(CashProvider agent) {
         super(agent);
+        this.agent=agent;
         this.behaviouralChoice = BehaviouralChoices.CASH_FIRST;
+    }
+
+    AutomaticContractHandler handler = new AutomaticContractHandler();
+
+
+    public void loanRequest(double amount, SimState simState){
+        if(amount<MAX_LOAN_WILLING && amount<agent.getInventory().getAllGoodEntries().get("GBP")){
+            Loan funding = new Loan("funding", simState, handler,
+                    agent.hedgeFund, agent, amount, 0.0, 0.0);
+
+            agent.add(funding);
+            agent.hedgeFund.add(funding);
+            agent.hedgeFund.add(new GBP(funding.getPrincipal()));
+            funding.start(simState);
+
+        }
+
     }
 
     // TODO Here we need a constructor where we can set our behavioural choice
@@ -137,7 +162,6 @@ public class CashProviderBehaviour extends Behaviour {
         return availableActions.get(0);
     }
 
-    private CashProvider agent;
 
     public enum BehaviouralChoices {
         CASH_FIRST, STOCK_FIRST, PROPORTIONAL
