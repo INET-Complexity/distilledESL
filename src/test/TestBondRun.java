@@ -34,7 +34,7 @@ public class TestBondRun extends SimState {
         List<Bank> buyers = new ArrayList<>();
 
         for (int i = 0; i < NUMBER_OF_GOVERNMENTS; i++) {
-            Bank government = new Bank("Government " + i);
+            Bank government = new Bank("Government " + i, prices);
             government.add(new GBP(1000000.0));
           //  government.add(new Stock(100.0));
             governments.add(government);
@@ -42,7 +42,7 @@ public class TestBondRun extends SimState {
         }
 
         for (int i = 0; i < NUMBER_OF_BUYERS; i++) {
-            Bank buyer = new Bank("Buyer " + i);
+            Bank buyer = new Bank("Buyer " + i, prices);
             buyer.add(new GBP(10000.0));
             buyers.add(buyer);
         }
