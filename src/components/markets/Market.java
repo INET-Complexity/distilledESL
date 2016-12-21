@@ -5,5 +5,4 @@ import ESL.inventory.Item;
 
 public interface Market {
     void putForSale(double amount);
-    boolean canBeSoldHere(Item item);
 }

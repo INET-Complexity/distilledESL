@@ -9,6 +9,7 @@ import ESL.contract.obligation.ScheduledObligation;
 import ESL.inventory.Contract;
 import ESL.inventory.Good;
 import ESL.inventory.Item;
+import components.behaviour.Action;
 import sim.engine.SimState;
 
 import java.util.List;
@@ -117,6 +118,10 @@ public class Repo extends MasonScheduledContracts {
     }
 
 
+    @Override
+    public List<Action> getAvailableActions(Agent agent) {
+        return null;
+    }
 
     @Override
     public ScheduledObligation requestNextObligation(SimState state) {

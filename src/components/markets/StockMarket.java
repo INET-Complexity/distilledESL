@@ -38,11 +38,6 @@ public class StockMarket implements Market {
         return price;
     }
 
-    @Override
-    public boolean canBeSoldHere(Item item) {
-        return (item instanceof Stock);
-    }
-
     private double price;
     private double totalSupply;
 }

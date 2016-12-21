@@ -15,7 +15,7 @@ import java.util.function.BiFunction;
  */
 public abstract class Contract extends Item implements HasBehaviour {
 
-    public Contract(String name) {
+    protected Contract(String name) {
 	super(name);
     }
 

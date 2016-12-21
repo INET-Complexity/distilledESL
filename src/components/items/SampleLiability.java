@@ -1,12 +1,18 @@
 package components.items;
 
+import ESL.agent.Agent;
 import ESL.inventory.Contract;
 import ESL.inventory.Good;
+import components.behaviour.Action;
+import components.behaviour.HasBehaviour;
+import components.behaviour.PayOffSampleLiability;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 
-public class SampleLiability extends Good {
+public class SampleLiability extends Good implements HasBehaviour {
 
     public SampleLiability(double amount) {
         super("SampleLiability", amount);
@@ -23,7 +29,9 @@ public class SampleLiability extends Good {
     }
 
     @Override
-    public double getValue() {
-        return -1.0*getQuantity();
+    public List<Action> getAvailableActions(Agent agent) {
+        ArrayList<Action> actions = new ArrayList<>();
+        actions.add(new PayOffSampleLiability());
+        return actions;
     }
 }

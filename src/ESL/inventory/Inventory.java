@@ -37,8 +37,12 @@ public class Inventory {
         }
     }
 
-    public void remove(Contract contract) {
-        this.contracts.remove(contract);
+    public void remove(Contract contract) throws Exception {
+        if (!this.contracts.contains(contract)) {
+            throw new Exception("Error: removing a contract that is not present.");
+        } else {
+            this.contracts.remove(contract);
+        }
     }
 
     public double net_value(Map<Object, Object> parameters, Map<Contract, BiFunction<Contract, Map, Double>> value_functions) {

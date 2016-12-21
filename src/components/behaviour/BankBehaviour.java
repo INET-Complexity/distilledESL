@@ -26,7 +26,7 @@ public class BankBehaviour extends Behaviour {
         double currentLeverage = getLeverage();
         double cash = agent.getInventory().getAllGoodEntries().get("GBP");
         System.out.println(agent.getName()+" is checking its leverage target.");
-        System.out.println("I'm checking leverage with this stockprice"+Stock.getPrice());
+        System.out.println("I'm checking leverage with this stockprice"+agent.getStockMarket().getPrice());
         System.out.println("My current leverage is "+currentLeverage*100.0+"%");
         double sizeOfAction = getSizeOfAction();
 
@@ -49,7 +49,7 @@ public class BankBehaviour extends Behaviour {
 
     public void leverUp(double sizeOfAction){
         System.out.println("I'm trying to lever up by an amount: £"+sizeOfAction);
-        double stockValue = Stock.getPrice();
+        double stockValue = agent.getStockMarket().getPrice();
         double numberToBuy = 1.0*sizeOfAction/stockValue;
         double cash = agent.getInventory().getAllGoodEntries().get("GBP");
         if (sizeOfAction<=cash){
@@ -85,13 +85,14 @@ public class BankBehaviour extends Behaviour {
 
                 // I have no cash!
                 else {
-                    double stockValue = agent.getInventory().getAllGoodEntries().get("Stock")*Stock.getPrice();
+                    double stockPrice = agent.getStockMarket().getPrice();
+                    double stockValue = agent.getInventory().getAllGoodEntries().get("Stock")*stockPrice;
 
                     if (stockValue >= sizeOfAction) {
-                        agent.payLiabilityWithStock(1.0*sizeOfAction/Stock.getPrice());
+                        agent.payLiabilityWithStock(1.0*sizeOfAction/stockPrice);
                     } else if (stockValue > 0) {
-                        agent.payLiabilityWithStock(1.0*stockValue/Stock.getPrice());
-                        deLever(sizeOfAction-1.0*stockValue/Stock.getPrice());
+                        agent.payLiabilityWithStock(1.0*stockValue/stockPrice);
+                        deLever(sizeOfAction-1.0*stockValue/stockPrice);
                     } else {
                         if(checkForDefault()) {
                             triggerDefault();

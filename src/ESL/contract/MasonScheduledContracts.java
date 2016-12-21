@@ -12,7 +12,7 @@ public abstract class MasonScheduledContracts extends HandledContracts implement
 
 	private Obligation nextObligation;
 	
-	public MasonScheduledContracts(String name, SimState state, ContractHandler handler) {
+	protected MasonScheduledContracts(String name, SimState state, ContractHandler handler) {
 		super(name,handler);
 	}
 	
@@ -34,7 +34,7 @@ public abstract class MasonScheduledContracts extends HandledContracts implement
 		
 	}
 	
-	public void scheduleEvent(ScheduledObligation o, SimState state) {
+	protected void scheduleEvent(ScheduledObligation o, SimState state) {
 	
 		// if next obligation is null, then do not schedule another event.
 		if (o == null || o.getObligation() == null) {
@@ -49,7 +49,7 @@ public abstract class MasonScheduledContracts extends HandledContracts implement
 	
 	public abstract ScheduledObligation requestNextObligation(SimState state);
 	
-	public void scheduleNextEvent(Obligation o) {
+	private void scheduleNextEvent(Obligation o) {
 		this.nextObligation = o;
 	}
 }

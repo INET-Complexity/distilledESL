@@ -29,23 +29,6 @@ public class Bank extends FinancialInstitution implements HasLeverageConstraint,
         setBehaviour(new BankBehaviour(this));
     }
 
-
-    public void add(Contract contract) {
-        try {
-            getInventory().add(contract);
-        } catch(Exception e){
-            e.printStackTrace();
-        }
-    }
-
-    public void add(Good good) {
-        try{
-            getInventory().add(good);
-        } catch(Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     public void payLiabilityWithCash(double amount) {
         try {
             System.out.println("I'm paying £"+amount+" of cash to pay off liabilities.");

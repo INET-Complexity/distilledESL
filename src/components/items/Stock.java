@@ -5,7 +5,9 @@ import ESL.inventory.Contract;
 import ESL.inventory.Good;
 import components.behaviour.Action;
 import components.behaviour.HasBehaviour;
+import components.behaviour.SellStock;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
@@ -18,7 +20,9 @@ public class Stock extends Good  implements CanBePledgedCollateral, HasBehaviour
 
     @Override
     public List<Action> getAvailableActions(Agent agent) {
-        return null;
+        ArrayList<Action> actions = new ArrayList<>();
+        actions.add(new SellStock());
+        return actions;
     }
 
     @Override
