@@ -1,40 +1,31 @@
 package components.markets;
 
+import ESL.inventory.Item;
 import components.items.Stock;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-public class StockMarket extends Market {
+public class StockMarket implements Market {
     private final double ELASTICITY_DEMAND = 0.001/100;
     private final double VARIANCE_EXOGENOUS_SHOCKS = 1.0/100;
     public Map<Object, Object> prices = new HashMap<>();
 
     public StockMarket() {
+        price = 1.0;
         totalSupply = 0;
-        prices.put("price_Stock",Stock.getPrice());
+        prices.put("price_Stock",price);
         prices.put("price_GBP", 1.0);
         prices.put("price_SampleLiability", -1.0);
+
+        //Todo who should be doing these things?
     }
 
-    public double generateNumber() {
-        Random r = new Random();
-        double g = VARIANCE_EXOGENOUS_SHOCKS*r.nextGaussian();
-        return g;
-    }
-
-
-    public void step() {
-        Stock.setPrice(Stock.getPrice()*(1+generateNumber()-ELASTICITY_DEMAND* totalSupply));
-        prices.put("price_Stock",Stock.getPrice());
-        System.out.println("The market has stepped and gotten to this price "+Stock.getPrice()+"total supply was "+totalSupply+"random number was "+generateNumber());
-        totalSupply=0;
-    }
 
     public void setPrice(double amount) {
-        Stock.setPrice(amount);
-        prices.put("price_Stock",Stock.getPrice());
+        price = amount;
+        prices.put("price_Stock",price);
     }
 
     public void putForSale(double amount) {
@@ -44,9 +35,14 @@ public class StockMarket extends Market {
     public void putForBuy(double amount){ totalSupply -= amount;}
 
     public double getPrice() {
-        return Stock.getPrice();
+        return price;
     }
 
+    @Override
+    public boolean canBeSoldHere(Item item) {
+        return (item instanceof Stock);
+    }
 
+    private double price;
     private double totalSupply;
 }

@@ -12,11 +12,12 @@ public class AutomaticContractHandler extends ContractHandler{
 	public ObligationResponse handleObligation(Obligation o) {
 
 		if (o == null) {
-			return new ObligationResponse(o, false);
+			return new ObligationResponse(null, false);
 		}
 		if (o.getWhat() instanceof Good) {
 			return new ObligationResponse(o, handleGood(o));
 		} else {
+			// todo: what if the obligation is to move a contract?
 			return new ObligationResponse(o, false);
 		}
 	}

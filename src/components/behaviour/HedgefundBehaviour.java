@@ -1,8 +1,7 @@
 package components.behaviour;
 
 import ESL.inventory.Contract;
-import components.institutions.Bank;
-import components.institutions.HedgeFund;
+import components.agents.HedgeFund;
 import components.items.Bond;
 import components.items.Stock;
 import sim.engine.SimState;

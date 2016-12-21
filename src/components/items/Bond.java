@@ -7,7 +7,11 @@ import ESL.contract.messages.ObligationResponse;
 import ESL.contract.obligation.Obligation;
 import ESL.contract.obligation.ScheduledObligation;
 import ESL.inventory.Good;
+import components.behaviour.Action;
+import components.behaviour.HasBehaviour;
 import sim.engine.SimState;
+
+import java.util.List;
 
 /**
  * A standard, fixed rate bond. The bond allows for an issue price that is different from its principal.
@@ -22,7 +26,7 @@ import sim.engine.SimState;
  *
  * @author rafa
  */
-public class Bond extends MasonScheduledContracts implements Collateral {
+public class Bond extends MasonScheduledContracts implements CanBePledgedCollateral {
     private State currentState;
     private Agent issuer;
     private Agent holder;
@@ -71,6 +75,10 @@ public class Bond extends MasonScheduledContracts implements Collateral {
 
     public void start(SimState state) {
         this.scheduleEvent(requestNextObligation(state), state);
+    }
+
+    public void triggerNextObligation(SimState state) {
+
     }
 
     @Override
@@ -193,8 +201,20 @@ public class Bond extends MasonScheduledContracts implements Collateral {
     public double getFaceValue() {
         return this.faceValue;
     }
+
     private enum State {
         PRINCIPAL, COUPON, DEFAULT, MATURED, TERMINATED
+    }
+
+    @Override
+    public List<Action> getAvailableActions(Agent agent) {
+        if (agent == issuer) {
+            return null; // Todo
+        } else if (agent == holder) {
+            return null; // Todo
+        } else {
+            return null;
+        }
     }
 
     @Override

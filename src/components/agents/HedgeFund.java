@@ -1,29 +1,38 @@
-package components.institutions;
+package components.agents;
 
-import ESL.agent.Agent;
 import ESL.inventory.Contract;
 import ESL.inventory.Good;
 import components.behaviour.Action;
-import components.behaviour.BankBehaviour;
 import components.behaviour.HedgefundBehaviour;
 import components.items.GBP;
 import components.items.SampleLiability;
 import components.items.Stock;
 import components.markets.Market;
 import components.markets.StockMarket;
+import sim.engine.SimState;
 
 import java.util.ArrayList;
 
-public class Bank extends FinancialInstitution {
-    private BankBehaviour bankBehaviour;
+public class HedgeFund extends FinancialInstitution {
+    //private HedgefundBehaviour hedgefundBehaviour;
     public StockMarket stockMarket;
+    private CashProvider cashProvider;
     public boolean alive;
 
-    public Bank(String name) {
+    public HedgeFund(String name) {
         super(name);
         this.alive = true;
-        setBehaviour(new BankBehaviour(this));
+        setBehaviour(new HedgefundBehaviour(this));
     }
+
+    public Market getMarket() {
+        return this.stockMarket;
+    }
+
+    public CashProvider getCashProvider(){ return this.cashProvider;}
+
+    public void setCashProvider(CashProvider cashprovider){this.cashProvider=cashprovider;
+    cashProvider.hedgeFund=this;}
 
 
     public void setStockMarket(StockMarket stockMarket) {
@@ -31,8 +40,6 @@ public class Bank extends FinancialInstitution {
     }
 
     public StockMarket getStockMarket(){return this.stockMarket;}
-
-
 
     public void add(Contract contract) {
         try {
@@ -64,7 +71,7 @@ public class Bank extends FinancialInstitution {
     }
 
     public void getFreeFunding(double amount){
-        System.out.println("i'm getting+ "+amount+" of funding");
+        System.out.println("i'm getting "+amount+" of funding");
         getInventory().add(new GBP(amount));
         getInventory().add(new SampleLiability(amount));
     }
@@ -97,17 +104,15 @@ public class Bank extends FinancialInstitution {
 
     public void printBalanceSheet() {
         System.out.println("My name is "+getName());
-        System.out.println("Total ASSET value: "+this.getInventory().asset_value(stockMarket.prices, this));
+        System.out.println("Total ASSET value: "+this.getInventory().asset_value(stockMarket.prices,this));
         System.out.println("Total LIABILITY value: "+this.getInventory().liability_value(stockMarket.prices, this));
         System.out.println();
     }
 
-    public void step() {
-        ((BankBehaviour) getBehaviour()).checkLeverageAndAct();
+    public void step(SimState simState) {
+        ((HedgefundBehaviour) getBehaviour()).checkLeverageAndAct(simState);
 
     }
-
-
 
     /**
      *

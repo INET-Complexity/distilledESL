@@ -1,8 +1,7 @@
 package components.behaviour;
 
 import ESL.contract.handler.AutomaticContractHandler;
-import components.institutions.Bank;
-import components.institutions.CashProvider;
+import components.agents.CashProvider;
 import components.items.GBP;
 import components.items.Loan;
 import components.items.Stock;

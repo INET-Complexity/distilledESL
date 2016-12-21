@@ -1,6 +1,7 @@
 package ESL.inventory;
 
 import ESL.agent.Agent;
+import components.behaviour.Action;
 
 import java.util.*;
 import java.util.function.BiFunction;
@@ -150,22 +151,35 @@ public class Inventory {
         return items;
     }
 
-            public HashMap<String, Double> liabilities(Map<Object, Object> parameters, HashMap<Class<?>, BiFunction<Contract, Map, Double>> value_functions) {
-                HashMap<String, Double> items = new HashMap<String, Double>();
-                for (Contract contract : this.contracts) {
-                    double value = value_functions.get(contract.getClass()).apply(contract, parameters);
-                    if (value < 0) {
-                        items.put(contract.getName(), value);
-                    }
-                }
-                for (Map.Entry<String, Double> entry : this.goods.entrySet()) {
-                    double value = entry.getValue() * (Double)parameters.get("price_" + entry.getKey());
-                    if (value < 0) {
-                        items.put(entry.getKey(), value);
-                    }
-                }
-                return items;
+    public HashMap<String, Double> liabilities(Map<Object, Object> parameters, HashMap<Class<?>, BiFunction<Contract, Map, Double>> value_functions) {
+        HashMap<String, Double> items = new HashMap<String, Double>();
+        for (Contract contract : this.contracts) {
+            double value = value_functions.get(contract.getClass()).apply(contract, parameters);
+            if (value < 0) {
+                items.put(contract.getName(), value);
             }
+        }
+        for (Map.Entry<String, Double> entry : this.goods.entrySet()) {
+            double value = entry.getValue() * (Double)parameters.get("price_" + entry.getKey());
+            if (value < 0) {
+                items.put(entry.getKey(), value);
+            }
+        }
+        return items;
+    }
+
+    public List<Action> getAvailableActions(Agent agent) {
+        ArrayList<Action> actions = new ArrayList<>();
+
+        for (Contract contract : this.contracts) {
+            actions.addAll(contract.getAvailableActions(agent));
+        }
+
+        //TODO: What about the goods?
+
+        return actions;
+    }
+
 }
 
 

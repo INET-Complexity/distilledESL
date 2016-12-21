@@ -3,14 +3,17 @@ package ESL.inventory;
 //import com.sun.org.apache.xpath.internal.functions.Function;
 
 import ESL.agent.Agent;
+import components.behaviour.Action;
+import components.behaviour.HasBehaviour;
 
+import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 
 /**
  * Created by taghawi on 10/21/16.
  */
-public abstract class Contract extends Item {
+public abstract class Contract extends Item implements HasBehaviour {
 
     public Contract(String name) {
 	super(name);

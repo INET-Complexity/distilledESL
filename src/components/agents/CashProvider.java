@@ -1,4 +1,4 @@
-package components.institutions;
+package components.agents;
 
 import ESL.inventory.Contract;
 import ESL.inventory.Good;

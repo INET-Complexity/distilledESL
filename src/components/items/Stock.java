@@ -1,25 +1,24 @@
 package components.items;
 
+import ESL.agent.Agent;
 import ESL.inventory.Contract;
 import ESL.inventory.Good;
+import components.behaviour.Action;
+import components.behaviour.HasBehaviour;
 
+import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 
-public class Stock extends Good  implements Collateral {
+public class Stock extends Good  implements CanBePledgedCollateral, HasBehaviour {
     public Stock(Double amount) {
         super("Stock",amount);
     }
 
-    //TODO: PRICE OF EQUITY?
-    private static double price = 1.0;
 
-    public static void setPrice(double amount) {
-        price = amount;
-    }
-
-    public static double getPrice() {
-        return price;
+    @Override
+    public List<Action> getAvailableActions(Agent agent) {
+        return null;
     }
 
     @Override
@@ -39,19 +38,6 @@ public class Stock extends Good  implements Collateral {
     private boolean encumbered;
     private double encumberedAmount; // todo what if we only want to set some amount of equity to encumbered?
 
-    @Override
-    public Double valuation(Map<Object, Object> parameters, BiFunction<Contract, Map, Double> value_function) {
-        return this.getQuantity()*price;
-    }
 
-    @Override
-    public Double valuation(Map<Object, Object> parameters, Map<Contract, BiFunction<Contract, Map, Double>> value_functions) {
-        return this.getQuantity()*price;
-    }
-
-    @Override
-    public double getValue() {
-        return this.getQuantity()*price;
-    }
 }
 

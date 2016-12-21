@@ -14,7 +14,7 @@ import sim.engine.SimState;
  *
  * @author rafa
  */
-public class Loan extends MasonScheduledContracts implements Collateral {
+public class Loan extends MasonScheduledContracts implements CanBePledgedCollateral {
     /**
      * Constructor allowing for an issue price different to the face value.
      * @param name name of the bond

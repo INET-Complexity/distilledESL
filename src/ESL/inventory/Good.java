@@ -1,12 +1,11 @@
 package ESL.inventory;
 
+import components.behaviour.HasBehaviour;
+
 import java.util.Map;
 import java.util.function.BiFunction;
 
-/**
- * Created by taghawi on 10/21/16.
- */
-public class Good extends Item {
+public abstract class Good extends Item {
     
 	private double quantity;
 
@@ -25,5 +24,4 @@ public class Good extends Item {
     public double getQuantity() {
     	return this.quantity;
     }
-    public double getValue() {return 0.0;}
 }

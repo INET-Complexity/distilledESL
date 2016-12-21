@@ -1,11 +1,9 @@
 package test;
 
 import ESL.contract.handler.AutomaticContractHandler;
-import ESL.inventory.Contract;
 import components.behaviour.HedgefundBehaviour;
-import components.institutions.Bank;
-import components.institutions.CashProvider;
-import components.institutions.HedgeFund;
+import components.agents.CashProvider;
+import components.agents.HedgeFund;
 import components.items.*;
 import components.markets.StockMarket;
 import sim.engine.SimState;
@@ -13,10 +11,7 @@ import sim.engine.Steppable;
 import sim.engine.Stoppable;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.function.BiFunction;
 
 public class TestHedgefunds extends SimState implements Steppable {
 

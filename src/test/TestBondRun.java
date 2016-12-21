@@ -2,11 +2,9 @@ package test;
 
 import ESL.contract.handler.AutomaticContractHandler;
 import ESL.inventory.Contract;
-import components.institutions.Bank;
+import components.agents.Bank;
 import components.items.Bond;
 import components.items.GBP;
-import components.items.SampleLiability;
-import components.items.Stock;
 import sim.engine.SimState;
 
 import java.util.ArrayList;

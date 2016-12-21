@@ -1,6 +1,6 @@
 package components.behaviour;
 
-import components.institutions.Bank;
+import components.agents.Bank;
 import components.items.Stock;
 
 import java.util.ArrayList;
@@ -27,7 +27,6 @@ public class BankBehaviour extends Behaviour {
         double cash = agent.getInventory().getAllGoodEntries().get("GBP");
         System.out.println(agent.getName()+" is checking its leverage target.");
         System.out.println("I'm checking leverage with this stockprice"+Stock.getPrice());
-        agent.printBalanceSheet();
         System.out.println("My current leverage is "+currentLeverage*100.0+"%");
         double sizeOfAction = getSizeOfAction();
 
@@ -105,13 +104,13 @@ public class BankBehaviour extends Behaviour {
     }
 
     private double getSizeOfAction() {
-        double assetValue = agent.getInventory().asset_value(agent.stockMarket.prices,agent);
-        double liabilityValue = -1.0*agent.getInventory().liability_value(agent.stockMarket.prices,agent);
+        double assetValue = agent.getInventory().asset_value(agent.getStockMarket().prices,agent);
+        double liabilityValue = -1.0*agent.getInventory().liability_value(agent.getStockMarket().prices,agent);
         return assetValue - 1.0*(assetValue-liabilityValue)/LEVERAGE_TARGET;
     }
     private double getLeverage() {
-        double assetValue = agent.getInventory().asset_value(agent.stockMarket.prices,agent);
-        double liabilityValue = -1.0*agent.getInventory().liability_value(agent.stockMarket.prices,agent);
+        double assetValue = agent.getInventory().asset_value(agent.getStockMarket().prices,agent);
+        double liabilityValue = -1.0*agent.getInventory().liability_value(agent.getStockMarket().prices,agent);
         return  (assetValue-liabilityValue)/assetValue;
     }
 
