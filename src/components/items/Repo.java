@@ -83,7 +83,7 @@ public class Repo extends MasonScheduledContracts {
      *
      * @param item add this balancesheet item (good or contract) to the collateral for the repo
      */
-    public void addCollateral(CanBePledgedCollateral item) {
+    public void addCollateral(Collateral item) {
         if (item.isEncumbered()) {
             System.out.println("Error: this item is already encumbered.");
         } else {
@@ -92,7 +92,7 @@ public class Repo extends MasonScheduledContracts {
         }
     }
 
-    public void removeCollateral(CanBePledgedCollateral item) throws Exception {
+    public void removeCollateral(Collateral item) throws Exception {
         if (!this.collateral.contains((Item) item)) {
             throw new Exception("I'm trying to remove an item that is not currently collateral of this repo.");
         } else {

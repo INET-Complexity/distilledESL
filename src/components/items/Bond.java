@@ -8,7 +8,6 @@ import ESL.contract.obligation.Obligation;
 import ESL.contract.obligation.ScheduledObligation;
 import ESL.inventory.Good;
 import components.behaviour.Action;
-import components.behaviour.HasBehaviour;
 import sim.engine.SimState;
 
 import java.util.List;
@@ -26,7 +25,7 @@ import java.util.List;
  *
  * @author rafa
  */
-public class Bond extends MasonScheduledContracts implements CanBePledgedCollateral {
+public class Bond extends MasonScheduledContracts {
     private State currentState;
     private Agent issuer;
     private Agent holder;
@@ -62,6 +61,8 @@ public class Bond extends MasonScheduledContracts implements CanBePledgedCollate
         this.rate=rate;
         this.numCoupons=numCoupons;
         this.couponFrequency=couponFrequency;
+
+        this.setCollateralType(new CanBeCollateral());
     }
 
     /**
@@ -159,25 +160,6 @@ public class Bond extends MasonScheduledContracts implements CanBePledgedCollate
         this.numCoupons = numCoupons;
     }
 
-    @Override
-    public void setEncumbered() {
-        if (this.encumbered) {
-            System.out.println("Strange: I'm setting this as encumbered but it already is.");
-        }
-        this.encumbered=true;
-    }
-
-    @Override
-    public void setUnencumbered() {
-        this.encumbered=false;
-    }
-
-    @Override
-    public boolean isEncumbered() {
-        return this.encumbered;
-    }
-
-
     private void printObligation(Obligation o) {
 
         if (o == null) {
@@ -228,7 +210,5 @@ public class Bond extends MasonScheduledContracts implements CanBePledgedCollate
             else return 0.0;
         }
 
-
-    private boolean encumbered;
 }
 

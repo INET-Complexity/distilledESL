@@ -1,7 +1,6 @@
 package components.items;
 
 import ESL.agent.Agent;
-import ESL.inventory.Contract;
 import ESL.inventory.Good;
 import components.behaviour.Action;
 import components.behaviour.HasBehaviour;
@@ -9,10 +8,8 @@ import components.behaviour.SellStock;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.function.BiFunction;
 
-public class Stock extends Good  implements CanBePledgedCollateral, HasBehaviour {
+public class Stock extends Good  implements Collateral, HasBehaviour {
     public Stock(Double amount) {
         super("Stock",amount);
     }
