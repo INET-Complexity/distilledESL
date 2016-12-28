@@ -1,6 +1,7 @@
 package test;
 
 import ESL.contract.handler.AutomaticContractHandler;
+import components.Parameters;
 import components.behaviour.HedgefundBehaviour;
 import components.agents.CashProvider;
 import components.agents.HedgeFund;
@@ -33,7 +34,8 @@ public class TestHedgefunds extends SimState implements Steppable {
 
         super.start(); // reuse the SimState start method
 
-        stockMarket = new StockMarket();
+        globalParameters = new Parameters();
+        stockMarket = new StockMarket(globalParameters);
 
         hedgefunds = new ArrayList<>();
         cashproviders = new ArrayList<>();
@@ -43,6 +45,7 @@ public class TestHedgefunds extends SimState implements Steppable {
             HedgeFund newHedgeFund = new HedgeFund("Hedgefund "+i);
             newHedgeFund.setStockMarket(stockMarket);
             initialiseInventory(newHedgeFund);
+            newHedgeFund.setGlobalParameters(globalParameters);
             hedgefunds.add(newHedgeFund);
         }
 
@@ -50,6 +53,7 @@ public class TestHedgefunds extends SimState implements Steppable {
             CashProvider newCashProvider = new CashProvider("CashProvider "+i);
             newCashProvider.setStockMarket(stockMarket);
             newCashProvider.add(new GBP(1000000));
+            newCashProvider.setGlobalParameters(globalParameters);
             cashproviders.add(newCashProvider);
             newCashProvider.printBalanceSheet();
         }
@@ -58,8 +62,8 @@ public class TestHedgefunds extends SimState implements Steppable {
        getFunding(cashproviders, hedgefunds);
 
         for (HedgeFund hedgefund: hedgefunds) {
-            hedgefund.add(new SampleLiability(hedgefund.getInventory().asset_value(stockMarket.prices, hedgefund) *
-                    (1.0 - ((HedgefundBehaviour) hedgefund.getBehaviour()).LEVERAGE_TARGET)+hedgefund.getInventory().liability_value(stockMarket.prices, hedgefund)));
+            hedgefund.add(new SampleLiability(hedgefund.getInventory().asset_value(globalParameters.getMap(), hedgefund) *
+                    (1.0 - ((HedgefundBehaviour) hedgefund.getBehaviour()).LEVERAGE_TARGET)+hedgefund.getInventory().liability_value(globalParameters.getMap(), hedgefund)));
         }
 
         initialCreditShock();
@@ -147,5 +151,6 @@ public class TestHedgefunds extends SimState implements Steppable {
 
 
 
+    private Parameters globalParameters;
     public Stoppable scheduleRepeat;
 }

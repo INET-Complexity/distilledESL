@@ -2,6 +2,7 @@ package test;
 
 import ESL.contract.handler.AutomaticContractHandler;
 import ESL.inventory.Contract;
+import components.Parameters;
 import components.agents.Bank;
 import components.items.Bond;
 import components.items.GBP;
@@ -28,22 +29,22 @@ public class TestBondRun extends SimState {
         super.start(); // reuse the SimState start method
 
         initialisePrices();
-        initialiseValuationFunctions();
 
         List<Bank> governments = new ArrayList<>();
         List<Bank> buyers = new ArrayList<>();
 
         for (int i = 0; i < NUMBER_OF_GOVERNMENTS; i++) {
-            Bank government = new Bank("Government " + i, prices);
+            Bank government = new Bank("Government " + i);
             government.add(new GBP(1000000.0));
-          //  government.add(new Stock(100.0));
+            government.setGlobalParameters(globalParameters);
             governments.add(government);
 
         }
 
         for (int i = 0; i < NUMBER_OF_BUYERS; i++) {
-            Bank buyer = new Bank("Buyer " + i, prices);
+            Bank buyer = new Bank("Buyer " + i);
             buyer.add(new GBP(10000.0));
+            buyer.setGlobalParameters(globalParameters);
             buyers.add(buyer);
         }
 
@@ -67,31 +68,16 @@ public class TestBondRun extends SimState {
 
                 bondContract.start(this);
             }
-            System.out.println("Valuation is "+government.getInventory().asset_value(prices, government));
         }
 
     }
 
     private void initialisePrices() {
-        prices.put("price_GBP", 1.0);
-
+        globalParameters = new Parameters();
     }
 
-    private void initialiseValuationFunctions() {
-        BiFunction<Contract, Map, Double> bondValuation = new BiFunction<Contract, Map, Double>() {
-            @Override
-            public Double apply(Contract contract, Map map) {
 
-                return ((Bond) contract).getFaceValue();
-            }
-        };
-
-
-        standardValuationFunctions.put(Bond.class,bondValuation);
-    }
-
-    HashMap<Object,Object> prices = new HashMap<>();
-    HashMap<Class<?>, BiFunction<Contract, Map, Double>> standardValuationFunctions = new HashMap<>();
+    private Parameters globalParameters;
 
     public static void main(String[] args)
     {

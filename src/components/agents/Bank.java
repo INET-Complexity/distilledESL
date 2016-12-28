@@ -22,10 +22,10 @@ import java.util.Map;
 public class Bank extends FinancialInstitution implements HasLeverageConstraint, HasRWLeverageConstraint,
         HasLCRConstraint, HasNSFRConstraint, HasBehaviour {
 
-    public Bank(String name, Map<Object, Object> globalParameters) {
+    public Bank(String name) {
         super(name);
         this.alive = true;
-        setGlobalParameters(globalParameters);
+        setGlobalParameters(null);
         setBehaviour(new BankBehaviour(this));
     }
 

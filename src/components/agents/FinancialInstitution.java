@@ -3,9 +3,8 @@ package components.agents;
 import ESL.agent.Agent;
 import ESL.inventory.Contract;
 import ESL.inventory.Good;
+import components.Parameters;
 import components.behaviour.Behaviour;
-
-import java.util.Map;
 
 public class FinancialInstitution extends Agent {
 
@@ -54,25 +53,25 @@ public class FinancialInstitution extends Agent {
         return this.behaviour;
     }
 
-    public void setGlobalParameters(Map<Object, Object> globalParameters) {
+    public void setGlobalParameters(Parameters globalParameters) {
         this.globalParameters = globalParameters;
     }
 
-    public Map<Object, Object> getGlobalParameters() {
+    public Parameters getGlobalParameters() {
         return globalParameters;
     }
 
     public double getAssetValue() {
-        return this.getInventory().asset_value(globalParameters, this);
+        return this.getInventory().asset_value(globalParameters.getMap(), this);
     }
 
     public double getLiabilityValue() {
-        return this.getInventory().liability_value(globalParameters,this);
+        return this.getInventory().liability_value(globalParameters.getMap(),this);
     }
 
 
     private Behaviour behaviour;
-    private Map<Object, Object> globalParameters;
+    private Parameters globalParameters;
 
 
 }
