@@ -14,6 +14,10 @@ public abstract class Good extends Item {
         this.quantity = quantity;
     }
 
+    public void add(double amount) {
+        this.quantity+=amount;
+    }
+
     public Double valuation(Map<Object, Object> parameters, Map<Contract, BiFunction<Contract, Map, Double>> value_functions) {
         return (Double) parameters.get("price_" + this.getName()) * quantity;
     }

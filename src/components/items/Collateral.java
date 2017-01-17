@@ -7,41 +7,92 @@ import ESL.inventory.Item;
  */
 public interface Collateral {
     void pledge() throws Exception;
+    void pledge(double amount) throws Exception;
     void unpledge() throws Exception;
+    void unpledge(double amount) throws Exception;
     boolean isEncumbered();
+    double getEncumberedAmount();
 }
 
 class CanBeCollateral implements Collateral {
-    {
-        encumbered = false;
+
+    CanBeCollateral(double max) {
+        encumberedAmount=0.0;
+        this.max = max;
     }
 
     public void pledge() throws Exception {
-        if (!encumbered) {encumbered=true;}
-        else { throw new Exception("Already encumbered!");}
+        if (encumberedAmount<max) {encumberedAmount=max;}
+        else { throw new Exception("Already encumbered.");}
+    }
+
+    @Override
+    public void pledge(double amount) throws Exception {
+        if ((max - encumberedAmount)>= amount) {
+            encumberedAmount += amount;
+        } else {
+            throw new Exception("Not enough unencumbered amount.");
+        }
     }
 
     public void unpledge() throws Exception {
-        if (!encumbered) {encumbered=false;}
-        else { throw new Exception("Already unencumbered!");}
+        if (encumberedAmount>0) {encumberedAmount=0;}
+        else { throw new Exception("Already unencumbered.");}
+    }
+
+    @Override
+    public void unpledge(double amount) throws Exception {
+        if (encumberedAmount >= amount) {
+            encumberedAmount -= amount;
+        } else {
+            throw new Exception("Not enough unencumbered amount.");
+        }
     }
 
     public boolean isEncumbered() {
-        return encumbered;
+        return (encumberedAmount>0);
     }
 
-    private boolean encumbered;
+    public double getEncumberedAmount() {
+        return encumberedAmount;
+    }
+
+    public double getMax() {
+        return max;
+    }
+
+    public void setMax(double max) {
+        this.max = max;
+    }
+
+    private double encumberedAmount;
+    private double max;
 
 }
 
 class CannotBeCollateral implements Collateral {
     public void pledge() throws Exception {
-        throw new Exception("This item cannot be pledged as collateral");
+        error();
+    }
+
+    public void pledge(double amount) throws Exception {
+        error();
     }
 
     public void unpledge() throws Exception {
-        throw new Exception("This item cannot be pledged (or unpledged) as collateral.");
+        error();
     }
 
+    public void unpledge(double amount) throws Exception {
+        error();
+    }
+
+    private void error() throws Exception {
+        throw new Exception("Error: This item cannot be pledged (or unpledged) as collateral.");
+    }
     public boolean isEncumbered() {return false;}
+
+    public double getEncumberedAmount() {
+        return 0;
+    }
 }

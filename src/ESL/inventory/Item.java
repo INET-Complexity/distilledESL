@@ -27,9 +27,25 @@ public class Item {
 		}
 	}
 
+	public void pledge(double amount) {
+		try {
+			collateralType.pledge(amount);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
 	public void unpledge() {
 		try{
 			collateralType.unpledge();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void unpledge(double amount) {
+		try{
+			collateralType.unpledge(amount);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
