@@ -3,5 +3,7 @@ package doubleEntry;
 public enum AccountType {
     ASSET,
     LIABILITY,
-    EQUITY
+    EQUITY,
+    INCOME,
+    EXPENSES
 }

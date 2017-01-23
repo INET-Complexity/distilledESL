@@ -2,6 +2,7 @@ package testDoubleEntry;
 
 import doubleEntry.BondAssetAccount;
 import doubleEntry.CashAccount;
+import doubleEntry.ReverseRepoAccount;
 import doubleEntryComponents.Agent;
 import doubleEntryComponents.Bank;
 import doubleEntryComponents.Simulation;
@@ -10,11 +11,8 @@ import java.util.HashSet;
 
 public class InitialisationTest {
 
-    HashSet<Agent> agents = new
-
     public static void main(String[] args) {
         Simulation simulation = new Simulation();
-        createBanks(simulation);
     }
 
     void createBank(Simulation sim) {
