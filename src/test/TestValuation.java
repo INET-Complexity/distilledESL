@@ -1,25 +1,19 @@
 //package test;
 //
 //import ESL.contract.handler.AutomaticContractHandler;
-//import ESL.inventory.Contract;
-//import components.Parameters;
-//import components.agents.Bank;
+//import components.institutions.Bank;
 //import components.items.Bond;
 //import components.items.GBP;
 //import sim.engine.SimState;
 //
 //import java.util.ArrayList;
-//import java.util.HashMap;
 //import java.util.List;
-//import java.util.Map;
-//import java.util.function.BiFunction;
 //
-//public class TestBondRun extends SimState {
+//public class TestValuation extends SimState {
 //    public int NUMBER_OF_GOVERNMENTS=2;
 //    public int NUMBER_OF_BUYERS=2;
 //
-//
-//    public TestBondRun(long seed)
+//    public TestValuation(long seed)
 //    {
 //        super(seed);
 //    }
@@ -28,27 +22,24 @@
 //
 //        super.start(); // reuse the SimState start method
 //
-//        initialisePrices();
-//
 //        List<Bank> governments = new ArrayList<>();
 //        List<Bank> buyers = new ArrayList<>();
 //
 //        for (int i = 0; i < NUMBER_OF_GOVERNMENTS; i++) {
 //            Bank government = new Bank("Government " + i);
 //            government.add(new GBP(1000000.0));
-//            government.setGlobalParameters(globalParameters);
 //            governments.add(government);
-//
 //        }
 //
 //        for (int i = 0; i < NUMBER_OF_BUYERS; i++) {
 //            Bank buyer = new Bank("Buyer " + i);
 //            buyer.add(new GBP(10000.0));
-//            buyer.setGlobalParameters(globalParameters);
 //            buyers.add(buyer);
 //        }
 //
-//        purchaseBonds(governments, buyers);
+//        //government.getInventory().asset_value(null, null);
+//
+//        //purchaseBonds(governments, buyers);
 //
 //    }
 //
@@ -67,21 +58,16 @@
 //                buyer.add(bondContract);
 //
 //                bondContract.start(this);
+//                //government.getInventory().asset_value(null, null);
 //            }
 //        }
 //
 //    }
 //
-//    private void initialisePrices() {
-//        globalParameters = new Parameters();
-//    }
-//
-//
-//    private Parameters globalParameters;
 //
 //    public static void main(String[] args)
 //    {
-//        doLoop(TestBondRun.class, args);
+//        doLoop(TestValuation.class, args);
 //        System.exit(0);
 //    }
 //
