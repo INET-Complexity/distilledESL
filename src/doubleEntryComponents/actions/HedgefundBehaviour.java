@@ -1,6 +1,7 @@
 package doubleEntryComponents.actions;
 
 import doubleEntryComponents.Bank;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 
@@ -17,5 +18,21 @@ public class HedgefundBehaviour extends Behaviour {
     @Override
     public Action getNextAction(ArrayList<Action> availableActions) {
         return null;
+    }
+
+    @Override
+    protected ArrayList<Action> chooseActions(ArrayList<Action> availableActions) {
+
+        ArrayList<Action> chosenActions = new ArrayList<>();
+        double totalInitialHoldings = bank.getGeneralLedger().getAssetValue();
+
+        for (Action action : availableActions) {
+            assert((action instanceof PayLoan) || (action instanceof SellAsset));
+            action.setAmount(1.0*action.getMax()/totalInitialHoldings);
+            chosenActions.add(action);
+        }
+
+        return chosenActions;
+
     }
 }

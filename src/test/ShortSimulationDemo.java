@@ -2,12 +2,15 @@ package test;
 
 import doubleEntryComponents.Bank;
 import doubleEntryComponents.actions.BankBehaviour1;
+import doubleEntryComponents.actions.HedgefundBehaviour;
 import doubleEntryComponents.actions.LeverageConstraint;
 import doubleEntryComponents.contracts.Asset;
 import doubleEntryComponents.contracts.AssetMarket;
 import doubleEntryComponents.contracts.Loan;
 
 public class ShortSimulationDemo {
+
+    public static AssetMarket assetMarket = new AssetMarket();
 
     void init() {
     }
@@ -16,28 +19,33 @@ public class ShortSimulationDemo {
         Bank bank1 = new Bank("Bank 1");
         Bank bank2 = new Bank("Bank 2");
         Bank hedgeFund = new Bank("HedgeFund 1");
-        AssetMarket assetMarket = new AssetMarket();
 
-        initBank1(bank1, assetMarket);
-        initBank2(bank2, assetMarket);
-        initHedgefund(hedgeFund, assetMarket);
+        initBank1(bank1);
+        initBank2(bank2);
+        initHedgefund(hedgeFund);
         initLoans(bank1, bank2, hedgeFund);
 
         initBehaviours(bank1, bank2, hedgeFund);
 
+        runSchedule(bank1, bank2, hedgeFund);
+
+    }
+
+    private static void runSchedule(Bank bank1, Bank bank2, Bank hedgefund) {
+        System.out.println("Time t=0.");
+        bank1.printBalanceSheet();
+        bank2.printBalanceSheet();
+        hedgefund.printBalanceSheet();
+
+        System.out.println("Shock arrives!");
+        shockExternalAsset(1.0*(17-15)/17);
+        updateAssetPrices(bank1, bank2, hedgefund);
+        bank1.act();
         bank1.printBalanceSheet();
 
-        shockExternalAsset((1.0*(17-15)/17), assetMarket);
-        bank1.updateAssetPrices();
-
-        System.out.println(bank1.getLeverageConstraint().getLeverage());
-        bank1.act();
-
-        System.out.println("Initial equity of bank "+bank1.getName()+": "+bank1.getGeneralLedger().getEquityValue());
-        System.out.println("Initial equity of bank "+bank2.getName()+": "+bank2.getGeneralLedger().getEquityValue());
-        System.out.println("Initial equity of HF: "+hedgeFund.getGeneralLedger().getEquityValue());
-
-
+        hedgefund.printBalanceSheet();
+        hedgefund.act();
+        hedgefund.printBalanceSheet();
     }
 
     private static void initBehaviours(Bank bank1, Bank bank2, Bank hedgefund) {
@@ -46,14 +54,14 @@ public class ShortSimulationDemo {
         hedgefund.setBehaviour(new BankBehaviour1(hedgefund));
 
     }
-    private static void initBank1(Bank bank, AssetMarket assetMarket) {
+    private static void initBank1(Bank bank) {
         bank.addCash(20);
         bank.add(new Asset(bank, Asset.AssetType.E, assetMarket, 17.0));
         bank.add(new Asset(bank, Asset.AssetType.A1, assetMarket, 40.0));
         bank.setLeverageConstraint(new LeverageConstraint(bank, 5.0/100, 4.0/100, 3.0/100));
     }
 
-    private static void initBank2(Bank bank, AssetMarket assetMarket) {
+    private static void initBank2(Bank bank) {
         bank.addCash(20);
         bank.add(new Asset(bank, Asset.AssetType.A2, assetMarket, 40.0));
         bank.add(new Asset(bank, Asset.AssetType.A3, assetMarket, 17.0));
@@ -61,7 +69,7 @@ public class ShortSimulationDemo {
 
     }
 
-    private static void initHedgefund(Bank hedgefund, AssetMarket assetMarket) {
+    private static void initHedgefund(Bank hedgefund) {
         hedgefund.addCash(9.0);
         hedgefund.add(new Asset(hedgefund, Asset.AssetType.A1, assetMarket, 20.0));
         hedgefund.add(new Asset(hedgefund, Asset.AssetType.A2, assetMarket, 20.0));
@@ -82,8 +90,14 @@ public class ShortSimulationDemo {
         bank2.add(new Loan(null, bank2, 95.0));
     }
 
-    private static void shockExternalAsset(double percentage, AssetMarket assetMarket) {
+    private static void shockExternalAsset(double percentage) {
         assetMarket.setPriceE(assetMarket.getPrice(Asset.AssetType.E)*(1-percentage));
+    }
+
+    private static void updateAssetPrices(Bank bank1, Bank bank2, Bank hedgefund) {
+        bank1.updateAssetPrices();
+        bank2.updateAssetPrices();
+        hedgefund.updateAssetPrices();
     }
 }
 

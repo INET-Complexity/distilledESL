@@ -48,4 +48,8 @@ public class PayLoan extends Action {
     public void print() {
         System.out.println("PayLoan action by "+loan.getLiabilityParty().getName()+" -> amount: "+getAmount());
     }
+
+    public Loan getLoan() {
+        return loan;
+    }
 }

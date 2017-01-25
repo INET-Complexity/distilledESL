@@ -1,28 +1,31 @@
 package doubleEntryComponents.actions;
 
 import doubleEntryComponents.Bank;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 
 public abstract class Behaviour {
 
-    private Bank bank;
+    public Bank bank;
     Behaviour(Bank bank) {
         this.bank = bank;
     }
 
     public void act() {
+        System.out.println(bank.getName()+" is acting.");
         ArrayList<Action> availableActions = bank.getAvailableActions(bank);
         ArrayList<Action> chosenActions = chooseActions(availableActions);
         performActions(chosenActions);
 
     }
 
-    private ArrayList<Action> chooseActions(ArrayList<Action> availableActions) {
+
+    @Nullable
+    protected ArrayList<Action> chooseActions(ArrayList<Action> availableActions) {
         if (bank.getLeverageConstraint().isBelowMin()) {
-            ArrayList<Action> chosenActions = new ArrayList<>();
-            chosenActions.add(new TriggerDefault());
-            return chosenActions;
+            triggerDefault();
+            return null;
         } else if (bank.getLeverageConstraint().isBelowBuffer()) {
             ArrayList<Action> chosenActions = new ArrayList<>();
 
@@ -94,5 +97,20 @@ public abstract class Behaviour {
             }
         }
         return null;
+    }
+
+    public void triggerDefault() {
+        ArrayList<Action> availableActions = bank.getAvailableActions(bank);
+        for (Action action : availableActions ) {
+            // Sell every asset!
+            if (action instanceof SellAsset) {
+                action.setAmount(action.getMax());
+                action.perform();
+            } else if (action instanceof PayLoan) {
+                // Loans must be terminated and changed into assets.
+                ((PayLoan)action).getLoan().liquidate();
+            } // all other actions are ignored
+        }
+
     }
 }

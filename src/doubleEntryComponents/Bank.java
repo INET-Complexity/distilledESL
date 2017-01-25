@@ -83,7 +83,12 @@ public class Bank extends Agent {
     public void printBalanceSheet() {
         System.out.println();
         System.out.println("Balance Sheet of "+getName());
+        System.out.println("**************************");
         generalLedger.printBalanceSheet();
+    }
+
+    public void liquidateLoan(double initialValue, double valueFraction) {
+        generalLedger.liquidateLoan(initialValue, valueFraction);
     }
 
 }

@@ -218,7 +218,6 @@ public class Ledger {
     }
 
     public void printBalanceSheet() {
-        System.out.println();
         System.out.println("Asset accounts:");
         System.out.println("---------------");
         for (Account account : assets) {
@@ -234,5 +233,18 @@ public class Ledger {
         }
         System.out.println("TOTAL LIABILITIES: "+getLiabilityValue());
         System.out.println();
+    }
+
+    public void liquidateLoan(double initialValue, double valueFraction) {
+        Account assetLoanAccount = getAssetAccountFor(Loan.class);
+
+        double valueLost = (1 - valueFraction) * initialValue;
+        // First, we devalue the loan :(
+        defaultEquityAccount.debit(valueLost);
+        assetLoanAccount.credit(valueLost);
+
+        // Then, we liquidate it
+        defaultCashAccount.debit(initialValue-valueLost);
+        assetLoanAccount.credit(initialValue-valueLost);
     }
 }
