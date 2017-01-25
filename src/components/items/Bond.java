@@ -7,7 +7,10 @@ import ESL.contract.messages.ObligationResponse;
 import ESL.contract.obligation.Obligation;
 import ESL.contract.obligation.ScheduledObligation;
 import ESL.inventory.Good;
+import components.behaviour.Action;
 import sim.engine.SimState;
+
+import java.util.List;
 
 /**
  * A standard, fixed rate bond. The bond allows for an issue price that is different from its principal.
@@ -22,7 +25,7 @@ import sim.engine.SimState;
  *
  * @author rafa
  */
-public class Bond extends MasonScheduledContracts implements Collateral {
+public class Bond extends MasonScheduledContracts {
     private State currentState;
     private Agent issuer;
     private Agent holder;
@@ -58,6 +61,8 @@ public class Bond extends MasonScheduledContracts implements Collateral {
         this.rate=rate;
         this.numCoupons=numCoupons;
         this.couponFrequency=couponFrequency;
+
+        this.setCollateralType(new CanBeCollateral());
     }
 
     /**
@@ -71,6 +76,10 @@ public class Bond extends MasonScheduledContracts implements Collateral {
 
     public void start(SimState state) {
         this.scheduleEvent(requestNextObligation(state), state);
+    }
+
+    public void triggerNextObligation(SimState state) {
+
     }
 
     @Override
@@ -151,25 +160,6 @@ public class Bond extends MasonScheduledContracts implements Collateral {
         this.numCoupons = numCoupons;
     }
 
-    @Override
-    public void setEncumbered() {
-        if (this.encumbered) {
-            System.out.println("Strange: I'm setting this as encumbered but it already is.");
-        }
-        this.encumbered=true;
-    }
-
-    @Override
-    public void setUnencumbered() {
-        this.encumbered=false;
-    }
-
-    @Override
-    public boolean isEncumbered() {
-        return this.encumbered;
-    }
-
-
     private void printObligation(Obligation o) {
 
         if (o == null) {
@@ -185,15 +175,40 @@ public class Bond extends MasonScheduledContracts implements Collateral {
         }
         System.out.println("The current state is: " + this.currentState + ". Therefore, " + from.getName() + " gave "
                 + to.getName() + " " + quantity + " of " + what);
-        System.out.println("FinancialInstitution " + from.getName() + " has £" + from.getInventory().getAllGoodEntries().get("GBP"));
-        System.out.println("FinancialInstitution " + to.getName() + " has £" + to.getInventory().getAllGoodEntries().get("GBP"));
+        System.out.println("Bank " + from.getName() + " has £" + from.getInventory().getAllGoodEntries().get("GBP"));
+        System.out.println("Bank " + to.getName() + " has £" + to.getInventory().getAllGoodEntries().get("GBP"));
 
+    }
+
+    public double getFaceValue() {
+        return this.faceValue;
     }
 
     private enum State {
         PRINCIPAL, COUPON, DEFAULT, MATURED, TERMINATED
     }
 
-    private boolean encumbered;
+    @Override
+    public List<Action> getAvailableActions(Agent agent) {
+        if (agent == issuer) {
+            return null; // Todo
+        } else if (agent == holder) {
+            return null; // Todo
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public Double default_valuation(Agent agent) {
+        // TODO: Value a bond! this is temporary solution
+        if (issuer==agent){
+            return -getFaceValue();}
+            else if(holder==agent){
+                return getFaceValue();
+            }
+            else return 0.0;
+        }
+
 }
 

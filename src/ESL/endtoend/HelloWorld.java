@@ -22,7 +22,7 @@ public class HelloWorld extends SimState {
 		List<Agent> agents = new ArrayList<Agent>();
 
 		for (int i = 1; i <= 2; i++) {
-			Agent a = new Agent("FinancialInstitution " + i);
+			Agent a = new Agent("Bank " + i);
 
 			// initialize each agent with $100.0
 			a.getInventory().add(new Good("cash", 1000.0));

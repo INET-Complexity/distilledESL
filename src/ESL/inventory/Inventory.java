@@ -1,5 +1,8 @@
 package ESL.inventory;
 
+import ESL.agent.Agent;
+import components.behaviour.Action;
+
 import java.util.*;
 import java.util.function.BiFunction;
 
@@ -13,9 +16,9 @@ public class Inventory {
      * Adds an Item to the BalanceSheet. This method is
      * protected to maintain stock-flow consistency.
      * @param good the Item to add
-     * @return returns a boolean regarding whether the add was successful.
      */
     public void add(Good good) {
+        //Todo: how shall we deal with adding goods??
         goods.put(good.getName(), goods.getOrDefault(good.getName(), 0.0) + good.getQuantity());
     }
 
@@ -26,6 +29,7 @@ public class Inventory {
             this.contracts.add(contract);
         }
     }
+
     public void remove(Good good) throws Exception {
         if (good.getQuantity() > this.goods.get(good.getName())) {
             throw new Exception(("not enough goods"));
@@ -34,8 +38,12 @@ public class Inventory {
         }
     }
 
-    public void remove(Contract contract) {
-        this.contracts.remove(contract);
+    public void remove(Contract contract) throws Exception {
+        if (!this.contracts.contains(contract)) {
+            throw new Exception("Error: removing a contract that is not present.");
+        } else {
+            this.contracts.remove(contract);
+        }
     }
 
     public double net_value(Map<Object, Object> parameters, Map<Contract, BiFunction<Contract, Map, Double>> value_functions) {
@@ -66,7 +74,28 @@ public class Inventory {
         return nv;
     }
 
-    public double liability_value(Map<Object, Object> parameters, Map<Contract, BiFunction<Contract, Map, Double>> value_functions) {
+    /**
+     * This is the new valuation function
+     */
+    public double asset_value(Map<Object, Object> parameters, Agent agent) {
+        Double nv = 0.0;
+        for (Contract contract : this.contracts) {
+            double value = contract.default_valuation(agent);
+            if (value > 0) {
+                nv += value;
+            }
+        }
+
+        for (Map.Entry<String, Double> entry : this.goods.entrySet()) {
+            double value = entry.getValue() * (Double)parameters.get("price_" + entry.getKey());
+            if (value > 0) {
+                nv += value;
+            }
+        }
+        return nv;
+    }
+
+    public double liability_value(Map<Object, Object> parameters, HashMap<Class<?>, BiFunction<Contract, Map, Double>> value_functions) {
         Double nv = 0.0;
         for (Contract contract : this.contracts) {
             double value = value_functions.get(contract.getClass()).apply(contract, parameters);
@@ -74,6 +103,24 @@ public class Inventory {
                 nv += value;
             }
         }
+        for (Map.Entry<String, Double> entry : this.goods.entrySet()) {
+            double value = entry.getValue() * (Double)parameters.get("price_" + entry.getKey());
+            if (value < 0) {
+                nv += value;
+            }
+        }
+        return nv;
+    }
+
+    public double liability_value(Map<Object, Object> parameters, Agent agent) {
+        Double nv = 0.0;
+        for (Contract contract : this.contracts) {
+            double value = contract.default_valuation(agent);
+            if (value < 0) {
+                nv += value;
+            }
+        }
+
         for (Map.Entry<String, Double> entry : this.goods.entrySet()) {
             double value = entry.getValue() * (Double)parameters.get("price_" + entry.getKey());
             if (value < 0) {
@@ -109,22 +156,35 @@ public class Inventory {
         return items;
     }
 
-            public HashMap<String, Double> liabilities(Map<Object, Object> parameters, HashMap<Class<?>, BiFunction<Contract, Map, Double>> value_functions) {
-                HashMap<String, Double> items = new HashMap<String, Double>();
-                for (Contract contract : this.contracts) {
-                    double value = value_functions.get(contract.getClass()).apply(contract, parameters);
-                    if (value < 0) {
-                        items.put(contract.getName(), value);
-                    }
-                }
-                for (Map.Entry<String, Double> entry : this.goods.entrySet()) {
-                    double value = entry.getValue() * (Double)parameters.get("price_" + entry.getKey());
-                    if (value < 0) {
-                        items.put(entry.getKey(), value);
-                    }
-                }
-                return items;
+    public HashMap<String, Double> liabilities(Map<Object, Object> parameters, HashMap<Class<?>, BiFunction<Contract, Map, Double>> value_functions) {
+        HashMap<String, Double> items = new HashMap<String, Double>();
+        for (Contract contract : this.contracts) {
+            double value = value_functions.get(contract.getClass()).apply(contract, parameters);
+            if (value < 0) {
+                items.put(contract.getName(), value);
             }
+        }
+        for (Map.Entry<String, Double> entry : this.goods.entrySet()) {
+            double value = entry.getValue() * (Double)parameters.get("price_" + entry.getKey());
+            if (value < 0) {
+                items.put(entry.getKey(), value);
+            }
+        }
+        return items;
+    }
+
+    public List<Action> getAvailableActions(Agent agent) {
+        ArrayList<Action> actions = new ArrayList<>();
+
+        for (Contract contract : this.contracts) {
+            actions.addAll(contract.getAvailableActions(agent));
+        }
+
+        //TODO: What about the goods?
+
+        return actions;
+    }
+
 }
 
 

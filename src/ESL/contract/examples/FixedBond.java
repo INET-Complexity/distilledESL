@@ -111,8 +111,8 @@ public class FixedBond extends MasonScheduledContracts {
 	}
 	System.out.println("The current state is: " + this.currentState + ". Therefore, " + from.getName() + " gave "
 		+ to.getName() + " " + quantity + " of " + what);
-	System.out.println("FinancialInstitution " + from.getName() + " has $" + from.getInventory().getAllGoodEntries().get("cash"));
-	System.out.println("FinancialInstitution " + to.getName() + " has $" + to.getInventory().getAllGoodEntries().get("cash"));
+	System.out.println("Bank " + from.getName() + " has $" + from.getInventory().getAllGoodEntries().get("cash"));
+	System.out.println("Bank " + to.getName() + " has $" + to.getInventory().getAllGoodEntries().get("cash"));
 
     }
 

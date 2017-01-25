@@ -109,8 +109,8 @@ public class Loan extends MasonScheduledContracts implements Collateral {
         }
         System.out.println("The current state is: " + this.currentState + ". Therefore, " + from.getName() + " gave "
                 + to.getName() + " " + quantity + " of " + what);
-        System.out.println("FinancialInstitution " + from.getName() + " has £" + from.getInventory().getAllGoodEntries().get("GBP"));
-        System.out.println("FinancialInstitution " + to.getName() + " has £" + to.getInventory().getAllGoodEntries().get("GBP"));
+        System.out.println("Bank " + from.getName() + " has £" + from.getInventory().getAllGoodEntries().get("GBP"));
+        System.out.println("Bank " + to.getName() + " has £" + to.getInventory().getAllGoodEntries().get("GBP"));
 
     }
 
@@ -134,6 +134,21 @@ public class Loan extends MasonScheduledContracts implements Collateral {
 
     private enum State {
         PRINCIPAL, DEFAULT, MATURED, TERMINATED
+    }
+
+    @Override
+    public Double default_valuation(Agent agent) {
+        // TODO: Write a valuation here! this is temporary
+        if (issuer==agent){
+            return -principal;}
+        else if(holder==agent){
+            return principal;
+        }
+        else return 0.0;
+    }
+
+    public double getPrincipal(){
+        return this.principal;
     }
 
     private State currentState;

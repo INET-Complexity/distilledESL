@@ -1,7 +1,7 @@
 <component name="libraryTable">
-  <library name="mason.18">
+  <library name="mason.19">
     <CLASSES>
-      <root url="jar://$PROJECT_DIR$/../housing-model/lib/mason.18.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/mason.19.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

@@ -1,18 +1,21 @@
 package ESL.inventory;
 
+import components.behaviour.HasBehaviour;
+
 import java.util.Map;
 import java.util.function.BiFunction;
 
-/**
- * Created by taghawi on 10/21/16.
- */
-public class Good extends Item {
+public abstract class Good extends Item {
     
 	private double quantity;
 
     public Good(String name, double quantity) {
         super(name); 
         this.quantity = quantity;
+    }
+
+    public void add(double amount) {
+        this.quantity+=amount;
     }
 
     public Double valuation(Map<Object, Object> parameters, Map<Contract, BiFunction<Contract, Map, Double>> value_functions) {
@@ -25,5 +28,4 @@ public class Good extends Item {
     public double getQuantity() {
     	return this.quantity;
     }
-    public double getValue() {return 0.0;}
 }
