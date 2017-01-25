@@ -9,6 +9,9 @@ import java.util.Map;
  */
 public class Parameters  {
 
+    //TODO: Maybe use the Singleton pattern to make sure there is only one instance of global parameters?
+    //Todo: protect access to global parameters (everyone can read, not everyone can write)
+
     public Parameters() {
         globalParameters = new HashMap<>(1000);
         globalParameters.put("price_GBP",1.0);
@@ -19,6 +22,7 @@ public class Parameters  {
     }
 
     public void put(String name, double value) {
+        //Todo: is this a bit naive? (i.e. just using strings)
         globalParameters.put(name,value);
     }
 

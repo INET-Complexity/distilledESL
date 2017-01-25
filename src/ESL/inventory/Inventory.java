@@ -16,9 +16,9 @@ public class Inventory {
      * Adds an Item to the BalanceSheet. This method is
      * protected to maintain stock-flow consistency.
      * @param good the Item to add
-     * @return returns a boolean regarding whether the add was successful.
      */
     public void add(Good good) {
+        //Todo: how shall we deal with adding goods??
         goods.put(good.getName(), goods.getOrDefault(good.getName(), 0.0) + good.getQuantity());
     }
 
@@ -29,6 +29,7 @@ public class Inventory {
             this.contracts.add(contract);
         }
     }
+
     public void remove(Good good) throws Exception {
         if (good.getQuantity() > this.goods.get(good.getName())) {
             throw new Exception(("not enough goods"));

@@ -1,9 +1,7 @@
-package components.items;
-
-import ESL.inventory.Item;
+package doubleEntry;
 
 /**
- * This interface allows a contract or good to be pledged as collateral for a repo contract.
+ * This interface allows the contents of an account to be placed as collateral.
  */
 public interface Collateral {
     void pledge() throws Exception;
@@ -90,7 +88,10 @@ class CannotBeCollateral implements Collateral {
     private void error() throws Exception {
         throw new Exception("Error: This item cannot be pledged (or unpledged) as collateral.");
     }
-    public boolean isEncumbered() {return false;}
+
+    public boolean isEncumbered() {
+        return false;
+    }
 
     public double getEncumberedAmount() {
         return 0;

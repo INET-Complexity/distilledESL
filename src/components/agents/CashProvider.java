@@ -70,7 +70,10 @@ public class CashProvider extends FinancialInstitution {
 
     public void payLiabilityWithStock(double amount) {
         try {
+            System.out.println("I'm paying liabilities by using up a quantity "+amount+" of stock worth "+amount*stockMarket.getPrice());
+//            System.out.println("Before, I had an amount of stock of: "+getInventory().getAllGoodEntries().get("Stock"));
             getInventory().remove(new Stock(amount));
+//            System.out.println("Now, I have an amount of stock left of: "+getInventory().getAllGoodEntries().get("Stock"));
             stockMarket.putForSale(amount);
             getInventory().remove(new SampleLiability(amount*stockMarket.getPrice()));
 
