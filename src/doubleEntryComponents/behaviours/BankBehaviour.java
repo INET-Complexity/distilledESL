@@ -1,26 +1,33 @@
-package doubleEntryComponents.actions;
+package doubleEntryComponents.behaviours;
 
 import doubleEntryComponents.Bank;
+import doubleEntryComponents.actions.Action;
+import doubleEntryComponents.actions.CancelLoan;
+import doubleEntryComponents.actions.PayLoan;
+import doubleEntryComponents.actions.SellAsset;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 
-public abstract class Behaviour {
+public abstract class BankBehaviour extends Behaviour {
 
     public Bank bank;
-    Behaviour(Bank bank) {
+    public BankBehaviour(Bank bank) {
         this.bank = bank;
     }
 
+    @Override
     public void act() {
         System.out.println(bank.getName()+" is acting.");
         ArrayList<Action> availableActions = bank.getAvailableActions(bank);
+        System.out.println("my available actions are: "+availableActions);
         ArrayList<Action> chosenActions = chooseActions(availableActions);
         performActions(chosenActions);
 
     }
 
 
+    @Override
     @Nullable
     protected ArrayList<Action> chooseActions(ArrayList<Action> availableActions) {
         if (bank.getLeverageConstraint().isBelowMin()) {
@@ -64,7 +71,8 @@ public abstract class Behaviour {
 
     public abstract Action getNextAction(ArrayList<Action> availableActions);
 
-    private void performActions(ArrayList<Action> chosenActions) {
+    @Override
+    protected void performActions(ArrayList<Action> chosenActions) {
         if (chosenActions==null) return;
         for (Action action : chosenActions) {
                 action.print();

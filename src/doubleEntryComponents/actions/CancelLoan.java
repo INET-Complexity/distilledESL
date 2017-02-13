@@ -20,7 +20,11 @@ public class CancelLoan extends Action {
 
         //Todo: we are accessing the bank's ledger!
         lender.getGeneralLedger().pullFunding(getAmount());
-        borrower.getGeneralLedger().payLoan(getAmount());
+        try {
+            borrower.getGeneralLedger().payLoan(getAmount());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
     }
 

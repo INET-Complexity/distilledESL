@@ -1,6 +1,7 @@
-package doubleEntryComponents.actions;
+package doubleEntryComponents.behaviours;
 
 import doubleEntryComponents.Bank;
+import doubleEntryComponents.actions.Action;
 
 import java.util.ArrayList;
 
@@ -10,7 +11,7 @@ import java.util.ArrayList;
  *  2) Sell Assets
  *  3) Pay with cash
  */
-public class BankBehaviour2 extends Behaviour {
+public class BankBehaviour2 extends BankBehaviour {
 
     public BankBehaviour2(Bank bank) {
         super(bank);

@@ -1,8 +1,7 @@
 package test;
 
 import doubleEntryComponents.Bank;
-import doubleEntryComponents.actions.BankBehaviour1;
-import doubleEntryComponents.actions.HedgefundBehaviour;
+import doubleEntryComponents.behaviours.BankBehaviour1;
 import doubleEntryComponents.actions.LeverageConstraint;
 import doubleEntryComponents.contracts.Asset;
 import doubleEntryComponents.contracts.AssetMarket;
@@ -43,9 +42,17 @@ public class ShortSimulationDemo {
         bank1.act();
         bank1.printBalanceSheet();
 
+        updateAssetPrices(bank1, bank2, hedgefund);
+        System.out.println("price of A1 :"+assetMarket.getPrice(Asset.AssetType.A1));
+
+//        bank1.act();
+//
         hedgefund.printBalanceSheet();
         hedgefund.act();
         hedgefund.printBalanceSheet();
+
+        bank2.act();
+        bank2.printBalanceSheet();
     }
 
     private static void initBehaviours(Bank bank1, Bank bank2, Bank hedgefund) {

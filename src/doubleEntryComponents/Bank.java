@@ -2,22 +2,30 @@ package doubleEntryComponents;
 
 import doubleEntry.*;
 import doubleEntryComponents.actions.Action;
-import doubleEntryComponents.actions.Behaviour;
+import doubleEntryComponents.behaviours.BankBehaviour;
 import doubleEntryComponents.actions.LeverageConstraint;
+import doubleEntryComponents.actions.SellAsset;
 import doubleEntryComponents.contracts.Asset;
 import doubleEntryComponents.contracts.Contract;
 import doubleEntryComponents.contracts.Loan;
 
 import java.util.ArrayList;
 
+/**
+ * This class represents a simple bank with a single Ledger, called 'general Ledger'.
+ *
+ * Every Bank has a BankBehaviour.
+ */
 public class Bank extends Agent {
 
     private LeverageConstraint leverageConstraint;
-    private Behaviour behaviour;
+    private BankBehaviour behaviour;
+    private Ledger generalLedger;
+
 
     public Bank(String name) {
         super(name);
-        generalLedger = new Ledger();
+        generalLedger = new Ledger(this);
 
         // TODO: We need a better way to initialise the bank accounts!
         // Add the standard accounts to the bank here
@@ -50,8 +58,6 @@ public class Bank extends Agent {
 
     public void addCash(double amount) {generalLedger.addCash(amount);}
 
-    private Ledger generalLedger;
-
     public Ledger getGeneralLedger() {
         return generalLedger;
     }
@@ -64,7 +70,7 @@ public class Bank extends Agent {
         return leverageConstraint;
     }
 
-    public void setBehaviour(Behaviour behaviour) {
+    public void setBehaviour(BankBehaviour behaviour) {
         this.behaviour = behaviour;
     }
 
@@ -90,5 +96,26 @@ public class Bank extends Agent {
     public void liquidateLoan(double initialValue, double valueFraction) {
         generalLedger.liquidateLoan(initialValue, valueFraction);
     }
+
+    public void raiseLiquidity(double liquidityNeeded) {
+        ArrayList<Action> availableActions = getAvailableActions(this);
+
+        double initialAssetHoldings = generalLedger.getAssetAccountFor(Asset.class).getTotal();
+
+        for (Action action : availableActions) {
+            if (action instanceof SellAsset) {
+                action.setAmount(action.getMax()*liquidityNeeded/initialAssetHoldings);
+                action.print();
+                action.perform();
+            }
+        }
+
+    }
+
+
+
+    public double getAssetValue() {return generalLedger.getAssetValue();}
+    public double getLiabilityValue() {return generalLedger.getLiabilityValue();}
+    public double getEquityValue() {return generalLedger.getEquityValue();}
 
 }
