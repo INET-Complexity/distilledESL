@@ -26,6 +26,6 @@ public class SellAsset extends Action {
 
     @Override
     public void print() {
-        System.out.println("Sell Asset action by "+asset.getAssetParty().getName()+" -> asset type: "+asset.getAssetType() +"amount: "+getAmount());
+        System.out.println("Sell Asset action by "+asset.getAssetParty().getName()+" -> asset type: "+asset.getAssetType() +"amount: "+String.format( "%.2f", getAmount()));
     }
 }

@@ -49,7 +49,7 @@ public class PayLoan extends Action {
 
     @Override
     public void print() {
-        System.out.println("PayLoan action by "+loan.getLiabilityParty().getName()+" -> amount: "+getAmount());
+        System.out.println("PayLoan action by "+loan.getLiabilityParty().getName()+" -> amount: "+String.format( "%.2f", getAmount()));
     }
 
     public Loan getLoan() {

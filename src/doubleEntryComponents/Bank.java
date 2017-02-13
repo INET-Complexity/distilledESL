@@ -2,6 +2,7 @@ package doubleEntryComponents;
 
 import doubleEntry.*;
 import doubleEntryComponents.actions.Action;
+import doubleEntryComponents.actions.LCR_Constraint;
 import doubleEntryComponents.behaviours.BankBehaviour;
 import doubleEntryComponents.actions.LeverageConstraint;
 import doubleEntryComponents.actions.SellAsset;
@@ -19,6 +20,7 @@ import java.util.ArrayList;
 public class Bank extends Agent {
 
     private LeverageConstraint leverageConstraint;
+    private LCR_Constraint lcr_constraint;
     private BankBehaviour behaviour;
     private Ledger generalLedger;
 
@@ -68,6 +70,14 @@ public class Bank extends Agent {
 
     public LeverageConstraint getLeverageConstraint() {
         return leverageConstraint;
+    }
+
+    public LCR_Constraint getLCR_constraint() {
+        return lcr_constraint;
+    }
+
+    public void setLCR_constraint(LCR_Constraint lcr_constraint) {
+        this.lcr_constraint = lcr_constraint;
     }
 
     public void setBehaviour(BankBehaviour behaviour) {

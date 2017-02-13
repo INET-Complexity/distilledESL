@@ -3,10 +3,9 @@ package doubleEntryComponents.contracts;
 import doubleEntryComponents.Agent;
 import doubleEntryComponents.Bank;
 import doubleEntryComponents.actions.Action;
-import doubleEntryComponents.actions.CancelLoan;
+import doubleEntryComponents.actions.PullFunding;
 import doubleEntryComponents.actions.PayLoan;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 public class Loan extends Contract {
@@ -37,7 +36,7 @@ public class Loan extends Contract {
     public ArrayList<Action> getAvailableActions(Agent me) {
         ArrayList<Action> availableActions = new ArrayList<>();
         if (assetParty==me) {
-            availableActions.add(new CancelLoan(this));
+            availableActions.add(new PullFunding(this));
         } else if (liabilityParty == me) {
             availableActions.add(new PayLoan(this));
         }

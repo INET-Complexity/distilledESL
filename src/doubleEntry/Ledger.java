@@ -241,17 +241,17 @@ public class Ledger {
         System.out.println("Asset accounts:");
         System.out.println("---------------");
         for (Account account : assets) {
-            System.out.println(account.getName()+" -> "+account.getTotal());
+            System.out.println(account.getName()+" -> "+ String.format( "%.2f", account.getTotal()));
         }
-        System.out.println("TOTAL ASSETS: "+getAssetValue());
+        System.out.println("TOTAL ASSETS: "+ String.format( "%.2f", getAssetValue()));
         System.out.println();
 
         System.out.println("Liability accounts:");
         System.out.println("---------------");
         for (Account account : liabilities) {
-            System.out.println(account.getName()+" -> "+account.getTotal());
+            System.out.println(account.getName()+" -> "+ String.format( "%.2f", account.getTotal()));
         }
-        System.out.println("TOTAL LIABILITIES: "+getLiabilityValue());
+        System.out.println("TOTAL LIABILITIES: "+ String.format( "%.2f", getLiabilityValue()));
         System.out.println();
     }
 

@@ -3,10 +3,10 @@ package doubleEntryComponents.actions;
 import doubleEntryComponents.Bank;
 import doubleEntryComponents.contracts.Loan;
 
-public class CancelLoan extends Action {
+public class PullFunding extends Action {
 
     private Loan loan;
-    public CancelLoan(Loan loan) {
+    public PullFunding(Loan loan) {
         this.loan = loan;
         setAmount(0.0);
     }
@@ -36,7 +36,7 @@ public class CancelLoan extends Action {
 
     @Override
     public void print() {
-        System.out.println("CancelLoan action by "+loan.getAssetParty().getName()+" -> amount "
-            +getAmount()+", borrower is "+loan.getLiabilityParty().getName());
+        System.out.println("PullFunding action by "+loan.getAssetParty().getName()+" -> amount "
+            + String.format( "%.2f", getAmount()) +", borrower is "+loan.getLiabilityParty().getName());
     }
 }

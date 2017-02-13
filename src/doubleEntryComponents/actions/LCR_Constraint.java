@@ -50,4 +50,8 @@ public class LCR_Constraint {
     public double getLiquidityToRaise() {
         return max(LCR_denominator * (LCR_target - getLCR()), 0.0);
     }
+
+    public double getCashTarget() {
+        return LCR_target * LCR_denominator;
+    }
 }
