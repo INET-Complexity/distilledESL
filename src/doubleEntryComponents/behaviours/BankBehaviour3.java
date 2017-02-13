@@ -17,6 +17,7 @@ public class BankBehaviour3 extends BankBehaviour {
         super(bank);
     }
 
+    @Override
     public Action getNextAction(ArrayList<Action> availableActions) {
 
         Action cancelLoan = findCancelLoanAction(availableActions);
