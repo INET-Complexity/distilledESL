@@ -1,14 +1,15 @@
 package doubleEntryComponents.contracts;
 
 import doubleEntryComponents.Agent;
+import doubleEntryComponents.Bank;
 import doubleEntryComponents.actions.Action;
-import doubleEntryComponents.actions.CancelLoan;
+import doubleEntryComponents.actions.PullFunding;
 import doubleEntryComponents.actions.PayLoan;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 public class Loan extends Contract {
+    private static final double VALUE_GIVEN_DEFAULT = 0.30;
 
     public Loan(Agent assetParty, Agent liabilityParty, double principal) {
         this.assetParty = assetParty;
@@ -35,7 +36,7 @@ public class Loan extends Contract {
     public ArrayList<Action> getAvailableActions(Agent me) {
         ArrayList<Action> availableActions = new ArrayList<>();
         if (assetParty==me) {
-            availableActions.add(new CancelLoan(this));
+            availableActions.add(new PullFunding(this));
         } else if (liabilityParty == me) {
             availableActions.add(new PayLoan(this));
         }
@@ -55,6 +56,11 @@ public class Loan extends Contract {
     @Override
     public double getValue() {
         return principal;
+    }
+
+    public void liquidate() {
+        ((Bank) assetParty).liquidateLoan(getValue(), VALUE_GIVEN_DEFAULT);
+        principal = 0.0;
     }
 }
 

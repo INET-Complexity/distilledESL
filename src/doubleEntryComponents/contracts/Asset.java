@@ -29,6 +29,8 @@ public class Asset extends Contract {
 
     @Override
     public ArrayList<Action> getAvailableActions(Agent me) {
+        if (assetType == AssetType.E) return null; // External assets cannot be sold!
+
         ArrayList<Action> availableActions = new ArrayList<>();
         if (assetParty == me) {
             availableActions.add(new SellAsset(this));

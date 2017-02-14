@@ -15,8 +15,7 @@ public class LeverageConstraint {
         this.leverageBuffer = leverageBuffer;
         this.leverageMin = leverageMin;
 
-        assert(leverageBuffer >= leverageMin);
-        assert(leverageTarget >= leverageMin);
+        assert((leverageTarget >= leverageBuffer) && (leverageBuffer >= leverageMin));
     }
 
     public boolean isBelowBuffer() {
@@ -28,7 +27,7 @@ public class LeverageConstraint {
     }
 
     public double getLeverage() {
-        return (1.0 * bank.getGeneralLedger().getEquityValue() / bank.getGeneralLedger().getAssetValue());
+        return (1.0 * bank.getEquityValue() / bank.getAssetValue());
     }
 
     public double getAmountToDelever() {

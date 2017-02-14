@@ -1,21 +1,23 @@
-package doubleEntryComponents.actions;
+package doubleEntryComponents.behaviours;
 
 import doubleEntryComponents.Bank;
+import doubleEntryComponents.actions.Action;
 
 import java.util.ArrayList;
 
 /**
  * This class implements a Bank's behaviour consisting of:
- *  1) Pull Funding
- *  2) Sell Assets
- *  3) Pay with cash
+ *  1) Sell Assets
+ *  2) Pay with cash
+ *  3) Pull Funding
  */
-public class BankBehaviour2 extends Behaviour {
+public class BankBehaviour3 extends BankBehaviour {
 
-    public BankBehaviour2(Bank bank) {
+    public BankBehaviour3(Bank bank) {
         super(bank);
     }
 
+    @Override
     public Action getNextAction(ArrayList<Action> availableActions) {
 
         Action cancelLoan = findCancelLoanAction(availableActions);

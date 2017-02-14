@@ -62,7 +62,8 @@ public class Account {
     public ArrayList<Action> getAvailableActions(Agent me) {
         ArrayList<Action> availableActions = new ArrayList<>();
         for (Contract contract : contracts) {
-            availableActions.addAll(contract.getAvailableActions(me));
+            ArrayList<Action> contractActions = contract.getAvailableActions(me);
+            if (contractActions != null) availableActions.addAll(contractActions);
         }
         return availableActions;
     }

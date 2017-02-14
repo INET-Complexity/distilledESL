@@ -1,6 +1,7 @@
 package doubleEntry;
 
 import doubleEntryComponents.Agent;
+import doubleEntryComponents.Bank;
 import doubleEntryComponents.actions.Action;
 import doubleEntryComponents.contracts.Asset;
 import doubleEntryComponents.contracts.Contract;
@@ -16,19 +17,28 @@ import java.util.HashSet;
  *
  * A ledger contains a set of accounts, and is the interface between an agent and its accounts. Agents cannot
  * directly interact with accounts other than via a ledger.
+ *
+ * A simple economic agent will usually have a single Ledger, whereas complex firms and banks can have several.
  */
 public class Ledger {
 
-    public Ledger() {
-        accounts = new HashSet<>();
+    public Ledger(Agent owner) {
+        accounts = new HashSet<>(); // A list of accounts
+
+        // Subsets of the list for quicker searching
         assets = new HashSet<>();
         liabilities = new HashSet<>();
         equity = new HashSet<>();
+
+        // A hashmap relating types of contracts to the account they should be sitting in
         defaultAssetAccounts = new HashMap<>();
+        // Note that separate hashmaps must exist for assets and liabilities since some contracts can be either
         defaultLiabilityAccounts = new HashMap<>();
+        this.owner = owner;
     }
 
 
+    private Agent owner;
     private HashSet<Account> accounts;
     private HashSet<Account> assets;
     private HashSet<Account> liabilities;
@@ -170,11 +180,21 @@ public class Ledger {
 
     }
 
-    public void payLoan(double amount) {
+    public void payLoan(double amount) throws Exception {
         Account loanAccount = getLiabilityAccountFor(Loan.class);
+
+        if (defaultCashAccount.getTotal() < amount) {
+            System.out.println(owner.getName()+" must raise liquidity immediately.");
+            throw new Exception("Not enough funds.");
+
+            //owner.raiseLiquidity(amount * (1 - defaultCashAccount.getTotal()/getAssetValue()));
+
+        }
+
 
         loanAccount.debit(amount);
         defaultCashAccount.credit(amount);
+
     }
 
     public void sellAsset(double amount) {
@@ -218,21 +238,33 @@ public class Ledger {
     }
 
     public void printBalanceSheet() {
-        System.out.println();
         System.out.println("Asset accounts:");
         System.out.println("---------------");
         for (Account account : assets) {
-            System.out.println(account.getName()+" -> "+account.getTotal());
+            System.out.println(account.getName()+" -> "+ String.format( "%.2f", account.getTotal()));
         }
-        System.out.println("TOTAL ASSETS: "+getAssetValue());
+        System.out.println("TOTAL ASSETS: "+ String.format( "%.2f", getAssetValue()));
         System.out.println();
 
         System.out.println("Liability accounts:");
         System.out.println("---------------");
         for (Account account : liabilities) {
-            System.out.println(account.getName()+" -> "+account.getTotal());
+            System.out.println(account.getName()+" -> "+ String.format( "%.2f", account.getTotal()));
         }
-        System.out.println("TOTAL LIABILITIES: "+getLiabilityValue());
+        System.out.println("TOTAL LIABILITIES: "+ String.format( "%.2f", getLiabilityValue()));
         System.out.println();
+    }
+
+    public void liquidateLoan(double initialValue, double valueFraction) {
+        Account assetLoanAccount = getAssetAccountFor(Loan.class);
+
+        double valueLost = (1 - valueFraction) * initialValue;
+        // First, we devalue the loan :(
+        defaultEquityAccount.debit(valueLost);
+        assetLoanAccount.credit(valueLost);
+
+        // Then, we liquidate it
+        defaultCashAccount.debit(initialValue-valueLost);
+        assetLoanAccount.credit(initialValue-valueLost);
     }
 }

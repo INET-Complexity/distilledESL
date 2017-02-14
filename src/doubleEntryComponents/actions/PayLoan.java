@@ -26,7 +26,10 @@ public class PayLoan extends Action {
 
         Bank borrower = (Bank) loan.getLiabilityParty();
 
-        borrower.getGeneralLedger().payLoan(getAmount());
+        try {borrower.getGeneralLedger().payLoan(getAmount());}
+        catch (Exception e) {
+            e.printStackTrace();
+        }
 
         if (loan.getAssetParty()!= null) {
             Bank lender = (Bank) loan.getAssetParty();
@@ -46,6 +49,10 @@ public class PayLoan extends Action {
 
     @Override
     public void print() {
-        System.out.println("PayLoan action by "+loan.getLiabilityParty().getName()+" -> amount: "+getAmount());
+        System.out.println("PayLoan action by "+loan.getLiabilityParty().getName()+" -> amount: "+String.format( "%.2f", getAmount()));
+    }
+
+    public Loan getLoan() {
+        return loan;
     }
 }
