@@ -7,7 +7,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
-import test.ShortSimulationDemo;
+import demos.ShortSimulationDemo;
 
 public class Launch extends Application {
 
