@@ -14,14 +14,14 @@ import java.util.HashSet;
  * This is the main class implementing double entry accounting. All public operations provided by this class
  * are given as a double entry operation, i.e. a pair of (dr, cr) operations.
  *
- * A ledger contains a set of accounts, and is the interface between an agent and its accounts. Agents cannot
- * directly interact with accounts other than via a ledger.
+ * A Book contains a set of accounts, and is the interface between an agent and its accounts. Agents cannot
+ * directly interact with accounts other than via a Book.
  *
- * A simple economic agent will usually have a single Ledger, whereas complex firms and banks can have several.
+ * A simple economic agent will usually have a single Book, whereas complex firms and banks can have several.
  */
-public class Ledger {
+public class Book {
 
-    public Ledger(Agent owner) {
+    public Book(Agent owner) {
         accounts = new HashSet<>(); // A list of accounts
 
         // Subsets of the list for quicker searching

@@ -25,14 +25,14 @@ public class PayLoan extends Action {
 
         Bank borrower = (Bank) loan.getLiabilityParty();
 
-        try {borrower.getGeneralLedger().payLoan(getAmount());}
+        try {borrower.getMainBook().payLoan(getAmount());}
         catch (Exception e) {
             e.printStackTrace();
         }
 
         if (loan.getAssetParty()!= null) {
             Bank lender = (Bank) loan.getAssetParty();
-            lender.getGeneralLedger().pullFunding(getAmount());
+            lender.getMainBook().pullFunding(getAmount());
         }
 
         loan.reducePrincipal(getAmount());
