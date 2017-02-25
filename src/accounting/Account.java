@@ -12,7 +12,7 @@ public class Account {
     public Account(String name, AccountType accountType, Double startingBalance) {
         this.name = name;
         this.accountType = accountType;
-        this.total = startingBalance;
+        this.balance = startingBalance;
         this.contractClass = null;
         this.contracts = new HashSet<>();
     }
@@ -21,7 +21,7 @@ public class Account {
         this(name,accountType,0.0);
     }
 
-    private double total;
+    private double balance;
 
     private Collateral collateralType;
     private AccountType accountType;
@@ -40,9 +40,9 @@ public class Account {
      */
     public void debit(double amount) {
         if ((accountType==AccountType.ASSET) || (accountType==AccountType.EXPENSES)) {
-            total += amount;
+            balance += amount;
         } else {
-            total -= amount;
+            balance -= amount;
         }
     }
 
@@ -52,9 +52,9 @@ public class Account {
      */
     public void credit(double amount) {
         if ((accountType==AccountType.ASSET) || (accountType==AccountType.EXPENSES)) {
-            total -= amount;
+            balance -= amount;
         } else {
-            total += amount;
+            balance += amount;
         }
     }
 
@@ -76,8 +76,8 @@ public class Account {
         return accountType;
     }
 
-    public double getTotal() {
-        return total;
+    public double getBalance() {
+        return balance;
     }
 
     public void setContractClass(Class<? extends Contract> contractClass) {

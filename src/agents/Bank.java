@@ -113,7 +113,7 @@ public class Bank extends Agent {
     public void raiseLiquidity(double liquidityNeeded) {
         ArrayList<Action> availableActions = getAvailableActions(this);
 
-        double initialAssetHoldings = mainBook.getAssetAccountFor(Asset.class).getTotal();
+        double initialAssetHoldings = mainBook.getAssetAccountFor(Asset.class).getBalance();
 
         for (Action action : availableActions) {
             if (action instanceof SellAsset) {
@@ -132,7 +132,7 @@ public class Bank extends Agent {
 
     @Override
     public void payLoan(double amount) throws Exception {
-        mainBook.payLoan(amount);
+        mainBook.payLiability(amount);
     }
 
     public double getAssetValue() {return mainBook.getAssetValue();}
