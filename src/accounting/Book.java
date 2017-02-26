@@ -17,9 +17,10 @@ import java.util.HashSet;
  * A Book contains a set of accounts, and is the interface between an agent and its accounts. Agents cannot
  * directly interact with accounts other than via a Book.
  *
- * At the moment, a Book contains an account for each type of contract.
+ * At the moment, a Book contains an account for each type of contract, plus an equity account and a cash account.
  *
- * A simple economic agent will usually have a single Book, whereas complex firms and banks can have several.
+ * A simple economic agent will usually have a single Book, whereas complex firms and banks can have several books
+ * (as in branch banking for example).
  *
  * @author rafa
  */
@@ -37,11 +38,11 @@ public class Book implements BookAPI {
         // Each Account includes an inventory to hold one type of contract.
         // These hashmaps are used to access the correct account for a given type of contract.
         // Note that separate hashmaps are needed for asset accounts and liability accounts: the same contract
-        // type (such as Loan) can be an asset or a liability so might have to be placed on an asset or a liability account.
+        // type (such as Loan) can sometimes be an asset and sometimes a liability.
         assetAccountsMap = new HashMap<>();
         liabilityAccountsMap = new HashMap<>();
 
-        // Not sure whether I should be passing the owner
+        // Not sure whether I should be passing the owner...
         this.owner = owner;
 
         // A book is initially created with a cash account and an equityAccounts account (it's the simplest possible book)
@@ -122,7 +123,8 @@ public class Book implements BookAPI {
     }
 
     /**
-     * Adding an asset means debiting the assetAccounts account relevant to that type of contract and crediting the equityAccounts account.
+     * Adding an asset means debiting the account relevant to that type of contract
+     * and crediting equity.
      * @param contract an Asset contract to add
      */
     public void addAsset(Contract contract) {
@@ -134,7 +136,7 @@ public class Book implements BookAPI {
             addAccount(assetAccount, contract.getClass());
         }
 
-        // (dr assetAccounts, cr equityAccounts)
+        // (dr asset, cr equity)
         assetAccount.debit(contract.getValue());
         equityAccount.credit(contract.getValue());
 
@@ -143,7 +145,8 @@ public class Book implements BookAPI {
     }
 
     /**
-     * Adding a liability means debiting equityAccounts and crediting the liabilityAccounts account relevant to that type of contract.
+     * Adding a liability means debiting equity and crediting the account
+     * relevant to that type of contract.
      * @param contract a Liability contract to add
      */
     public void addLiability(Contract contract) {
@@ -156,7 +159,7 @@ public class Book implements BookAPI {
             addAccount(liabilityAccount, contract.getClass());
         }
 
-        // (dr equityAccounts, cr liability)
+        // (dr equity, cr liability)
         equityAccount.debit(contract.getValue());
         liabilityAccount.credit(contract.getValue());
 
@@ -165,7 +168,7 @@ public class Book implements BookAPI {
 
     public void addCash(double amount) {
 
-        // (dr assetAccounts, cr equityAccounts)
+        // (dr cash, cr equity)
         cashAccount.debit(amount);
         equityAccount.credit(amount);
     }
@@ -180,14 +183,14 @@ public class Book implements BookAPI {
     public void pullFunding(double amount) {
         Account loanAccount = assetAccountsMap.get(Loan.class);
 
-        // (dr cash, cr assetAccounts (loan) )
+        // (dr cash, cr asset )
         cashAccount.debit(amount);
         loanAccount.credit(amount);
 
     }
 
     /**
-     * Operation to pay back a liability loan; debit liabilityAccounts and credit cash
+     * Operation to pay back a liability loan; debit liability and credit cash
      * @param amount amount to pay back
      */
     public void payLiability(double amount, Class<? extends Contract> liabilityType) {
@@ -203,26 +206,26 @@ public class Book implements BookAPI {
             System.out.println();
         }
 
-        // (dr liabilityAccounts, cr cash )
+        // (dr liability, cr cash )
         liabilityAccount.debit(amount);
         cashAccount.credit(amount);
 
     }
 
     /**
-     * If I've sold an asset, debit cash and credit assetAccounts
+     * If I've sold an asset, debit cash and credit asset
      * @param amount the *value* of the asset
      */
     public void sellAsset(double amount, Class<? extends Contract> assetType) {
         Account assetAccount = assetAccountsMap.get(assetType);
 
-        // (dr cash, cr assetAccounts)
+        // (dr cash, cr asset)
         cashAccount.debit(amount);
         assetAccount.credit(amount);
     }
 
     /**
-     * Behavioral stuff
+     * Behavioral stuff; not sure if it should be here
      * @param me the owner of the Book
      * @return an ArrayList of Actions that are available to me at this moment
      */
@@ -250,7 +253,7 @@ public class Book implements BookAPI {
     }
 
     /**
-     * if an Asset loses value, I must debit equityAccounts and credit assetAccounts
+     * if an Asset loses value, I must debit equity and credit asset
      * @param amount
      */
     private void devalueAsset(double amount) {
@@ -265,8 +268,8 @@ public class Book implements BookAPI {
      * This mimics the default on a loan. If I lend money to someone and they default on me, at the moment
      * I assume that I lose a 'valueFraction' of its value. There are two double-entry operations:
      *
-     * First I take a hit on equityAccounts for the lost value of the loan (dr equityAccounts, cr assetAccounts)
-     * Then I cash in the loan (dr cash, cr assetAccounts)
+     * First I take a hit on equity for the lost value of the loan (dr equity, cr asset)
+     * Then I cash in the loan (dr cash, cr asset)
      *
      * @param initialValue the original value of the loan
      * @param valueFraction the fraction of the loan that will be lost due to the default
@@ -277,7 +280,7 @@ public class Book implements BookAPI {
         double valueLost = (1 - valueFraction) * initialValue;
 
         // First, we devalue the loan :(
-        // (dr equityAccounts, cr asset)
+        // (dr equity, cr asset)
         equityAccount.debit(valueLost);
         assetLoanAccount.credit(valueLost);
 
