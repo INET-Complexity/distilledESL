@@ -16,7 +16,7 @@ public class SellAsset extends Action {
     public void perform() {
         Bank owner = (Bank) asset.getAssetParty();
         asset.sellAmount(getAmount());
-        owner.getMainBook().sellAsset(getAmount());
+        owner.getMainBook().sellAsset(getAmount(), Asset.class);
     }
 
     @Override

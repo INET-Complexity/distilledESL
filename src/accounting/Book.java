@@ -20,17 +20,19 @@ import java.util.HashSet;
  * At the moment, a Book contains an account for each type of contract.
  *
  * A simple economic agent will usually have a single Book, whereas complex firms and banks can have several.
+ *
+ * @author rafa
  */
-public class Book {
+public class Book implements BookAPI {
 
     public Book(Agent owner) {
         // A Book is a list of accounts
         accounts = new HashSet<>();
 
         // Subsets of the list of accounts (for quicker searching)
-        assets = new HashSet<>();
-        liabilities = new HashSet<>();
-        equity = new HashSet<>();
+        assetAccounts = new HashSet<>();
+        liabilityAccounts = new HashSet<>();
+        equityAccounts = new HashSet<>();
 
         // Each Account includes an inventory to hold one type of contract.
         // These hashmaps are used to access the correct account for a given type of contract.
@@ -42,34 +44,35 @@ public class Book {
         // Not sure whether I should be passing the owner
         this.owner = owner;
 
-        // A book is initially created with a cash account and an equity account (it's the simplest possible book)
+        // A book is initially created with a cash account and an equityAccounts account (it's the simplest possible book)
         cashAccount = new Account("cash", AccountType.ASSET);
-        equityAccount = new Account("equity", AccountType.EQUITY);
+        equityAccount = new Account("equityAccounts", AccountType.EQUITY);
+        addAccount(cashAccount, null);
+        addAccount(equityAccount, null);
     }
 
 
     private Agent owner;
     private HashSet<Account> accounts;
-    private HashSet<Account> assets;
-    private HashSet<Account> liabilities;
-    private HashSet<Account> equity;
-    private HashMap<Class<? extends contracts.Contract>,Account> assetAccountsMap;
-    private HashMap<Class<? extends contracts.Contract>,Account> liabilityAccountsMap;
+    private HashSet<Account> assetAccounts;
+    private HashSet<Account> liabilityAccounts;
+    private HashSet<Account> equityAccounts;
+    private HashMap<Class<? extends contracts.Contract>, Account> assetAccountsMap;
+    private HashMap<Class<? extends contracts.Contract>, Account> liabilityAccountsMap;
     private Account cashAccount;
     private Account equityAccount;
 
     public double getAssetValue() {
         double assetTotal = 0;
-        for (Account assetAccount : assets) {
+        for (Account assetAccount : assetAccounts) {
             assetTotal+=assetAccount.getBalance();
         }
         return assetTotal;
     }
 
-
     public double getLiabilityValue() {
         double liabilityTotal = 0;
-        for (Account liabilityAccount : liabilities) {
+        for (Account liabilityAccount : liabilityAccounts) {
             liabilityTotal+=liabilityAccount.getBalance();
         }
         return liabilityTotal;
@@ -77,10 +80,18 @@ public class Book {
 
     public double getEquityValue() {
         double equityTotal = 0;
-        for (Account equityAccount : equity) {
+        for (Account equityAccount : equityAccounts) {
             equityTotal += equityAccount.getBalance();
         }
         return equityTotal;
+    }
+
+    public double getAssetValueOf(Class<? extends Contract> contractType) {
+        return assetAccountsMap.get(contractType).getBalance();
+    }
+
+    public double getLiabilityValueOf(Class<? extends Contract> contractType) {
+        return liabilityAccountsMap.get(contractType).getBalance();
     }
 
     public double getCash() {
@@ -93,22 +104,25 @@ public class Book {
         switch(account.getAccountType()) {
 
             case ASSET:
-                assets.add(account);
+                assetAccounts.add(account);
                 assetAccountsMap.put(contractType, account);
                 break;
 
             case LIABILITY:
-                liabilities.add(account);
+                liabilityAccounts.add(account);
                 liabilityAccountsMap.put(contractType, account);
                 break;
 
-            // Not sure what to do with EQUITY, INCOME, EXPENSES
+            case EQUITY:
+                equityAccounts.add(account);
+
+            // Not sure what to do with INCOME, EXPENSES
         }
 
     }
 
     /**
-     * Adding an asset means debiting the assets account relevant to that type of contract and crediting the equity account.
+     * Adding an asset means debiting the assetAccounts account relevant to that type of contract and crediting the equityAccounts account.
      * @param contract an Asset contract to add
      */
     public void addAsset(Contract contract) {
@@ -120,7 +134,7 @@ public class Book {
             addAccount(assetAccount, contract.getClass());
         }
 
-        // (dr assets, cr equity)
+        // (dr assetAccounts, cr equityAccounts)
         assetAccount.debit(contract.getValue());
         equityAccount.credit(contract.getValue());
 
@@ -129,7 +143,7 @@ public class Book {
     }
 
     /**
-     * Adding a liability means debiting equity and crediting the liabilities account relevant to that type of contract.
+     * Adding a liability means debiting equityAccounts and crediting the liabilityAccounts account relevant to that type of contract.
      * @param contract a Liability contract to add
      */
     public void addLiability(Contract contract) {
@@ -142,7 +156,7 @@ public class Book {
             addAccount(liabilityAccount, contract.getClass());
         }
 
-        // (dr equity, cr liability)
+        // (dr equityAccounts, cr liability)
         equityAccount.debit(contract.getValue());
         liabilityAccount.credit(contract.getValue());
 
@@ -151,7 +165,7 @@ public class Book {
 
     public void addCash(double amount) {
 
-        // (dr assets, cr equity)
+        // (dr assetAccounts, cr equityAccounts)
         cashAccount.debit(amount);
         equityAccount.credit(amount);
     }
@@ -166,14 +180,14 @@ public class Book {
     public void pullFunding(double amount) {
         Account loanAccount = assetAccountsMap.get(Loan.class);
 
-        // (dr cash, cr assets (loan) )
+        // (dr cash, cr assetAccounts (loan) )
         cashAccount.debit(amount);
         loanAccount.credit(amount);
 
     }
 
     /**
-     * Operation to pay back a liability loan; debit liabilities and credit cash
+     * Operation to pay back a liability loan; debit liabilityAccounts and credit cash
      * @param amount amount to pay back
      */
     public void payLiability(double amount, Class<? extends Contract> liabilityType) {
@@ -189,20 +203,20 @@ public class Book {
             System.out.println();
         }
 
-        // (dr liabilities, cr cash )
+        // (dr liabilityAccounts, cr cash )
         liabilityAccount.debit(amount);
         cashAccount.credit(amount);
 
     }
 
     /**
-     * If I've sold an asset, debit cash and credit assets
+     * If I've sold an asset, debit cash and credit assetAccounts
      * @param amount the *value* of the asset
      */
     public void sellAsset(double amount, Class<? extends Contract> assetType) {
         Account assetAccount = assetAccountsMap.get(assetType);
 
-        // (dr cash, cr assets)
+        // (dr cash, cr assetAccounts)
         cashAccount.debit(amount);
         assetAccount.credit(amount);
     }
@@ -236,13 +250,13 @@ public class Book {
     }
 
     /**
-     * if an Asset loses value, I must debit equity and credit assets
+     * if an Asset loses value, I must debit equityAccounts and credit assetAccounts
      * @param amount
      */
     private void devalueAsset(double amount) {
         Account assetAccount = assetAccountsMap.get(Asset.class);
 
-        // (dr equity, cr assets)
+        // (dr equityAccounts, cr assetAccounts)
         equityAccount.debit(amount);
         assetAccount.credit(amount);
     }
@@ -251,8 +265,8 @@ public class Book {
      * This mimics the default on a loan. If I lend money to someone and they default on me, at the moment
      * I assume that I lose a 'valueFraction' of its value. There are two double-entry operations:
      *
-     * First I take a hit on equity for the lost value of the loan (dr equity, cr assets)
-     * Then I cash in the loan (dr cash, cr assets)
+     * First I take a hit on equityAccounts for the lost value of the loan (dr equityAccounts, cr assetAccounts)
+     * Then I cash in the loan (dr cash, cr assetAccounts)
      *
      * @param initialValue the original value of the loan
      * @param valueFraction the fraction of the loan that will be lost due to the default
@@ -263,7 +277,7 @@ public class Book {
         double valueLost = (1 - valueFraction) * initialValue;
 
         // First, we devalue the loan :(
-        // (dr equity, cr asset)
+        // (dr equityAccounts, cr asset)
         equityAccount.debit(valueLost);
         assetLoanAccount.credit(valueLost);
 
@@ -276,7 +290,7 @@ public class Book {
     public void printBalanceSheet() {
         System.out.println("Asset accounts:");
         System.out.println("---------------");
-        for (Account account : assets) {
+        for (Account account : assetAccounts) {
             System.out.println(account.getName()+" -> "+ String.format( "%.2f", account.getBalance()));
         }
         System.out.println("TOTAL ASSETS: "+ String.format( "%.2f", getAssetValue()));
@@ -284,7 +298,7 @@ public class Book {
 
         System.out.println("Liability accounts:");
         System.out.println("---------------");
-        for (Account account : liabilities) {
+        for (Account account : liabilityAccounts) {
             System.out.println(account.getName()+" -> "+ String.format( "%.2f", account.getBalance()));
         }
         System.out.println("TOTAL LIABILITIES: "+ String.format( "%.2f", getLiabilityValue()));

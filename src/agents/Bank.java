@@ -28,16 +28,6 @@ public class Bank extends Agent {
     public Bank(String name) {
         super(name);
         mainBook = new Book(this);
-
-        // TODO: We need a better way to initialise the bank accounts!
-        // Add the standard accounts to the bank here
-
-        mainBook.addCashAccount(new Account("cash", AccountType.ASSET,0.0));
-        mainBook.addAccount(new Account("assets", AccountType.ASSET,0.0), Asset.class);
-        mainBook.addAccount(new Account("loans (lending)", AccountType.ASSET, 0.0), Loan.class);
-        mainBook.addAccount(new Account("loans (borrowing)", AccountType.LIABILITY, 0.0), Loan.class);
-        mainBook.addEquityAccount(new Account("equity", AccountType.EQUITY,0.0));
-
     }
 
 
@@ -110,10 +100,11 @@ public class Bank extends Agent {
         mainBook.liquidateLoan(initialValue, valueFraction);
     }
 
+    //Todo: is this the best way to do this? This should really be in Behaviour
     public void raiseLiquidity(double liquidityNeeded) {
         ArrayList<Action> availableActions = getAvailableActions(this);
 
-        double initialAssetHoldings = mainBook.getAssetAccountFor(Asset.class).getBalance();
+        double initialAssetHoldings = mainBook.getAssetValueOf(Asset.class);
 
         for (Action action : availableActions) {
             if (action instanceof SellAsset) {
@@ -131,8 +122,8 @@ public class Bank extends Agent {
     }
 
     @Override
-    public void payLoan(double amount) throws Exception {
-        mainBook.payLiability(amount);
+    public void payLoan(double amount)  {
+        mainBook.payLiability(amount, Loan.class);
     }
 
     public double getAssetValue() {return mainBook.getAssetValue();}

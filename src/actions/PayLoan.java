@@ -25,7 +25,7 @@ public class PayLoan extends Action {
 
         Bank borrower = (Bank) loan.getLiabilityParty();
 
-        try {borrower.getMainBook().payLiability(getAmount());}
+        try {borrower.getMainBook().payLiability(getAmount(), Loan.class);}
         catch (Exception e) {
             e.printStackTrace();
         }
