@@ -137,8 +137,7 @@ public class Book implements BookAPI {
         }
 
         // (dr asset, cr equity)
-        assetAccount.debit(contract.getValue());
-        equityAccount.credit(contract.getValue());
+        Account.doubleEntry(assetAccount, equityAccount, contract.getValue());
 
         // Add the contract to the account's inventory
         assetAccount.addContract(contract);
@@ -160,8 +159,7 @@ public class Book implements BookAPI {
         }
 
         // (dr equity, cr liability)
-        equityAccount.debit(contract.getValue());
-        liabilityAccount.credit(contract.getValue());
+        Account.doubleEntry(equityAccount, liabilityAccount, contract.getValue());
 
         liabilityAccount.addContract(contract);
     }
@@ -169,8 +167,8 @@ public class Book implements BookAPI {
     public void addCash(double amount) {
 
         // (dr cash, cr equity)
-        cashAccount.debit(amount);
-        equityAccount.credit(amount);
+        Account.doubleEntry(cashAccount, equityAccount, amount);
+
     }
 
 
@@ -184,8 +182,8 @@ public class Book implements BookAPI {
         Account loanAccount = assetAccountsMap.get(Loan.class);
 
         // (dr cash, cr asset )
-        cashAccount.debit(amount);
-        loanAccount.credit(amount);
+        Account.doubleEntry(cashAccount, loanAccount, amount);
+
 
     }
 
@@ -207,8 +205,8 @@ public class Book implements BookAPI {
         }
 
         // (dr liability, cr cash )
-        liabilityAccount.debit(amount);
-        cashAccount.credit(amount);
+        Account.doubleEntry(liabilityAccount, cashAccount, amount);
+
 
     }
 
@@ -220,8 +218,7 @@ public class Book implements BookAPI {
         Account assetAccount = assetAccountsMap.get(assetType);
 
         // (dr cash, cr asset)
-        cashAccount.debit(amount);
-        assetAccount.credit(amount);
+        Account.doubleEntry(cashAccount, assetAccount, amount);
     }
 
     /**
@@ -260,8 +257,8 @@ public class Book implements BookAPI {
         Account assetAccount = assetAccountsMap.get(Asset.class);
 
         // (dr equityAccounts, cr assetAccounts)
-        equityAccount.debit(amount);
-        assetAccount.credit(amount);
+        Account.doubleEntry(equityAccount, assetAccount, amount);
+
     }
 
     /**
@@ -281,13 +278,11 @@ public class Book implements BookAPI {
 
         // First, we devalue the loan :(
         // (dr equity, cr asset)
-        equityAccount.debit(valueLost);
-        assetLoanAccount.credit(valueLost);
+        Account.doubleEntry(equityAccount, assetLoanAccount, valueLost);
 
         // Then, we liquidate it
         // (dr cash, cr asset)
-        cashAccount.debit(initialValue-valueLost);
-        assetLoanAccount.credit(initialValue-valueLost);
+        Account.doubleEntry(cashAccount, assetLoanAccount, initialValue - valueLost);
     }
 
     public void printBalanceSheet() {

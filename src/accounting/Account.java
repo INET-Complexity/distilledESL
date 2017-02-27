@@ -23,6 +23,11 @@ public class Account {
 
     private double balance;
 
+    public static void doubleEntry(Account debitAccount, Account creditAccount, double amount) {
+        debitAccount.debit(amount);
+        creditAccount.credit(amount);
+    }
+
 //    private Collateral collateralType;
     private AccountType accountType;
     private String name;
@@ -38,7 +43,7 @@ public class Account {
      * A Debit is a positive change for ASSET and EXPENSES accounts, and negative for the rest.
      * @param amount the amount to debit
      */
-    void debit(double amount) {
+    private void debit(double amount) {
         if ((accountType==AccountType.ASSET) || (accountType==AccountType.EXPENSES)) {
             balance += amount;
         } else {
@@ -50,7 +55,7 @@ public class Account {
      * A Credit is a negative change for ASSET and EXPENSES accounts, and positive for the rest.
      * @param amount the amount to credit
      */
-    void credit(double amount) {
+    private void credit(double amount) {
         if ((accountType==AccountType.ASSET) || (accountType==AccountType.EXPENSES)) {
             balance -= amount;
         } else {
