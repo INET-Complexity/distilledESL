@@ -101,21 +101,16 @@ public class Ledger implements LedgerAPI {
     }
 
     public HashSet<Contract> getAssetsOfType(Class<? extends Contract> contractType) {
-        Account assetsAccount = contractsToAssetAccounts.get(contractType);
-        if (assetsAccount == null) {
-            return null;
-        } else {
-            return assetsAccount.contracts;
-        }
+        return allAssets.stream()
+                .filter(contract -> contractType.isInstance(contract))
+                .collect(Collectors.toCollection(HashSet::new));
     }
 
     public HashSet<Contract> getLiabilitiesOfType(Class<? extends Contract> contractType) {
-        Account liabilitiesAccount = contractsToLiabilityAccounts.get(contractType);
-        if (liabilitiesAccount == null) {
-            return null;
-        } else {
-            return liabilitiesAccount.contracts;
-        }
+        return allLiabilities.stream()
+                .filter(contract -> contractType.isInstance(contract))
+                .collect(Collectors.toCollection(HashSet::new));
+
     }
 
     public double getCash() {
@@ -161,9 +156,7 @@ public class Ledger implements LedgerAPI {
         // (dr asset, cr equity)
         Account.doubleEntry(assetAccount, equityAccount, contract.getValue());
 
-        // Add the contract to the account's inventory
-        assetAccount.addContract(contract);
-        // And to the general inventory?
+        // Add to the general inventory?
         allAssets.add(contract);
     }
 
@@ -184,8 +177,7 @@ public class Ledger implements LedgerAPI {
         // (dr equity, cr liability)
         Account.doubleEntry(equityAccount, liabilityAccount, contract.getValue());
 
-        liabilityAccount.addContract(contract);
-        // And to the general inventory?
+        // Add to the general inventory?
         allLiabilities.add(contract);
     }
 
@@ -250,16 +242,16 @@ public class Ledger implements LedgerAPI {
      */
     public ArrayList<Action> getAvailableActions(Agent me) {
         ArrayList<Action> availableActions = new ArrayList<>();
-        for (Account account : assetAccounts) {
-            availableActions.addAll(account.getAvailableActions(me));
+        for (Contract contract : allAssets) {
+            if (contract.getAvailableActions(me)!=null) {
+                availableActions.addAll(contract.getAvailableActions(me));
+            }
         }
 
-        for (Account account : liabilityAccounts) {
-            availableActions.addAll(account.getAvailableActions(me));
-        }
-
-        for (Account account : equityAccounts) {
-            availableActions.addAll(account.getAvailableActions(me));
+        for (Contract contract : allLiabilities) {
+            if (contract.getAvailableActions(me)!= null) {
+                availableActions.addAll(contract.getAvailableActions(me));
+            }
         }
 
         return availableActions;

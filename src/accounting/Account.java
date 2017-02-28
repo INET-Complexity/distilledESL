@@ -7,14 +7,12 @@ import contracts.Contract;
 import java.util.ArrayList;
 import java.util.HashSet;
 
-public class Account {
+class Account {
 
     private Account(String name, AccountType accountType, Double startingBalance) {
         this.name = name;
         this.accountType = accountType;
         this.balance = startingBalance;
-        this.contractClass = null;
-        this.contracts = new HashSet<>();
     }
 
     Account(String name, AccountType accountType) {
@@ -23,7 +21,7 @@ public class Account {
 
     private double balance;
 
-    public static void doubleEntry(Account debitAccount, Account creditAccount, double amount) {
+    static void doubleEntry(Account debitAccount, Account creditAccount, double amount) {
         debitAccount.debit(amount);
         creditAccount.credit(amount);
     }
@@ -31,13 +29,7 @@ public class Account {
 //    private Collateral collateralType;
     private AccountType accountType;
     private String name;
-    private Class<? extends Contract> contractClass;
-    protected HashSet<Contract> contracts;
 
-
-    void addContract(Contract contract) {
-        contracts.add(contract);
-    }
 
     /**
      * A Debit is a positive change for ASSET and EXPENSES accounts, and negative for the rest.
@@ -62,20 +54,6 @@ public class Account {
             balance += amount;
         }
     }
-
-
-    ArrayList<Action> getAvailableActions(Agent me) {
-        ArrayList<Action> availableActions = new ArrayList<>();
-        for (Contract contract : contracts) {
-            ArrayList<Action> contractActions = contract.getAvailableActions(me);
-            if (contractActions != null) availableActions.addAll(contractActions);
-        }
-        return availableActions;
-    }
-
-//    public void setCollateralType(Collateral collateralType) {
-//        this.collateralType = collateralType;
-//    }
 
     AccountType getAccountType() {
         return accountType;
