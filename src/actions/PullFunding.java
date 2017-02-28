@@ -17,9 +17,9 @@ public class PullFunding extends Action {
         Agent lender = loan.getAssetParty();
         Agent borrower = loan.getLiabilityParty();
 
-        lender.pullFunding(getAmount());
+        lender.pullFunding(getAmount(), loan);
         try {
-            borrower.payLoan(getAmount());
+            borrower.payLoan(getAmount(), loan);
         } catch (Exception e) {
             e.printStackTrace();
         }

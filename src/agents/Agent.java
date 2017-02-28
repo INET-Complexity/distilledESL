@@ -20,7 +20,7 @@ public abstract class Agent {
     }
 
     public abstract void raiseLiquidity(double amount);
-    public abstract void pullFunding(double amount);
-    public abstract void payLoan(double amount) throws Exception;
+    public abstract void pullFunding(double amount, Contract loan);
+    public abstract void payLoan(double amount, Contract loan) throws Exception;
 
 }

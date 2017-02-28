@@ -52,7 +52,7 @@ public class Asset extends Contract {
     @Override
     public Agent getLiabilityParty() {
         return null;
-    }
+    } //An Asset does not have a liability party
 
     @Override
     public double getValue() {
@@ -81,6 +81,10 @@ public class Asset extends Contract {
 
     public AssetType getAssetType() {
         return assetType;
+    }
+
+    public double getQuantity() {
+        return quantity;
     }
 }
 

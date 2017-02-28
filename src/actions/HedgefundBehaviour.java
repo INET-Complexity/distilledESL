@@ -25,7 +25,7 @@ public class HedgefundBehaviour extends BankBehaviour {
 
         Double amountToDelever = bank.getLeverageConstraint().getAmountToDelever();
         ArrayList<Action> chosenActions = new ArrayList<>();
-        double totalInitialHoldings = bank.getMainBook().getAssetValue();
+        double totalInitialHoldings = bank.getMainLedger().getAssetValue();
 
         for (Action action : availableActions) {
             assert((action instanceof PayLoan) || (action instanceof SellAsset));

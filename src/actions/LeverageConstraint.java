@@ -31,6 +31,6 @@ public class LeverageConstraint {
     }
 
     public double getAmountToDelever() {
-        return (bank.getMainBook().getAssetValue() * (1 - (getLeverage() / leverageTarget) ));
+        return (bank.getMainLedger().getAssetValue() * (1 - (getLeverage() / leverageTarget) ));
     }
 }

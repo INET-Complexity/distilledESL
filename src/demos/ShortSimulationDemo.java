@@ -4,9 +4,7 @@ import agents.Bank;
 import actions.LCR_Constraint;
 import behaviours.BankBehaviour1;
 import actions.LeverageConstraint;
-import contracts.Asset;
-import contracts.AssetMarket;
-import contracts.Loan;
+import contracts.*;
 
 public class ShortSimulationDemo {
 
@@ -23,8 +21,8 @@ public class ShortSimulationDemo {
         initBank1(bank1);
         initBank2(bank2);
         initHedgefund(hedgeFund);
-        initLoans(bank1, bank2, hedgeFund);
-
+        //initLoans(bank1, bank2, hedgeFund);
+        initRepos(bank1, bank2, hedgeFund);
         initBehaviours(bank1, bank2, hedgeFund);
 
         runSchedule(bank1, bank2, hedgeFund);
@@ -63,16 +61,16 @@ public class ShortSimulationDemo {
     }
     private static void initBank1(Bank bank) {
         bank.addCash(20.0);
-        bank.add(new Asset(bank, Asset.AssetType.E, assetMarket, 17.0));
-        bank.add(new Asset(bank, Asset.AssetType.A1, assetMarket, 40.0));
+        bank.add(new AssetCollateral(bank, Asset.AssetType.E, assetMarket, 17.0));
+        bank.add(new AssetCollateral(bank, Asset.AssetType.A1, assetMarket, 40.0));
         bank.setLeverageConstraint(new LeverageConstraint(bank, 5.0/100, 4.0/100, 3.0/100));
         bank.setLCR_constraint(new LCR_Constraint(bank, 1.0, 1.0, 1.0, 20.0));
     }
 
     private static void initBank2(Bank bank) {
         bank.addCash(20);
-        bank.add(new Asset(bank, Asset.AssetType.A2, assetMarket, 40.0));
-        bank.add(new Asset(bank, Asset.AssetType.A3, assetMarket, 17.0));
+        bank.add(new AssetCollateral(bank, Asset.AssetType.A2, assetMarket, 40.0));
+        bank.add(new AssetCollateral(bank, Asset.AssetType.A3, assetMarket, 17.0));
         bank.setLeverageConstraint(new LeverageConstraint(bank, 5.0/100, 4.0/100, 3.0/100));
         bank.setLCR_constraint(new LCR_Constraint(bank, 1.0, 1.0, 1.0, 20.0));
 
@@ -80,8 +78,8 @@ public class ShortSimulationDemo {
 
     private static void initHedgefund(Bank hedgefund) {
         hedgefund.addCash(7.9167);
-        hedgefund.add(new Asset(hedgefund, Asset.AssetType.A1, assetMarket, 20.0));
-        hedgefund.add(new Asset(hedgefund, Asset.AssetType.A2, assetMarket, 20.0));
+        hedgefund.add(new AssetCollateral(hedgefund, Asset.AssetType.A1, assetMarket, 20.0));
+        hedgefund.add(new AssetCollateral(hedgefund, Asset.AssetType.A2, assetMarket, 20.0));
         hedgefund.setLeverageConstraint(new LeverageConstraint(hedgefund, 4.0/100, 3.0/100, 2.0/100));
 
     }
@@ -99,6 +97,20 @@ public class ShortSimulationDemo {
         bank2.add(new Loan(null, bank2, 95.0));
     }
 
+    private static void initRepos(Bank bank1, Bank bank2, Bank hedgefund) {
+        Repo loan1H = new Repo(bank1,hedgefund,23.0);
+        bank1.add(loan1H);
+        hedgefund.add(loan1H);
+
+        Repo loan2H = new Repo(bank2, hedgefund, 23.0);
+        bank2.add(loan2H);
+        hedgefund.add(loan2H);
+
+        loan1H.marginCall();
+
+        bank1.add(new Loan(null, bank1, 95.0));
+        bank2.add(new Loan(null, bank2, 95.0));
+    }
     private static void shockExternalAsset(double percentage) {
         assetMarket.setPriceE(assetMarket.getPrice(Asset.AssetType.E)*(1-percentage));
     }
