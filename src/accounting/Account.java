@@ -9,28 +9,33 @@ import java.util.HashSet;
 
 public class Account {
 
-    public Account(String name, AccountType accountType, Double startingBalance) {
+    private Account(String name, AccountType accountType, Double startingBalance) {
         this.name = name;
         this.accountType = accountType;
-        this.total = startingBalance;
+        this.balance = startingBalance;
         this.contractClass = null;
         this.contracts = new HashSet<>();
     }
 
-    public Account(String name, AccountType accountType) {
+    Account(String name, AccountType accountType) {
         this(name,accountType,0.0);
     }
 
-    private double total;
+    private double balance;
 
-    private Collateral collateralType;
+    public static void doubleEntry(Account debitAccount, Account creditAccount, double amount) {
+        debitAccount.debit(amount);
+        creditAccount.credit(amount);
+    }
+
+//    private Collateral collateralType;
     private AccountType accountType;
     private String name;
     private Class<? extends Contract> contractClass;
     protected HashSet<Contract> contracts;
 
 
-    public void addContract(Contract contract) {
+    void addContract(Contract contract) {
         contracts.add(contract);
     }
 
@@ -38,11 +43,11 @@ public class Account {
      * A Debit is a positive change for ASSET and EXPENSES accounts, and negative for the rest.
      * @param amount the amount to debit
      */
-    public void debit(double amount) {
+    private void debit(double amount) {
         if ((accountType==AccountType.ASSET) || (accountType==AccountType.EXPENSES)) {
-            total += amount;
+            balance += amount;
         } else {
-            total -= amount;
+            balance -= amount;
         }
     }
 
@@ -50,16 +55,16 @@ public class Account {
      * A Credit is a negative change for ASSET and EXPENSES accounts, and positive for the rest.
      * @param amount the amount to credit
      */
-    public void credit(double amount) {
+    private void credit(double amount) {
         if ((accountType==AccountType.ASSET) || (accountType==AccountType.EXPENSES)) {
-            total -= amount;
+            balance -= amount;
         } else {
-            total += amount;
+            balance += amount;
         }
     }
 
 
-    public ArrayList<Action> getAvailableActions(Agent me) {
+    ArrayList<Action> getAvailableActions(Agent me) {
         ArrayList<Action> availableActions = new ArrayList<>();
         for (Contract contract : contracts) {
             ArrayList<Action> contractActions = contract.getAvailableActions(me);
@@ -68,27 +73,19 @@ public class Account {
         return availableActions;
     }
 
-    public void setCollateralType(Collateral collateralType) {
-        this.collateralType = collateralType;
-    }
+//    public void setCollateralType(Collateral collateralType) {
+//        this.collateralType = collateralType;
+//    }
 
-    public AccountType getAccountType() {
+    AccountType getAccountType() {
         return accountType;
     }
 
-    public double getTotal() {
-        return total;
+    double getBalance() {
+        return balance;
     }
 
-    public void setContractClass(Class<? extends Contract> contractClass) {
-        this.contractClass = contractClass;
-    }
-
-    public Class<? extends Contract> getContractClass() {
-        return contractClass;
-    }
-
-    public String getName() {
+    String getName() {
         return name;
     }
 }
