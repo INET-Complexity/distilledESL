@@ -262,7 +262,8 @@ public class Ledger implements LedgerAPI {
      */
     public void updateAssetPrices() {
         List<Contract> allAssets = this.allAssets.stream()
-                .filter(contract -> contract instanceof Asset).collect(Collectors.toList());
+                .filter(contract -> contract instanceof Asset)
+                .collect(Collectors.toList());
 
         for (Contract contract : allAssets) {
             Asset asset = (Asset) contract;
