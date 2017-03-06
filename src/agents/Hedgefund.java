@@ -8,18 +8,13 @@ import contracts.*;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Map;
 
-/**
- * This class represents a simple bank with a single Ledger, called 'general Ledger'.
- *
- * Every Bank has a BankBehaviour.
- */
-public class Bank extends Agent implements CanPledgeCollateral {
+public class Hedgefund extends Agent implements CanPledgeCollateral {
 
     private LeverageConstraint leverageConstraint;
-    private LCR_Constraint lcr_constraint;
 
-    public Bank(String name) {
+    public Hedgefund(String name) {
         super(name);
         this.leverageConstraint = new LeverageConstraint(this);
     }
@@ -66,7 +61,6 @@ public class Bank extends Agent implements CanPledgeCollateral {
         repo.unpledgeProportionally(excessValue);
     }
 
-
     public void setLeverageConstraint(LeverageConstraint leverageConstraint) {
         this.leverageConstraint = leverageConstraint;
     }
@@ -75,11 +69,4 @@ public class Bank extends Agent implements CanPledgeCollateral {
         return leverageConstraint;
     }
 
-    public LCR_Constraint getLCR_constraint() {
-        return lcr_constraint;
-    }
-
-    public void setLCR_constraint(LCR_Constraint lcr_constraint) {
-        this.lcr_constraint = lcr_constraint;
-    }
 }

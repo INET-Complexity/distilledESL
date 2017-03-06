@@ -14,17 +14,15 @@ import static java.lang.StrictMath.min;
 
 public class BankBehaviour extends Behaviour {
 
-    double counter;
     public Bank bank;
     public BankBehaviour(Bank bank) {
         this.bank = bank;
     }
 
-    private ArrayList<Action> chosenActions;
-    private ArrayList<Action> availableActions;
 
     @Override
     public void act() {
+        ArrayList<Action> availableActions;
         System.out.println(bank.getName()+" is acting.");
         availableActions = bank.getAvailableActions(bank);
         System.out.println();
@@ -107,7 +105,9 @@ public class BankBehaviour extends Behaviour {
                 }
             }
 
-            // We cannot do anything else!
+            // We cannot do anything else! Let's break the LCR constraint.
+
+            // Pay up all the remaining cash!
             System.out.println("We cannot reach the target leverage this round.");
 
             chosenActions.add(payLoan);

@@ -5,9 +5,7 @@ import actions.MarginCall;
 import agents.Agent;
 import agents.CanPledgeCollateral;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * A Repo is a securitized Loan, i.e. it includes collateral. Collateral is stored as hashmap of CanBeCollateral contracts
@@ -34,36 +32,47 @@ public class Repo extends Loan {
         }
     }
 
-    public void unpledgeCollateral(CanBeCollateral asset, double quantity) {
+    private void unpledgeCollateral(CanBeCollateral asset, double quantity) {
         asset.unEncumber(quantity);
-
-        assert(collateral.containsKey(asset));
+        assert(collateral.get(asset) >= quantity);
         collateral.put(asset, collateral.get(asset) - quantity);
     }
 
     public void marginCall() {
-        double currentValue = valueCollateral();
+        double currentValue = valueCollateralHaircutted();
         if (currentValue < principal) { //TODO: include finite precision? i.e. currentValue < principal + smallNumber
-            // Need to put more collateral!
-            assert(liabilityParty instanceof CanPledgeCollateral);
             ((CanPledgeCollateral) liabilityParty).putMoreCollateral(principal - currentValue, this);
 
         } else if (currentValue > principal) {
-            // What?
+            ((CanPledgeCollateral) liabilityParty).withdrawCollateral(principal - currentValue, this);
         }
     }
 
-    private double valueCollateral() {
+    private double valueCollateralHaircutted() {
         double value = 0;
 
         for (Map.Entry<CanBeCollateral, Double> entry : collateral.entrySet()) {
             CanBeCollateral asset = entry.getKey();
             Double quantity = entry.getValue();
 
-            value += asset.getPrice() * quantity * asset.getHairCut();
+            value += asset.getPrice() * quantity * (1.0 - asset.getHairCut());
         }
 
         return value;
+    }
+
+    public Set<Map.Entry<CanBeCollateral, Double>> getCollateral() {
+        return collateral.entrySet();
+    }
+
+    public void unpledgeProportionally(double excessValue) {
+        double totalValue = valueCollateralHaircutted();
+
+        for (Map.Entry<CanBeCollateral, Double> entry : collateral.entrySet()) {
+            CanBeCollateral asset = entry.getKey();
+            double quantityToUnpledge = collateral.get(asset) * (1 - asset.getHairCut()) * excessValue / totalValue;
+            unpledgeCollateral(asset, quantityToUnpledge);
+        }
     }
 
     private HashMap<CanBeCollateral, Double> collateral;
