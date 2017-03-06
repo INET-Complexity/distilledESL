@@ -2,7 +2,7 @@ package demos;
 
 import agents.Bank;
 import actions.LCR_Constraint;
-import behaviours.BankBehaviour1;
+import behaviours.BankBehaviour;
 import actions.LeverageConstraint;
 import contracts.*;
 
@@ -53,9 +53,9 @@ public class ShortSimulationDemo {
     }
 
     private static void initBehaviours(Bank bank1, Bank bank2, Bank hedgefund) {
-        bank1.setBehaviour(new BankBehaviour1(bank1));
-        bank2.setBehaviour(new BankBehaviour1(bank2));
-        hedgefund.setBehaviour(new BankBehaviour1(hedgefund));
+        bank1.setBehaviour(new BankBehaviour(bank1));
+        bank2.setBehaviour(new BankBehaviour(bank2));
+        hedgefund.setBehaviour(new BankBehaviour(hedgefund));
 
     }
     private static void initBank1(Bank bank) {

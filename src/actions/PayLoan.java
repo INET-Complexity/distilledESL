@@ -40,10 +40,7 @@ public class PayLoan extends Action {
     }
 
     public double getMax() {
-        // The maximum action possible is the min of:
-        // - the loan principal
-        // - the agent's cash
-        return min(((Bank) loan.getLiabilityParty()).getCash(), loan.getValue());
+        return loan.getValue();
     }
 
     @Override

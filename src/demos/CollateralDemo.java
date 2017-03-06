@@ -3,7 +3,7 @@ package demos;
 import actions.LCR_Constraint;
 import actions.LeverageConstraint;
 import agents.Bank;
-import behaviours.BankBehaviour1;
+import behaviours.BankBehaviour;
 import contracts.*;
 
 public class CollateralDemo {
@@ -50,13 +50,13 @@ public class CollateralDemo {
     }
 
     private static void initBehaviours(Bank bank1, Bank bank2, Bank hedgefund) {
-        bank1.setBehaviour(new BankBehaviour1(bank1));
-        bank2.setBehaviour(new BankBehaviour1(bank2));
-        hedgefund.setBehaviour(new BankBehaviour1(hedgefund));
+        bank1.setBehaviour(new BankBehaviour(bank1));
+        bank2.setBehaviour(new BankBehaviour(bank2));
+        hedgefund.setBehaviour(new BankBehaviour(hedgefund));
 
     }
     private static void initBank1(Bank bank) {
-        bank.addCash(16.0);//
+        bank.addCash(20.0);//
         bank.add(new AssetCollateral(bank, Asset.AssetType.E, assetMarket, 17.0));
         bank.add(new AssetCollateral(bank, Asset.AssetType.A1, assetMarket, 40.0));
         bank.setLeverageConstraint(new LeverageConstraint(bank, 5.0/100, 3.0/100, 1.0/100));
