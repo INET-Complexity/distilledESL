@@ -91,24 +91,30 @@ public class Ledger implements LedgerAPI {
 
     public double getAssetValueOf(Class<? extends Contract> contractType) {
 //        return contractsToAssetAccounts.get(contractType).getBalance();
-        return allAssets.stream().filter(contract -> contractType.isInstance(contract)).mapToDouble(contract -> contract.getValue()).sum();
+        return allAssets.stream()
+                .filter(contractType::isInstance)
+                .mapToDouble(Contract::getValue)
+                .sum();
     }
 
     public double getLiabilityValueOf(Class<? extends Contract> contractType) {
 //        return contractsToLiabilityAccounts.get(contractType).getBalance();
-        return allLiabilities.stream().filter(contract -> contractType.isInstance(contract)).mapToDouble(contract -> contract.getValue()).sum();
+        return allLiabilities.stream()
+                .filter(contractType::isInstance)
+                .mapToDouble(Contract::getValue)
+                .sum();
 
     }
 
     public HashSet<Contract> getAssetsOfType(Class<? extends Contract> contractType) {
         return allAssets.stream()
-                .filter(contract -> contractType.isInstance(contract))
+                .filter(contractType::isInstance)
                 .collect(Collectors.toCollection(HashSet::new));
     }
 
     public HashSet<Contract> getLiabilitiesOfType(Class<? extends Contract> contractType) {
         return allLiabilities.stream()
-                .filter(contract -> contractType.isInstance(contract))
+                .filter(contractType::isInstance)
                 .collect(Collectors.toCollection(HashSet::new));
 
     }
