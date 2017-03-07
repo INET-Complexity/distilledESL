@@ -1,9 +1,12 @@
 package demos;
 
+import actions.HedgefundLeverageConstraint;
 import actions.LCR_Constraint;
 import actions.BankLeverageConstraint;
 import agents.Bank;
+import agents.Hedgefund;
 import behaviours.BankBehaviour;
+import behaviours.HedgefundBehaviour;
 import contracts.*;
 
 public class CollateralDemo {
@@ -13,7 +16,7 @@ public class CollateralDemo {
     public static void main(String[] args) {
         Bank bank1 = new Bank("Bank 1");
         Bank bank2 = new Bank("Bank 2");
-        Bank hedgeFund = new Bank("HedgeFund 1");
+        Hedgefund hedgeFund = new Hedgefund("HedgeFund 1");
 
         initBank1(bank1);
         initBank2(bank2);
@@ -25,7 +28,7 @@ public class CollateralDemo {
 
     }
 
-    private static void runSchedule(Bank bank1, Bank bank2, Bank hedgefund) {
+    private static void runSchedule(Bank bank1, Bank bank2, Hedgefund hedgefund) {
         System.out.println("Time t=0.");
         bank1.printBalanceSheet();
         bank2.printBalanceSheet();
@@ -49,10 +52,10 @@ public class CollateralDemo {
         bank2.printBalanceSheet();
     }
 
-    private static void initBehaviours(Bank bank1, Bank bank2, Bank hedgefund) {
+    private static void initBehaviours(Bank bank1, Bank bank2, Hedgefund hedgefund) {
         bank1.setBehaviour(new BankBehaviour(bank1));
         bank2.setBehaviour(new BankBehaviour(bank2));
-        hedgefund.setBehaviour(new BankBehaviour(hedgefund));
+        hedgefund.setBehaviour(new HedgefundBehaviour(hedgefund));
 
     }
     private static void initBank1(Bank bank) {
@@ -72,15 +75,15 @@ public class CollateralDemo {
 
     }
 
-    private static void initHedgefund(Bank hedgefund) {
+    private static void initHedgefund(Hedgefund hedgefund) {
         hedgefund.addCash(7.9167);
         hedgefund.add(new AssetCollateral(hedgefund, Asset.AssetType.A1, assetMarket, 20.0));
         hedgefund.add(new AssetCollateral(hedgefund, Asset.AssetType.A2, assetMarket, 20.0));
-        hedgefund.setBankLeverageConstraint(new BankLeverageConstraint(hedgefund, 4.0/100, 3.0/100, 2.0/100));
+        hedgefund.setBankLeverageConstraint(new HedgefundLeverageConstraint(hedgefund, 4.0/100, 3.0/100, 2.0/100));
 
     }
 
-    private static void initRepos(Bank bank1, Bank bank2, Bank hedgefund) {
+    private static void initRepos(Bank bank1, Bank bank2, Hedgefund hedgefund) {
         Repo loan1H = new Repo(bank1,hedgefund,23.0);
         bank1.add(loan1H);
         hedgefund.add(loan1H);
@@ -99,7 +102,7 @@ public class CollateralDemo {
         assetMarket.setPriceE(assetMarket.getPrice(Asset.AssetType.E)*(1-percentage));
     }
 
-    private static void updateAssetPrices(Bank bank1, Bank bank2, Bank hedgefund) {
+    private static void updateAssetPrices(Bank bank1, Bank bank2, Hedgefund hedgefund) {
         bank1.updateAssetPrices();
         bank2.updateAssetPrices();
         hedgefund.updateAssetPrices();

@@ -1,9 +1,7 @@
 package actions;
 
-import agents.Bank;
+import agents.Agent;
 import contracts.Loan;
-
-import static java.lang.Math.min;
 
 /**
  * the Payloan action represents the chance to pay back a loan that the agent has on its liability side.
@@ -21,13 +19,13 @@ public class PayLoan extends Action {
 
     @Override
     public void perform() {
-        Bank borrower = (Bank) loan.getLiabilityParty();
+        Agent borrower = loan.getLiabilityParty();
 
         // changes the accounts
         borrower.getMainLedger().payLiability(getAmount(), loan);
 
         if (loan.getAssetParty()!= null) {
-            Bank lender = (Bank) loan.getAssetParty();
+            Agent lender = loan.getAssetParty();
             lender.getMainLedger().pullFunding(getAmount(), loan);
         }
 

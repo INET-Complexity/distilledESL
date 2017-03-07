@@ -1,5 +1,6 @@
 package actions;
 
+import agents.Agent;
 import agents.Bank;
 import contracts.Asset;
 
@@ -14,7 +15,8 @@ public class SellAsset extends Action {
 
     @Override
     public void perform() {
-        Bank owner = (Bank) asset.getAssetParty();
+        Agent owner = asset.getAssetParty();
+
         // changes the contract
         asset.sellAmount(getAmount());
         // changes the accounts
