@@ -210,19 +210,12 @@ public class Ledger implements LedgerAPI {
     /**
      * Operation to pay back a liability loan; debit liability and credit cash
      * @param amount amount to pay back
+     * @param loan the loan which is being paid back
      */
     public void payLiability(double amount, Contract loan) {
         Account liabilityAccount = contractsToLiabilityAccounts.get(loan.getClass());
 
-        //Todo: What do we do if we can't pay??!! At the moment I'm calling my owner to raise liquidity
-        if (cashAccount.getBalance() < amount) {
-            System.out.println();
-            System.out.println("***");
-            System.out.println(owner.getName()+" must raise liquidity immediately.");
-            owner.raiseLiquidity(amount * (1 - cashAccount.getBalance()/getAssetValue()));
-            System.out.println("***");
-            System.out.println();
-        }
+        assert(getCash() >= amount); // Pre-condition: liquidity has been raised.
 
         // (dr liability, cr cash )
         Account.doubleEntry(liabilityAccount, cashAccount, amount);

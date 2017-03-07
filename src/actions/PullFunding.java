@@ -24,6 +24,8 @@ public class PullFunding extends Action {
             e.printStackTrace();
         }
 
+        // Update the loan
+        loan.reducePrincipal(getAmount());
     }
 
     @Override

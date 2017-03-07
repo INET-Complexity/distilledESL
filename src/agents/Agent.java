@@ -33,6 +33,16 @@ public abstract class Agent {
     }
 
     public void payLoan(double amount, Contract loan)  {
+        //Todo: What do we do if we can't pay??!! At the moment I'm forced to raise liquidity immediately
+        if (getCash() < amount) {
+            System.out.println();
+            System.out.println("***");
+            System.out.println(getName()+" must raise liquidity immediately.");
+            raiseLiquidity(amount * (1 - getCash() / getAssetValue()));
+            System.out.println("***");
+            System.out.println();
+        }
+
         mainLedger.payLiability(amount, loan);
     }
 

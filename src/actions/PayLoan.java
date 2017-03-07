@@ -24,10 +24,7 @@ public class PayLoan extends Action {
         Bank borrower = (Bank) loan.getLiabilityParty();
 
         // changes the accounts
-        // TODO: Important! This bit here can cause the borrower to raise liquidity immediately.
-        // Todo: we probably need an exception to guard against defaults.
         borrower.getMainLedger().payLiability(getAmount(), loan);
-
 
         if (loan.getAssetParty()!= null) {
             Bank lender = (Bank) loan.getAssetParty();

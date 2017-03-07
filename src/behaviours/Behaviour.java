@@ -6,6 +6,7 @@ import agents.Agent;
 import contracts.Loan;
 
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 public abstract class Behaviour {
     private Agent me;
@@ -87,5 +88,11 @@ public abstract class Behaviour {
             }
         }
         return null;
+    }
+
+    ArrayList<Action> getAllActionsOfType(Class<? extends Action> actionType) {
+        return availableActions.stream()
+                .filter(actionType::isInstance)
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 }
