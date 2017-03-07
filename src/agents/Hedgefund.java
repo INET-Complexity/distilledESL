@@ -1,27 +1,21 @@
 package agents;
 
 import actions.Action;
-import actions.LCR_Constraint;
 import actions.BankLeverageConstraint;
+import actions.HedgefundLeverageConstraint;
 import actions.SellAsset;
 import contracts.*;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 
-/**
- * This class represents a simple bank with a single Ledger, called 'general Ledger'.
- *
- * Every Bank has a BankBehaviour.
- */
-public class Bank extends Agent implements CanPledgeCollateral {
+public class Hedgefund extends Agent implements CanPledgeCollateral {
 
-    private BankLeverageConstraint bankLeverageConstraint;
-    private LCR_Constraint lcr_constraint;
+    private HedgefundLeverageConstraint hedgefundLeverageConstraint;
 
-    public Bank(String name) {
+    public Hedgefund(String name) {
         super(name);
-        this.bankLeverageConstraint = new BankLeverageConstraint(this);
+        this.hedgefundLeverageConstraint = new HedgefundLeverageConstraint(this);
     }
 
     //Todo: is this the best way to do this? This should really be in Behaviour
@@ -61,25 +55,30 @@ public class Bank extends Agent implements CanPledgeCollateral {
         }
     }
 
+    public double getEffectiveMinLeverage() {
+        double totalRepo = mainLedger.getLiabilityValueOf(Repo.class);
+        double averageHaircut = 0.0;
+
+        HashSet<Contract> collateral = mainLedger.getAssetsOfType(CanBeCollateral.class);
+        double totalCollateralValue = collateral.stream().mapToDouble(Contract::getValue).sum();
+
+        for (Contract asset : collateral) {
+            averageHaircut += ((CanBeCollateral) asset).getHairCut() * asset.getValue() / totalCollateralValue;
+        }
+
+        return totalRepo / averageHaircut;
+    }
 
     public void withdrawCollateral(double excessValue, Repo repo) {
         repo.unpledgeProportionally(excessValue);
     }
 
-
-    public void setBankLeverageConstraint(BankLeverageConstraint bankLeverageConstraint) {
-        this.bankLeverageConstraint = bankLeverageConstraint;
+    public void setBankLeverageConstraint(HedgefundLeverageConstraint hedgefundLeverageConstraint) {
+        this.hedgefundLeverageConstraint = hedgefundLeverageConstraint;
     }
 
-    public BankLeverageConstraint getBankLeverageConstraint() {
-        return bankLeverageConstraint;
+    public HedgefundLeverageConstraint getHedgefundLeverageConstraint() {
+        return hedgefundLeverageConstraint;
     }
 
-    public LCR_Constraint getLCR_constraint() {
-        return lcr_constraint;
-    }
-
-    public void setLCR_constraint(LCR_Constraint lcr_constraint) {
-        this.lcr_constraint = lcr_constraint;
-    }
 }

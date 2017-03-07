@@ -21,29 +21,26 @@ public class PayLoan extends Action {
 
     @Override
     public void perform() {
-        //if (amount == 0.0) {throw new UnderspecifiedActionException();}
-
         Bank borrower = (Bank) loan.getLiabilityParty();
 
-        try {borrower.getMainBook().payLiability(getAmount(), Loan.class);}
-        catch (Exception e) {
-            e.printStackTrace();
-        }
+        // changes the accounts
+        // TODO: Important! This bit here can cause the borrower to raise liquidity immediately.
+        // Todo: we probably need an exception to guard against defaults.
+        borrower.getMainLedger().payLiability(getAmount(), loan);
+
 
         if (loan.getAssetParty()!= null) {
             Bank lender = (Bank) loan.getAssetParty();
-            lender.getMainBook().pullFunding(getAmount());
+            lender.getMainLedger().pullFunding(getAmount(), loan);
         }
 
+        // changes the contract
         loan.reducePrincipal(getAmount());
 
     }
 
     public double getMax() {
-        // The maximum action possible is the min of:
-        // - the loan principal
-        // - the agent's cash
-        return min(((Bank) loan.getLiabilityParty()).getCash(), loan.getValue());
+        return loan.getValue();
     }
 
     @Override

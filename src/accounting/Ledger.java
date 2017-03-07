@@ -4,43 +4,44 @@ import agents.Agent;
 import actions.Action;
 import contracts.Asset;
 import contracts.Contract;
-import contracts.Loan;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * This is the main class implementing double entry accounting. All public operations provided by this class
  * are performed as a double entry operation, i.e. a pair of (dr, cr) operations.
  *
- * A Book contains a set of accounts, and is the interface between an agent and its accounts. Agents cannot
- * directly interact with accounts other than via a Book.
+ * A Ledger contains a set of accounts, and is the interface between an agent and its accounts. Agents cannot
+ * directly interact with accounts other than via a Ledger.
  *
- * At the moment, a Book contains an account for each type of contract, plus an equity account and a cash account.
+ * At the moment, a Ledger contains an account for each type of contract, plus an equity account and a cash account.
  *
- * A simple economic agent will usually have a single Book, whereas complex firms and banks can have several books
+ * A simple economic agent will usually have a single Ledger, whereas complex firms and banks can have several books
  * (as in branch banking for example).
  *
  * @author rafa
  */
-public class Book implements BookAPI {
+public class Ledger implements LedgerAPI {
 
-    public Book(Agent owner) {
-        // A Book is a list of accounts
-        accounts = new HashSet<>();
-
-        // Subsets of the list of accounts (for quicker searching)
+    public Ledger(Agent owner) {
+        // A Ledger is a list of accounts (for quicker searching)
         assetAccounts = new HashSet<>();
         liabilityAccounts = new HashSet<>();
         equityAccounts = new HashSet<>();
+
+        allAssets = new HashSet<>();
+        allLiabilities = new HashSet<>();
 
         // Each Account includes an inventory to hold one type of contract.
         // These hashmaps are used to access the correct account for a given type of contract.
         // Note that separate hashmaps are needed for asset accounts and liability accounts: the same contract
         // type (such as Loan) can sometimes be an asset and sometimes a liability.
-        assetAccountsMap = new HashMap<>();
-        liabilityAccountsMap = new HashMap<>();
+        contractsToAssetAccounts = new HashMap<>();
+        contractsToLiabilityAccounts = new HashMap<>();
 
         // Not sure whether I should be passing the owner...
         this.owner = owner;
@@ -53,13 +54,14 @@ public class Book implements BookAPI {
     }
 
 
+    private HashSet<Contract> allAssets;
+    private HashSet<Contract> allLiabilities;
     private Agent owner;
-    private HashSet<Account> accounts;
     private HashSet<Account> assetAccounts;
     private HashSet<Account> liabilityAccounts;
     private HashSet<Account> equityAccounts;
-    private HashMap<Class<? extends contracts.Contract>, Account> assetAccountsMap;
-    private HashMap<Class<? extends contracts.Contract>, Account> liabilityAccountsMap;
+    private HashMap<Class<? extends contracts.Contract>, Account> contractsToAssetAccounts;
+    private HashMap<Class<? extends contracts.Contract>, Account> contractsToLiabilityAccounts;
     private Account cashAccount;
     private Account equityAccount;
 
@@ -87,12 +89,34 @@ public class Book implements BookAPI {
         return equityTotal;
     }
 
-    public double getAssetValueOf(Class<? extends Contract> contractType) {
-        return assetAccountsMap.get(contractType).getBalance();
+    public double getAssetValueOf(Class<?> contractType) {
+//        return contractsToAssetAccounts.get(contractType).getBalance();
+        return allAssets.stream()
+                .filter(contractType::isInstance)
+                .mapToDouble(Contract::getValue)
+                .sum();
     }
 
-    public double getLiabilityValueOf(Class<? extends Contract> contractType) {
-        return liabilityAccountsMap.get(contractType).getBalance();
+    public double getLiabilityValueOf(Class<?> contractType) {
+//        return contractsToLiabilityAccounts.get(contractType).getBalance();
+        return allLiabilities.stream()
+                .filter(contractType::isInstance)
+                .mapToDouble(Contract::getValue)
+                .sum();
+
+    }
+
+    public HashSet<Contract> getAssetsOfType(Class<?> contractType) {
+        return allAssets.stream()
+                .filter(contractType::isInstance)
+                .collect(Collectors.toCollection(HashSet::new));
+    }
+
+    public HashSet<Contract> getLiabilitiesOfType(Class<?> contractType) {
+        return allLiabilities.stream()
+                .filter(contractType::isInstance)
+                .collect(Collectors.toCollection(HashSet::new));
+
     }
 
     public double getCash() {
@@ -101,17 +125,16 @@ public class Book implements BookAPI {
 
 
     private void addAccount(Account account, Class<? extends Contract> contractType) {
-        accounts.add(account);
         switch(account.getAccountType()) {
 
             case ASSET:
                 assetAccounts.add(account);
-                assetAccountsMap.put(contractType, account);
+                contractsToAssetAccounts.put(contractType, account);
                 break;
 
             case LIABILITY:
                 liabilityAccounts.add(account);
-                liabilityAccountsMap.put(contractType, account);
+                contractsToLiabilityAccounts.put(contractType, account);
                 break;
 
             case EQUITY:
@@ -128,7 +151,7 @@ public class Book implements BookAPI {
      * @param contract an Asset contract to add
      */
     public void addAsset(Contract contract) {
-        Account assetAccount = assetAccountsMap.get(contract.getClass());
+        Account assetAccount = contractsToAssetAccounts.get(contract.getClass());
 
         if (assetAccount==null) {
             // If there doesn't exist an Account to hold this type of contract, we create it
@@ -139,8 +162,8 @@ public class Book implements BookAPI {
         // (dr asset, cr equity)
         Account.doubleEntry(assetAccount, equityAccount, contract.getValue());
 
-        // Add the contract to the account's inventory
-        assetAccount.addContract(contract);
+        // Add to the general inventory?
+        allAssets.add(contract);
     }
 
     /**
@@ -149,8 +172,7 @@ public class Book implements BookAPI {
      * @param contract a Liability contract to add
      */
     public void addLiability(Contract contract) {
-        Account liabilityAccount = liabilityAccountsMap.get(contract.getClass());
-
+        Account liabilityAccount = contractsToLiabilityAccounts.get(contract.getClass());
 
         if (liabilityAccount==null) {
             // If there doesn't exist an Account to hold this type of contract, we create it
@@ -161,11 +183,11 @@ public class Book implements BookAPI {
         // (dr equity, cr liability)
         Account.doubleEntry(equityAccount, liabilityAccount, contract.getValue());
 
-        liabilityAccount.addContract(contract);
+        // Add to the general inventory?
+        allLiabilities.add(contract);
     }
 
     public void addCash(double amount) {
-
         // (dr cash, cr equity)
         Account.doubleEntry(cashAccount, equityAccount, amount);
 
@@ -178,21 +200,19 @@ public class Book implements BookAPI {
      * I'm using this for simplicity but note that this is equivalent to selling an asset.
      * @param amount the amount of loan that is cancelled
      */
-    public void pullFunding(double amount) {
-        Account loanAccount = assetAccountsMap.get(Loan.class);
+    public void pullFunding(double amount, Contract loan) {
+        Account loanAccount = contractsToAssetAccounts.get(loan.getClass());
 
         // (dr cash, cr asset )
         Account.doubleEntry(cashAccount, loanAccount, amount);
-
-
     }
 
     /**
      * Operation to pay back a liability loan; debit liability and credit cash
      * @param amount amount to pay back
      */
-    public void payLiability(double amount, Class<? extends Contract> liabilityType) {
-        Account liabilityAccount = liabilityAccountsMap.get(liabilityType);
+    public void payLiability(double amount, Contract loan) {
+        Account liabilityAccount = contractsToLiabilityAccounts.get(loan.getClass());
 
         //Todo: What do we do if we can't pay??!! At the moment I'm calling my owner to raise liquidity
         if (cashAccount.getBalance() < amount) {
@@ -215,7 +235,7 @@ public class Book implements BookAPI {
      * @param amount the *value* of the asset
      */
     public void sellAsset(double amount, Class<? extends Contract> assetType) {
-        Account assetAccount = assetAccountsMap.get(assetType);
+        Account assetAccount = contractsToAssetAccounts.get(assetType);
 
         // (dr cash, cr asset)
         Account.doubleEntry(cashAccount, assetAccount, amount);
@@ -223,14 +243,23 @@ public class Book implements BookAPI {
 
     /**
      * Behavioral stuff; not sure if it should be here
-     * @param me the owner of the Book
+     * @param me the owner of the Ledger
      * @return an ArrayList of Actions that are available to me at this moment
      */
     public ArrayList<Action> getAvailableActions(Agent me) {
         ArrayList<Action> availableActions = new ArrayList<>();
-        for (Account account : accounts) {
-            availableActions.addAll(account.getAvailableActions(me));
+        for (Contract contract : allAssets) {
+            if (contract.getAvailableActions(me)!=null) {
+                availableActions.addAll(contract.getAvailableActions(me));
+            }
         }
+
+        for (Contract contract : allLiabilities) {
+            if (contract.getAvailableActions(me)!= null) {
+                availableActions.addAll(contract.getAvailableActions(me));
+            }
+        }
+
         return availableActions;
     }
 
@@ -238,12 +267,14 @@ public class Book implements BookAPI {
      * Stress-testing specific.
      */
     public void updateAssetPrices() {
-        Account assetAccount = assetAccountsMap.get(Asset.class);
+        List<Contract> allAssets = this.allAssets.stream()
+                .filter(contract -> contract instanceof Asset)
+                .collect(Collectors.toList());
 
-        for (Contract contract : assetAccount.contracts) {
+        for (Contract contract : allAssets) {
             Asset asset = (Asset) contract;
             if (asset.priceFell()) {
-                devalueAsset(asset.valueLost());
+                devalueAsset(asset.valueLost(), asset);
                 asset.updatePrice();
             }
         }
@@ -253,8 +284,8 @@ public class Book implements BookAPI {
      * if an Asset loses value, I must debit equity and credit asset
      * @param amount
      */
-    private void devalueAsset(double amount) {
-        Account assetAccount = assetAccountsMap.get(Asset.class);
+    private void devalueAsset(double amount, Contract asset) {
+        Account assetAccount = contractsToAssetAccounts.get(asset.getClass());
 
         // (dr equityAccounts, cr assetAccounts)
         Account.doubleEntry(equityAccount, assetAccount, amount);
@@ -271,8 +302,8 @@ public class Book implements BookAPI {
      * @param initialValue the original value of the loan
      * @param valueFraction the fraction of the loan that will be lost due to the default
      */
-    public void liquidateLoan(double initialValue, double valueFraction) {
-        Account assetLoanAccount = assetAccountsMap.get(Loan.class);
+    public void liquidateLoan(double initialValue, double valueFraction, Contract loan) {
+        Account assetLoanAccount = contractsToAssetAccounts.get(loan.getClass());
 
         double valueLost = (1 - valueFraction) * initialValue;
 
@@ -304,7 +335,6 @@ public class Book implements BookAPI {
         System.out.println("TOTAL EQUITY: "+String.format("%.2f", getEquityValue()));
         System.out.println();
     }
-
 
 
 }

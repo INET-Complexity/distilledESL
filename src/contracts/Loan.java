@@ -17,9 +17,9 @@ public class Loan extends Contract {
         this.principal = principal;
     }
 
-    private Agent assetParty;
-    private Agent liabilityParty;
-    private double principal;
+    Agent assetParty;
+    Agent liabilityParty;
+    double principal;
 
     public void reducePrincipal(double amount) {
         assert(amount <= principal);
@@ -59,7 +59,7 @@ public class Loan extends Contract {
     }
 
     public void liquidate() {
-        ((Bank) assetParty).liquidateLoan(getValue(), VALUE_GIVEN_DEFAULT);
+        ((Bank) assetParty).liquidateLoan(getValue(), VALUE_GIVEN_DEFAULT, this);
         principal = 0.0;
     }
 }

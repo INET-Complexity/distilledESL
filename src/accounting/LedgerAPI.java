@@ -3,17 +3,17 @@ package accounting;
 import contracts.Contract;
 
 /**
- * Interface for a Book (operations that must be provided at the very least by a Book implementation).
+ * Interface for a Ledger (operations that must be provided at the very least by a Ledger implementation).
  *
  * @author rafa
  */
-public interface BookAPI {
+public interface LedgerAPI {
 
     double getAssetValue();
     double getLiabilityValue();
     double getEquityValue();
-    double getAssetValueOf(Class<? extends Contract> contractType);
-    double getLiabilityValueOf(Class<? extends Contract> contractType);
+    double getAssetValueOf(Class<?> contractType);
+    double getLiabilityValueOf(Class<?> contractType);
 
     void addAsset(Contract contract);
     void addLiability(Contract contract);
@@ -21,7 +21,7 @@ public interface BookAPI {
 
 
     void sellAsset(double amount, Class<? extends Contract> assetType);
-    void payLiability(double amount, Class<? extends Contract> liabilityType);
+    void payLiability(double amount, Contract liability);
 
 
 }
