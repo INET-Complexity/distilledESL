@@ -12,8 +12,8 @@ public interface LedgerAPI {
     double getAssetValue();
     double getLiabilityValue();
     double getEquityValue();
-    double getAssetValueOf(Class<? extends Contract> contractType);
-    double getLiabilityValueOf(Class<? extends Contract> contractType);
+    double getAssetValueOf(Class<?> contractType);
+    double getLiabilityValueOf(Class<?> contractType);
 
     void addAsset(Contract contract);
     void addLiability(Contract contract);

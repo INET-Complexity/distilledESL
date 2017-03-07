@@ -2,7 +2,7 @@ package agents;
 
 import actions.Action;
 import actions.LCR_Constraint;
-import actions.LeverageConstraint;
+import actions.BankLeverageConstraint;
 import actions.SellAsset;
 import contracts.*;
 
@@ -16,12 +16,12 @@ import java.util.HashSet;
  */
 public class Bank extends Agent implements CanPledgeCollateral {
 
-    private LeverageConstraint leverageConstraint;
+    private BankLeverageConstraint bankLeverageConstraint;
     private LCR_Constraint lcr_constraint;
 
     public Bank(String name) {
         super(name);
-        this.leverageConstraint = new LeverageConstraint(this);
+        this.bankLeverageConstraint = new BankLeverageConstraint(this);
     }
 
     //Todo: is this the best way to do this? This should really be in Behaviour
@@ -67,12 +67,12 @@ public class Bank extends Agent implements CanPledgeCollateral {
     }
 
 
-    public void setLeverageConstraint(LeverageConstraint leverageConstraint) {
-        this.leverageConstraint = leverageConstraint;
+    public void setBankLeverageConstraint(BankLeverageConstraint bankLeverageConstraint) {
+        this.bankLeverageConstraint = bankLeverageConstraint;
     }
 
-    public LeverageConstraint getLeverageConstraint() {
-        return leverageConstraint;
+    public BankLeverageConstraint getBankLeverageConstraint() {
+        return bankLeverageConstraint;
     }
 
     public LCR_Constraint getLCR_constraint() {

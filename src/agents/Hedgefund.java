@@ -1,22 +1,21 @@
 package agents;
 
 import actions.Action;
-import actions.LCR_Constraint;
-import actions.LeverageConstraint;
+import actions.BankLeverageConstraint;
+import actions.HedgefundLeverageConstraint;
 import actions.SellAsset;
 import contracts.*;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Map;
 
 public class Hedgefund extends Agent implements CanPledgeCollateral {
 
-    private LeverageConstraint leverageConstraint;
+    private HedgefundLeverageConstraint hedgefundLeverageConstraint;
 
     public Hedgefund(String name) {
         super(name);
-        this.leverageConstraint = new LeverageConstraint(this);
+        this.hedgefundLeverageConstraint = new HedgefundLeverageConstraint(this);
     }
 
     //Todo: is this the best way to do this? This should really be in Behaviour
@@ -56,17 +55,30 @@ public class Hedgefund extends Agent implements CanPledgeCollateral {
         }
     }
 
+    public double getEffectiveMinLeverage() {
+        double totalRepo = mainLedger.getLiabilityValueOf(Repo.class);
+        double averageHaircut = 0.0;
+
+        HashSet<Contract> collateral = mainLedger.getAssetsOfType(CanBeCollateral.class);
+        double totalCollateralValue = collateral.stream().mapToDouble(Contract::getValue).sum();
+
+        for (Contract asset : collateral) {
+            averageHaircut += ((CanBeCollateral) asset).getHairCut() * asset.getValue() / totalCollateralValue;
+        }
+
+        return totalRepo / averageHaircut;
+    }
 
     public void withdrawCollateral(double excessValue, Repo repo) {
         repo.unpledgeProportionally(excessValue);
     }
 
-    public void setLeverageConstraint(LeverageConstraint leverageConstraint) {
-        this.leverageConstraint = leverageConstraint;
+    public void setBankLeverageConstraint(HedgefundLeverageConstraint hedgefundLeverageConstraint) {
+        this.hedgefundLeverageConstraint = hedgefundLeverageConstraint;
     }
 
-    public LeverageConstraint getLeverageConstraint() {
-        return leverageConstraint;
+    public HedgefundLeverageConstraint getHedgefundLeverageConstraint() {
+        return hedgefundLeverageConstraint;
     }
 
 }

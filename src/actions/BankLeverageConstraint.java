@@ -2,7 +2,7 @@ package actions;
 
 import agents.Agent;
 
-public class LeverageConstraint {
+public class BankLeverageConstraint {
     private Agent agent;
     private double leverageTarget;
     private double leverageBuffer;
@@ -14,7 +14,7 @@ public class LeverageConstraint {
 
 
 
-    public LeverageConstraint(Agent agent, double leverageTarget, double leverageBuffer, double leverageMin) {
+    public BankLeverageConstraint(Agent agent, double leverageTarget, double leverageBuffer, double leverageMin) {
         this.agent = agent;
         this.leverageTarget = leverageTarget;
         this.leverageBuffer = leverageBuffer;
@@ -23,7 +23,7 @@ public class LeverageConstraint {
         assert((leverageTarget >= leverageBuffer) && (leverageBuffer >= leverageMin));
     }
 
-    public LeverageConstraint(Agent agent) {
+    public BankLeverageConstraint(Agent agent) {
         this(agent, DEFAULT_LEVERAGE_TARGET, DEFAULT_LEVERAGE_BUFFER, DEFAULT_LEVERAGE_MIN);
     }
 

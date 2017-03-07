@@ -1,7 +1,7 @@
 package demos;
 
 import actions.LCR_Constraint;
-import actions.LeverageConstraint;
+import actions.BankLeverageConstraint;
 import agents.Bank;
 import behaviours.BankBehaviour;
 import contracts.*;
@@ -59,7 +59,7 @@ public class CollateralDemo {
         bank.addCash(20.0);//
         bank.add(new AssetCollateral(bank, Asset.AssetType.E, assetMarket, 17.0));
         bank.add(new AssetCollateral(bank, Asset.AssetType.A1, assetMarket, 40.0));
-        bank.setLeverageConstraint(new LeverageConstraint(bank, 5.0/100, 3.0/100, 1.0/100));
+        bank.setBankLeverageConstraint(new BankLeverageConstraint(bank, 5.0/100, 3.0/100, 1.0/100));
         bank.setLCR_constraint(new LCR_Constraint(bank, 1.0, 1.0, 1.0, 20.0));
     }
 
@@ -67,7 +67,7 @@ public class CollateralDemo {
         bank.addCash(20);
         bank.add(new AssetCollateral(bank, Asset.AssetType.A2, assetMarket, 40.0));
         bank.add(new AssetCollateral(bank, Asset.AssetType.A3, assetMarket, 17.0));
-        bank.setLeverageConstraint(new LeverageConstraint(bank, 5.0/100, 4.0/100, 3.0/100));
+        bank.setBankLeverageConstraint(new BankLeverageConstraint(bank, 5.0/100, 4.0/100, 3.0/100));
         bank.setLCR_constraint(new LCR_Constraint(bank, 1.0, 1.0, 1.0, 20.0));
 
     }
@@ -76,7 +76,7 @@ public class CollateralDemo {
         hedgefund.addCash(7.9167);
         hedgefund.add(new AssetCollateral(hedgefund, Asset.AssetType.A1, assetMarket, 20.0));
         hedgefund.add(new AssetCollateral(hedgefund, Asset.AssetType.A2, assetMarket, 20.0));
-        hedgefund.setLeverageConstraint(new LeverageConstraint(hedgefund, 4.0/100, 3.0/100, 2.0/100));
+        hedgefund.setBankLeverageConstraint(new BankLeverageConstraint(hedgefund, 4.0/100, 3.0/100, 2.0/100));
 
     }
 

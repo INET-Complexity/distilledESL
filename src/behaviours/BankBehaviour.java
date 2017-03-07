@@ -21,10 +21,10 @@ public class BankBehaviour extends Behaviour {
 
     @Override
     protected void chooseActions() {
-        if (bank.getLeverageConstraint().isBelowBuffer()) {
+        if (bank.getBankLeverageConstraint().isBelowBuffer()) {
             // If leverage is below buffer, we must de-lever
 
-            double amountToDelever = bank.getLeverageConstraint().getAmountToDelever();
+            double amountToDelever = bank.getBankLeverageConstraint().getAmountToDelever();
             double maxLiabilitiesToPayOff = maxLiabilitiesToPayOff();
             double payLoan = 0.0;
 
@@ -43,6 +43,8 @@ public class BankBehaviour extends Behaviour {
                 amountToDelever = maxLiabilitiesToPayOff;
             }
 
+
+            // 1. Use cash to pay liabilities
             double maxCashToSpend = max(bank.getCash() - bank.getLCR_constraint().getCashTarget() , 0.0);
 
             if (maxCashToSpend==0) {
@@ -62,8 +64,7 @@ public class BankBehaviour extends Behaviour {
             }
 
 
-            // Second, since we could not de-lever just by using cash, we try to choose other actions.
-            // PECKING ORDER.
+            // 2. Use other actions according to the pecking order
             while (amountToDelever > 0.0 && actionsLeft()) {
                 Action nextAction = findActionOfType(PullFunding.class);
                 if (nextAction == null) {
@@ -94,12 +95,22 @@ public class BankBehaviour extends Behaviour {
                 }
             }
 
-            // We cannot do anything else! Let's break the LCR constraint.
+            if (amountToDelever < 0.001) {
+                payOffLiabilities(payLoan);
+                return;
+            }
 
-            // Pay up all the remaining cash!
-            System.out.println("We cannot reach the target leverage this round.");
-
-            payOffLiabilities(payLoan);
+            // 3. If we're still not done, break the LCR constraint and use up more cash
+            double remainingCash = bank.getCash() - maxCashToSpend;
+            if (remainingCash > amountToDelever) {
+                System.out.println("We managed to de-lever by breaking the LCR constraint.");
+                payLoan += amountToDelever;
+                payOffLiabilities(payLoan);
+            } else {
+                System.out.println("We cannot reach the leverage target this round.");
+                payLoan += remainingCash;
+                payOffLiabilities(payLoan);
+            }
 
         } else {
             System.out.println("Leverage is above buffer. No need to do anything!");
