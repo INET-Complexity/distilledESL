@@ -15,7 +15,9 @@ public class SellAsset extends Action {
     @Override
     public void perform() {
         Bank owner = (Bank) asset.getAssetParty();
+        // changes the contract
         asset.sellAmount(getAmount());
+        // changes the accounts
         owner.getMainLedger().sellAsset(getAmount(), asset.getClass());
     }
 

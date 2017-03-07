@@ -28,8 +28,7 @@ public class BankBehaviour extends Behaviour {
             double maxLiabilitiesToPayOff = maxLiabilitiesToPayOff();
             double payLoan = 0.0;
 
-            System.out.println();
-            System.out.println("Amount to delever is "+String.format("%.2f", amountToDelever));
+            System.out.println("\nAmount to delever is "+String.format("%.2f", amountToDelever));
 
 
             if (maxLiabilitiesToPayOff == 0) {
@@ -80,9 +79,9 @@ public class BankBehaviour extends Behaviour {
                     addAction(nextAction);
 
                     payLoan += nextAction.getAmount();
+                    amountToDelever = 0.0;
 
-                    System.out.println();
-                    System.out.println("We found a set of actions to reach our leverage target!");
+                    System.out.println("\nWe found a set of actions to reach our leverage target!");
                     break;
 
                 } else {

@@ -39,17 +39,17 @@ public class ShortSimulationDemo {
         updateAssetPrices(bank1, bank2, hedgefund);
         bank1.printBalanceSheet();
 
+        System.out.println("Time t=1.");
         bank1.act();
         bank1.printBalanceSheet();
         updateAssetPrices(bank1, bank2, hedgefund);
         System.out.println("price of A1 :"+assetMarket.getPrice(Asset.AssetType.A1));
 
-        hedgefund.printBalanceSheet();
-        hedgefund.act();
-        hedgefund.printBalanceSheet();
-
         bank2.act();
         bank2.printBalanceSheet();
+
+        hedgefund.act();
+
     }
 
     private static void initBehaviours(Bank bank1, Bank bank2, Bank hedgefund) {
