@@ -1,74 +1,30 @@
 package contracts;
 
+import java.util.HashMap;
+
 public class AssetMarket {
-    private double price1;
-    private double price2;
-    private double price3;
-    private double priceE;
-    private static final double PRICE_IMPACT = 0.0025;
+    private HashMap<Asset.AssetType, Double> prices;
+    private HashMap<Asset.AssetType, Double> priceImpacts;
 
     public AssetMarket() {
-        price1=1;
-        price2=1;
-        price3=1;
-        priceE=1;
+        prices = new HashMap<>();
+        setPrice(Asset.AssetType.CORPORATE_BONDS, 1.0);
+        setPrice(Asset.AssetType.EQUITIES, 1.0);
+        setPrice(Asset.AssetType.EXTERNAL, 1.0);
+        setPrice(Asset.AssetType.MBS, 1.0);
     }
 
-    public void computePriceImpact(Asset.AssetType assetType, double amount) {
-        double currentPrice = getPrice(assetType);
-        double newPrice = currentPrice * (1.0 - amount*PRICE_IMPACT);
-        switch (assetType) {
-            case A1:
-                price1 = newPrice;
-                break;
-            case A2:
-                price2 = newPrice;
-                break;
-            case A3:
-                price3 = newPrice;
-                break;
-            case E:
-                priceE = newPrice;
-                break;
-        }
+
+    private void computePriceImpact(Asset.AssetType assetType, double amountSold) {
+        double newPrice = prices.get(assetType) * (1.0 - amountSold * priceImpacts.get(assetType));
+        setPrice(assetType, newPrice);
     }
 
     public double getPrice(Asset.AssetType assetType) {
-        double price = 0;
-        switch (assetType) {
-            case A1:
-                price=price1;
-                break;
-
-            case A2:
-                price=price2;
-                break;
-
-            case A3:
-                price=price3;
-                break;
-
-            case E:
-                price=priceE;
-                break;
-        }
-
-        return price;
+        return prices.get(assetType);
     }
 
-    public void setPrice1(double price1) {
-        this.price1 = price1;
-    }
-
-    public void setPrice2(double price2) {
-        this.price2 = price2;
-    }
-
-    public void setPrice3(double price3) {
-        this.price3 = price3;
-    }
-
-    public void setPriceE(double priceE) {
-        this.priceE = priceE;
+    private void setPrice(Asset.AssetType assetType, double newPrice) {
+        prices.put(assetType, newPrice);
     }
 }
