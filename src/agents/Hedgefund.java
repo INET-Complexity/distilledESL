@@ -1,7 +1,6 @@
 package agents;
 
 import actions.Action;
-import actions.BankLeverageConstraint;
 import actions.HedgefundLeverageConstraint;
 import actions.SellAsset;
 import contracts.*;
@@ -12,6 +11,8 @@ import java.util.HashSet;
 public class Hedgefund extends Agent implements CanPledgeCollateral {
 
     private HedgefundLeverageConstraint hedgefundLeverageConstraint;
+    public final double cashBuffer = 15.0;
+    //Todo just a number for the moment.
 
     public Hedgefund(String name) {
         super(name);

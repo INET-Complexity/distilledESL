@@ -3,6 +3,7 @@ package actions;
 import agents.Agent;
 import agents.Bank;
 import contracts.Asset;
+import contracts.AssetCollateral;
 
 public class SellAsset extends Action {
 
@@ -21,8 +22,14 @@ public class SellAsset extends Action {
 
     @Override
     public double getMax() {
-        return asset.getValue();
+        if (asset instanceof AssetCollateral) {
+            // Only unencumbered assets can be sold!
+            return ((AssetCollateral)asset).getMaxEncumberableValue();
+        } else {
+            return asset.getValue();
+        }
     }
+    //Todo: should this be here, or should it be with the AssetCollateral?
 
     @Override
     public void print() {

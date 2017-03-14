@@ -2,12 +2,12 @@ package behaviours;
 
 import actions.Action;
 import actions.PayLoan;
-import actions.PullFunding;
 import actions.SellAsset;
 import agents.Hedgefund;
 
 import java.util.ArrayList;
 
+import static java.lang.Math.max;
 import static java.lang.Math.min;
 
 public class HedgefundBehaviour extends Behaviour {
@@ -46,8 +46,7 @@ public class HedgefundBehaviour extends Behaviour {
             }
         }
 
-        // 3) If we were trying to de-lever further from the previous timestep, we do it now. We break the LCR
-        // constraint if needed.
+        // 3) If we were trying to de-lever further from the previous timestep, we do it now.
         if (pendingToDeLever > 0) {
             double amountToDelever = min(pendingToDeLever, me.getCash());
             if (amountToDelever > 0) payOffLiabilities(amountToDelever);
@@ -71,8 +70,11 @@ public class HedgefundBehaviour extends Behaviour {
             liquidityToRaise += amountToDelever - availableNow;
         }
 
-        // 4) If we decided we need to raise liquidity, we go through our available actions and select a set of actions
-        // that will raise the required liquidity.
+        // 5) We try to raise an extra amount of liquidity, to replenish the liquidity buffer.
+        liquidityToRaise += max(0.0, me.cashBuffer - me.getCash());
+
+        // 6) If we decided we need to raise liquidity, we need to select a set of actions that will raise that liquidity.
+        // A hedgefund's actions include just firesales of unencumbered assets, which it performs proportionally.
         if (liquidityToRaise > 0) {
 
             ArrayList<Action> sellAssetActions = getAllActionsOfType(SellAsset.class);
@@ -86,8 +88,10 @@ public class HedgefundBehaviour extends Behaviour {
             }
 
             for (Action action : sellAssetActions) {
-                action.setAmount(liquidityToRaise * action.getMax() / totalSellableAssets);
-                addAction(action);
+                if (action.getMax()>0) { // Todo: To prevent selling encumbered assets
+                    action.setAmount(liquidityToRaise * action.getMax() / totalSellableAssets);
+                    addAction(action);
+                }
             }
         }
 
