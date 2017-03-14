@@ -23,7 +23,7 @@ public class Bond extends Contract {
     /**
      * Available actions for a bond include:
      * if this bond is encumbered, or if agent is not a party, none.
-     * if this is a Gvt bond, an interbank bond or a non-bank bond, the agent gets a SellBond action with
+     * if this is a Gvt bond, an interbank bond or a non-me bond, the agent gets a SellBond action with
      * the correct parameters
      *
      * @param agent the Agent who is querying its available actions

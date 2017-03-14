@@ -19,7 +19,7 @@ public class LCR_Constraint {
     /**
      * Simplified constructor where the denominator of the LCR equation is not calculated, but considered fixed.
      *
-     * @param bank the bank the constraint applies to
+     * @param bank the me the constraint applies to
      * @param LCR_target desired level
      * @param LCR_buffer level at which to act
      * @param LCR_min absolute minimum; below minimum usually means default

@@ -21,8 +21,8 @@ public class BoEDemo {
     private static void runSchedule() {
         assetMarket.shockPrice(Asset.AssetType.EXTERNAL, 0.05);
 //
-//        for (Bank bank : banks.values()) {
-//            bank.printBalanceSheet(); bank.act();
+//        for (Bank me : banks.values()) {
+//            me.printBalanceSheet(); me.act();
 //        }
         banks.get("Bank2").printBalanceSheet();
         banks.get("Bank2").act();

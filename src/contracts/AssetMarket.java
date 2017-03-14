@@ -1,7 +1,5 @@
 package contracts;
 
-import agents.Agent;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -46,6 +44,7 @@ public class AssetMarket {
     }
 
     public void clearTheMarket() {
+        System.out.println("\nMARKET CLEARING\n");
         for (Map.Entry<Asset.AssetType, Double> entry : amountsSold.entrySet()) {
             computePriceImpact(entry.getKey(), entry.getValue());
         }

@@ -43,21 +43,28 @@ public class Asset extends Contract {
     }
 
     /**
-     * We had an amount Q of asset valued at price P. We sold an amount q at price p.
+     * We had an amount Q of asset valued at price P. The we sold a quantity q that made the price fall to p. The
+     * sale happened at the mid-point price (P+p)/2.
      *
-     * 1) We gain an amount p*q of cash.
-     * 2) We make a loss Q*(P-p) in equity due to the devaluation.
+     * 1) We gain an amount pq of cash.
+     * 2) We make a loss q(P-p)/2 from the sale, and a loss (Q-q)*(P-p) due to the devaluation.
      * @param quantitySold the quantity of asset sold, in units
      */
-    public void clearSale(double quantitySold) {
+    protected void clearSale(double quantitySold) {
         double newPrice = getMarketPrice();
-        assetParty.sellAssetForValue(this, quantitySold * newPrice);
+        // Sell the asset at the mid-point price
+        assetParty.sellAssetForValue(this, quantitySold * 0.5 * (price + newPrice));
+
         // Take the loss on devaluation.
         if (newPrice < price) {
-            assetParty.devalueAsset(this, valueLost());
+            // Value lost is the sum of the value lost from the transaction and the devaluation of the asset that is left.
+            double totalValueLost = quantitySold * 0.5 * (price - newPrice) + (quantity - quantitySold) * (price - newPrice);
+            assetParty.devalueAsset(this, totalValueLost);
         }
+
         // Update the quantity remaining
         this.quantity -= quantitySold;
+
         // Update the price
         updatePrice();
     }

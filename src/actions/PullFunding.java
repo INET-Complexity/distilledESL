@@ -15,8 +15,9 @@ public class PullFunding extends Action {
 
     @Override
     public void perform() {
-        loan.getLiabilityParty().sendRequest(new Request(loan, getAmount()));
+        loan.getLiabilityParty().sendRequest(new Request(loan, getAmount(), 2));
     }
+    //Todo: how many timesteps do we allow the counterparty to raise the liquidity to pay?
 
     @Override
     public double getMax() {

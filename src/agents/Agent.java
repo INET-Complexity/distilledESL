@@ -7,22 +7,55 @@ import contracts.Asset;
 import contracts.Contract;
 
 import java.util.ArrayList;
-import java.util.PriorityQueue;
+import java.util.HashSet;
 
 public abstract class Agent {
     private String name;
     Ledger mainLedger;
     Behaviour behaviour;
-    private PriorityQueue<Request> requestInbox;
+    private HashSet<Request> requestInbox;
 
     public Agent(String name) {
         this.name = name;
         mainLedger = new Ledger(this);
-        requestInbox = new PriorityQueue<>();
+        requestInbox = new HashSet<>();
     }
 
     public void sendRequest(Request request) {
         requestInbox.add(request);
+    }
+
+    public double getTotalPullFunding() {
+        return requestInbox.stream()
+                .mapToDouble(Request::getAmount).sum();
+    }
+
+    public double getPullFundingDue() {
+        return requestInbox.stream()
+                .filter(Request::isDue)
+                .mapToDouble((Request::getAmount)).sum();
+    }
+
+    public void fulfilAllRequests() {
+        for (Request request : requestInbox) {
+            request.fulfil();
+            requestInbox.remove(request);
+        }
+    }
+
+    public void fulfilMaturedRequests() {
+        for (Request request : requestInbox) {
+            if (request.isDue()) {
+                request.fulfil();
+                requestInbox.remove(request);
+            }
+        }
+    }
+
+    public void tick() {
+        for (Request request : requestInbox) {
+            request.tick();
+        }
     }
 
     public void setBehaviour(Behaviour behaviour) {
@@ -40,16 +73,15 @@ public abstract class Agent {
         mainLedger.pullFunding(amount, loan);
     }
 
+    /**
+     * Pre-condition: we have enough liquidity!
+     *
+     * @param amount the amount to pay back of this loan
+     * @param loan the loan we are paying back
+     */
     public void payLoan(double amount, Contract loan)  {
-        //Todo: What do we do if we can't pay??!! At the moment I'm forced to raise liquidity immediately
-        if (getCash() < amount) {
-
-            System.out.println("\n***\n"+getName()+" must raise liquidity immediately.");
-            raiseLiquidity(amount * (1 - getCash() / getAssetValue()));
-            System.out.println("\n***");
-        }
-
         mainLedger.payLiability(amount, loan);
+        //Todo: throw an exception
     }
 
     public void sellAssetForValue(Asset asset, double value) {
@@ -57,6 +89,7 @@ public abstract class Agent {
     }
 
     public void devalueAsset(Asset asset, double valueLost) {
+        System.out.println(getName()+" made a loss of "+valueLost+" from the sale of an asset of type "+asset.getAssetType());
         mainLedger.devalueAsset(valueLost, asset);
     }
 

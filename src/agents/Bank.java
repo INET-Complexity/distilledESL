@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 
 /**
- * This class represents a simple bank with a single Ledger, called 'general Ledger'.
+ * This class represents a simple me with a single Ledger, called 'general Ledger'.
  *
  * Every Bank has a BankBehaviour.
  */

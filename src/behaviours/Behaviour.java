@@ -45,6 +45,9 @@ public abstract class Behaviour {
         chooseActions();
         performActions(chosenActions);
 
+        // Todo: tick here!
+        me.tick();
+
     }
 
     double maxLiabilitiesToPayOff() {

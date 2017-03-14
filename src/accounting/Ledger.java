@@ -282,6 +282,8 @@ public class Ledger implements LedgerAPI {
         // (dr equityAccounts, cr assetAccounts)
         Account.doubleEntry(equityAccount, assetAccount, valueLost);
 
+        //Todo: perform a check here that the Asset account balances match the value of the assets. (?)
+
     }
 
     /**
