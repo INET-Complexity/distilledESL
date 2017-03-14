@@ -91,13 +91,4 @@ public class Repo extends Loan {
     public double getValue() {
         return principal;
     }
-
-    @Override
-    public ArrayList<Action> getAvailableActions(Agent me) {
-        ArrayList<Action> availableActions = super.getAvailableActions(me);
-        if (me == assetParty) {
-            availableActions.add(new MarginCall(this));
-        }
-        return availableActions;
-    }
 }

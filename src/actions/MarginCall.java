@@ -22,7 +22,7 @@ public class MarginCall extends Action {
 
     @Override
     public String getName() {
-        return null;
+        return "Margin call";
     }
 
     @Override

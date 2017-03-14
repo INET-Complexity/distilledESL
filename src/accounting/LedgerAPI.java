@@ -24,4 +24,5 @@ public interface LedgerAPI {
     void payLiability(double amount, Contract liability);
 
 
+
 }

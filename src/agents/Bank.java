@@ -4,6 +4,7 @@ import actions.Action;
 import actions.LCR_Constraint;
 import actions.BankLeverageConstraint;
 import actions.SellAsset;
+import behaviours.BankBehaviour;
 import contracts.*;
 
 import java.util.ArrayList;
@@ -22,6 +23,8 @@ public class Bank extends Agent implements CanPledgeCollateral {
     public Bank(String name) {
         super(name);
         this.bankLeverageConstraint = new BankLeverageConstraint(this);
+        this.lcr_constraint = new LCR_Constraint(this, 1.0, 1.0, 1.0, 20.0);
+        this.behaviour = new BankBehaviour(this);
     }
 
     //Todo: is this the best way to do this? This should really be in Behaviour

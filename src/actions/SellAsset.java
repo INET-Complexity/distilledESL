@@ -15,12 +15,8 @@ public class SellAsset extends Action {
 
     @Override
     public void perform() {
-        Agent owner = asset.getAssetParty();
-
-        // changes the contract
-        asset.sellAmount(getAmount());
-        // changes the accounts
-        owner.getMainLedger().sellAsset(getAmount(), asset.getClass());
+        double quantityToSell = getAmount() / asset.getPrice();
+        asset.putForSale(quantityToSell);
     }
 
     @Override
@@ -34,6 +30,6 @@ public class SellAsset extends Action {
     }
 
     public String getName() {
-        return "Sell Asset of type "+ asset.getAssetType();
+        return "Sell Asset of type "+ asset.getAssetType()+" [max: "+getMax()+"]";
     }
 }

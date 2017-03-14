@@ -8,9 +8,9 @@ public class BankLeverageConstraint {
     private double leverageBuffer;
     private double leverageMin;
 
-    private static final double DEFAULT_LEVERAGE_TARGET = 4.0;
-    private static final double DEFAULT_LEVERAGE_BUFFER = 3.0;
-    private static final double DEFAULT_LEVERAGE_MIN = 1.0;
+    private static final double DEFAULT_LEVERAGE_TARGET = 4.0/100;
+    private static final double DEFAULT_LEVERAGE_BUFFER = 3.0/100;
+    private static final double DEFAULT_LEVERAGE_MIN = 1.0/100;
 
 
 

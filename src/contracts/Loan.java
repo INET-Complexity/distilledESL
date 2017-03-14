@@ -21,7 +21,13 @@ public class Loan extends Contract {
     Agent liabilityParty;
     double principal;
 
-    public void reducePrincipal(double amount) {
+    public void payLoan(double amount) {
+        if (liabilityParty!= null) liabilityParty.payLoan(amount, this);
+        if (assetParty!= null) assetParty.pullFunding(amount, this);
+        reducePrincipal(amount);
+    }
+
+    private void reducePrincipal(double amount) {
         assert(amount <= principal);
         principal -= amount;
 
@@ -34,10 +40,12 @@ public class Loan extends Contract {
 
     @Override
     public ArrayList<Action> getAvailableActions(Agent me) {
+        if (!(assetParty==me || liabilityParty==me)) return null;
+
         ArrayList<Action> availableActions = new ArrayList<>();
         if (assetParty==me) {
             availableActions.add(new PullFunding(this));
-        } else if (liabilityParty == me) {
+        } else {
             availableActions.add(new PayLoan(this));
         }
         return availableActions;

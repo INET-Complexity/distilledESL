@@ -29,7 +29,7 @@ public class Asset extends Contract {
 
     @Override
     public ArrayList<Action> getAvailableActions(Agent me) {
-        if (assetType == AssetType.E) return null; // External assets cannot be sold!
+        if (assetType == AssetType.EXTERNAL) return null; // External assets cannot be sold!
 
         ArrayList<Action> availableActions = new ArrayList<>();
         if (assetParty == me) {
@@ -38,10 +38,64 @@ public class Asset extends Contract {
         return availableActions;
     }
 
-    public void sellAmount(double amount) {
-        double quantitySold = 1.0 * amount/price;
+    public void putForSale(double quantity) {
+        assetMarket.putForSale(this, quantity);
+    }
+
+    /**
+     * We had an amount Q of asset valued at price P. We sold an amount q at price p.
+     *
+     * 1) We gain an amount p*q of cash.
+     * 2) We make a loss Q*(P-p) in equity due to the devaluation.
+     * @param quantitySold the quantity of asset sold, in units
+     */
+    public void clearSale(double quantitySold) {
+        double newPrice = getMarketPrice();
+        assetParty.sellAssetForValue(this, quantitySold * newPrice);
+        // Take the loss on devaluation.
+        if (newPrice < price) {
+            assetParty.devalueAsset(this, valueLost());
+        }
+        // Update the quantity remaining
         this.quantity -= quantitySold;
-        assetMarket.computePriceImpact(assetType, quantitySold);
+        // Update the price
+        updatePrice();
+    }
+
+
+    @Override
+    public double getValue() {
+        return quantity*price;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+    private double getMarketPrice() {
+        return assetMarket.getPrice(assetType);
+    }
+
+    public boolean priceFell() {
+        return (getMarketPrice() < price);
+    }
+
+    public double valueLost() {
+        return (price-getMarketPrice())*quantity;
+    }
+
+    public void updatePrice() {
+        price = getMarketPrice();
+    }
+
+    public enum AssetType {
+        MBS,
+        EQUITIES,
+        CORPORATE_BONDS,
+        EXTERNAL
+    }
+
+    public AssetType getAssetType() {
+        return assetType;
     }
 
     @Override
@@ -54,36 +108,7 @@ public class Asset extends Contract {
         return null;
     } //An Asset does not have a liability party
 
-    @Override
-    public double getValue() {
-        return quantity*price;
-    }
-
-    public double getPrice() {
-        return assetMarket.getPrice(assetType);
-    }
-
-    public boolean priceFell() {
-        return (getPrice() < price);
-    }
-
-    public double valueLost() {
-        return (price-getPrice())*quantity;
-    }
-
-    public void updatePrice() {
-        price = getPrice();
-    }
-
-    public enum AssetType {
-        A1, A2, A3, E
-    }
-
-    public AssetType getAssetType() {
-        return assetType;
-    }
-
-    public double getQuantity() {
+    protected double getQuantity() {
         return quantity;
     }
 }

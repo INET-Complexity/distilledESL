@@ -19,19 +19,7 @@ public class PayLoan extends Action {
 
     @Override
     public void perform() {
-        Agent borrower = loan.getLiabilityParty();
-
-        // changes the accounts
-        borrower.getMainLedger().payLiability(getAmount(), loan);
-
-        if (loan.getAssetParty()!= null) {
-            Agent lender = loan.getAssetParty();
-            lender.getMainLedger().pullFunding(getAmount(), loan);
-        }
-
-        // changes the contract
-        loan.reducePrincipal(getAmount());
-
+        loan.payLoan(getAmount());
     }
 
     public double getMax() {
@@ -40,11 +28,15 @@ public class PayLoan extends Action {
 
     @Override
     public void print() {
-        System.out.println("PayLoan action by "+loan.getLiabilityParty().getName()+" -> amount: "+String.format( "%.2f", getAmount()));
+        System.out.println("Pay Loan action by "+loan.getLiabilityParty().getName()+" -> amount: "+String.format( "%.2f", getAmount()));
     }
 
     public String getName() {
-        return "PayLoan";
+        if (loan.getAssetParty()==null) {
+            return "Pay Loan to unspecified lender [max: "+getMax()+"]";
+        } else {
+            return "Pay Loan to "+loan.getAssetParty().getName()+" [max: "+getMax()+"]";
+        }
     }
 
     public Loan getLoan() {

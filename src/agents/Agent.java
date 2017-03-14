@@ -3,18 +3,26 @@ package agents;
 import accounting.Ledger;
 import actions.Action;
 import behaviours.Behaviour;
+import contracts.Asset;
 import contracts.Contract;
 
 import java.util.ArrayList;
+import java.util.PriorityQueue;
 
 public abstract class Agent {
     private String name;
     Ledger mainLedger;
     Behaviour behaviour;
+    private PriorityQueue<Request> requestInbox;
 
     public Agent(String name) {
         this.name = name;
         mainLedger = new Ledger(this);
+        requestInbox = new PriorityQueue<>();
+    }
+
+    public void sendRequest(Request request) {
+        requestInbox.add(request);
     }
 
     public void setBehaviour(Behaviour behaviour) {
@@ -35,15 +43,21 @@ public abstract class Agent {
     public void payLoan(double amount, Contract loan)  {
         //Todo: What do we do if we can't pay??!! At the moment I'm forced to raise liquidity immediately
         if (getCash() < amount) {
-            System.out.println();
-            System.out.println("***");
-            System.out.println(getName()+" must raise liquidity immediately.");
+
+            System.out.println("\n***\n"+getName()+" must raise liquidity immediately.");
             raiseLiquidity(amount * (1 - getCash() / getAssetValue()));
-            System.out.println("***");
-            System.out.println();
+            System.out.println("\n***");
         }
 
         mainLedger.payLiability(amount, loan);
+    }
+
+    public void sellAssetForValue(Asset asset, double value) {
+        mainLedger.sellAsset(value, asset.getClass());
+    }
+
+    public void devalueAsset(Asset asset, double valueLost) {
+        mainLedger.devalueAsset(valueLost, asset);
     }
 
     public void add(Contract contract) {

@@ -21,7 +21,7 @@ public abstract class Action {
     public static void print(ArrayList<Action> actions) {
         int counter = 1;
         for (Action action : actions) {
-            System.out.println("Action "+counter+" "+action.getName());
+            System.out.println("Action "+counter+" -> "+action.getName());
             counter++;
         }
     }

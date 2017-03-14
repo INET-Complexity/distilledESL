@@ -28,7 +28,7 @@ public class BankBehaviour extends Behaviour {
             double maxLiabilitiesToPayOff = maxLiabilitiesToPayOff();
             double payLoan = 0.0;
 
-            System.out.println("\nAmount to delever is "+String.format("%.2f", amountToDelever));
+            System.out.println("\nAmount to delever is " + String.format("%.2f", amountToDelever));
 
 
             if (maxLiabilitiesToPayOff == 0) {
@@ -38,27 +38,28 @@ public class BankBehaviour extends Behaviour {
 
             if (maxLiabilitiesToPayOff < amountToDelever) {
                 System.out.println("Strange! We do not have enough liabilites to fully de-lever. " +
-                        "We will de-lever an amount "+maxLiabilitiesToPayOff);
+                        "We will de-lever an amount " + maxLiabilitiesToPayOff);
                 amountToDelever = maxLiabilitiesToPayOff;
             }
 
 
             // 1. Use cash to pay liabilities
-            double maxCashToSpend = max(bank.getCash() - bank.getLCR_constraint().getCashTarget() , 0.0);
+            double maxCashToSpend = max(bank.getCash() - bank.getLCR_constraint().getCashTarget(), 0.0);
 
-            if (maxCashToSpend==0) {
+            if (maxCashToSpend == 0) {
                 System.out.println();
                 System.out.println("We are at or below our LCR target. We cannot use cash to pay back liabilities.");
             } else {
                 if (maxCashToSpend > amountToDelever) {
                     payLoan += amountToDelever;
-                    System.out.println("We managed to de-lever by paying back liabilities => no contagion.");
+                    System.out.println("We managed to de-lever by using only cash => no contagion.");
                     payOffLiabilities(payLoan);
                     return;
 
                 } else {
                     payLoan += maxCashToSpend;
                     amountToDelever -= maxCashToSpend;
+                    System.out.println("We will use " + maxCashToSpend + " to pay off liabilities and must de-lever a further " + amountToDelever + ".");
                 }
             }
 
@@ -78,7 +79,7 @@ public class BankBehaviour extends Behaviour {
                     nextAction.setAmount(amountToDelever);
                     addAction(nextAction);
 
-                    payLoan += nextAction.getAmount();
+//                    payLoan += nextAction.getAmount();
                     amountToDelever = 0.0;
 
                     System.out.println("\nWe found a set of actions to reach our leverage target!");
@@ -88,29 +89,29 @@ public class BankBehaviour extends Behaviour {
                     nextAction.setAmount(nextAction.getMax());
                     addAction(nextAction);
 
-                    payLoan += nextAction.getAmount();
+//                    payLoan += nextAction.getAmount();
 
                     amountToDelever -= nextAction.getMax();
                 }
             }
 
-            if (amountToDelever < 0.001) {
-                payOffLiabilities(payLoan);
-                return;
-            }
+//            if (amountToDelever < 0.001) {
+//                payOffLiabilities(payLoan);
+//                return;
+//            }
 
             // 3. If we're still not done, break the LCR constraint and use up more cash
-            double remainingCash = bank.getCash() - maxCashToSpend;
-            if (remainingCash > amountToDelever) {
-                System.out.println("We managed to de-lever by breaking the LCR constraint.");
-                payLoan += amountToDelever;
-                payOffLiabilities(payLoan);
-            } else {
-                System.out.println("We cannot reach the leverage target this round.");
-                payLoan += remainingCash;
-                payOffLiabilities(payLoan);
-            }
-
+//            double remainingCash = bank.getCash() - maxCashToSpend;
+//            if (remainingCash > amountToDelever) {
+//                System.out.println("We managed to de-lever by breaking the LCR constraint.");
+//                payLoan += amountToDelever;
+//                payOffLiabilities(payLoan);
+//            } else {
+//                System.out.println("We cannot reach the leverage target this round.");
+//                payLoan += remainingCash;
+//                payOffLiabilities(payLoan);
+//            }
+//
         } else {
             System.out.println("Leverage is above buffer. No need to do anything!");
             //We're fine, do nothing

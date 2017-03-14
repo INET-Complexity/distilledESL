@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
  * @author rafa
  */
 public class Ledger implements LedgerAPI {
+    //TODO: We need to do valuation differently!!
 
     public Ledger(Agent owner) {
         // A Ledger is a list of accounts (for quicker searching)
@@ -242,15 +243,13 @@ public class Ledger implements LedgerAPI {
     public ArrayList<Action> getAvailableActions(Agent me) {
         ArrayList<Action> availableActions = new ArrayList<>();
         for (Contract contract : allAssets) {
-            if (contract.getAvailableActions(me)!=null) {
-                availableActions.addAll(contract.getAvailableActions(me));
-            }
+            ArrayList<Action> actions = contract.getAvailableActions(me);
+            if (actions != null) availableActions.addAll(actions);
         }
 
         for (Contract contract : allLiabilities) {
-            if (contract.getAvailableActions(me)!= null) {
-                availableActions.addAll(contract.getAvailableActions(me));
-            }
+            ArrayList<Action> actions = contract.getAvailableActions(me);
+            if (actions != null) availableActions.addAll(actions);
         }
 
         return availableActions;
@@ -275,13 +274,13 @@ public class Ledger implements LedgerAPI {
 
     /**
      * if an Asset loses value, I must debit equity and credit asset
-     * @param amount
+     * @param valueLost the value lost
      */
-    private void devalueAsset(double amount, Contract asset) {
+    public void devalueAsset(double valueLost, Contract asset) {
         Account assetAccount = contractsToAssetAccounts.get(asset.getClass());
 
         // (dr equityAccounts, cr assetAccounts)
-        Account.doubleEntry(equityAccount, assetAccount, amount);
+        Account.doubleEntry(equityAccount, assetAccount, valueLost);
 
     }
 

@@ -41,9 +41,10 @@ public class ShortSimulationDemo {
 
         System.out.println("Time t=1.");
         bank1.act();
+        assetMarket.clearTheMarket();
         bank1.printBalanceSheet();
         updateAssetPrices(bank1, bank2, hedgefund);
-        System.out.println("price of A1 :"+assetMarket.getPrice(Asset.AssetType.A1));
+        System.out.println("price of A1 :"+assetMarket.getPrice(Asset.AssetType.MBS));
 
         bank2.act();
         bank2.printBalanceSheet();
@@ -60,16 +61,16 @@ public class ShortSimulationDemo {
     }
     private static void initBank1(Bank bank) {
         bank.addCash(20.0);
-        bank.add(new Asset(bank, Asset.AssetType.E, assetMarket, 17.0));
-        bank.add(new Asset(bank, Asset.AssetType.A1, assetMarket, 40.0));
+        bank.add(new Asset(bank, Asset.AssetType.EQUITIES, assetMarket, 17.0));
+        bank.add(new Asset(bank, Asset.AssetType.MBS, assetMarket, 40.0));
         bank.setBankLeverageConstraint(new BankLeverageConstraint(bank, 5.0/100, 4.0/100, 3.0/100));
         bank.setLCR_constraint(new LCR_Constraint(bank, 1.0, 1.0, 1.0, 20.0));
     }
 
     private static void initBank2(Bank bank) {
         bank.addCash(20);
-        bank.add(new Asset(bank, Asset.AssetType.A2, assetMarket, 40.0));
-        bank.add(new Asset(bank, Asset.AssetType.A3, assetMarket, 17.0));
+        bank.add(new Asset(bank, Asset.AssetType.EQUITIES, assetMarket, 40.0));
+        bank.add(new Asset(bank, Asset.AssetType.CORPORATE_BONDS, assetMarket, 17.0));
         bank.setBankLeverageConstraint(new BankLeverageConstraint(bank, 5.0/100, 4.0/100, 3.0/100));
         bank.setLCR_constraint(new LCR_Constraint(bank, 1.0, 1.0, 1.0, 20.0));
 
@@ -77,8 +78,8 @@ public class ShortSimulationDemo {
 
     private static void initHedgefund(Bank hedgefund) {
         hedgefund.addCash(7.9167);
-        hedgefund.add(new Asset(hedgefund, Asset.AssetType.A1, assetMarket, 20.0));
-        hedgefund.add(new Asset(hedgefund, Asset.AssetType.A2, assetMarket, 20.0));
+        hedgefund.add(new Asset(hedgefund, Asset.AssetType.MBS, assetMarket, 20.0));
+        hedgefund.add(new Asset(hedgefund, Asset.AssetType.EQUITIES, assetMarket, 20.0));
         hedgefund.setBankLeverageConstraint(new BankLeverageConstraint(hedgefund, 4.0/100, 3.0/100, 2.0/100));
 
     }
@@ -98,7 +99,7 @@ public class ShortSimulationDemo {
 
 
     private static void shockExternalAsset(double percentage) {
-        assetMarket.setPriceE(assetMarket.getPrice(Asset.AssetType.E)*(1-percentage));
+        assetMarket.shockPrice(Asset.AssetType.EXTERNAL, percentage);
     }
 
     private static void updateAssetPrices(Bank bank1, Bank bank2, Bank hedgefund) {
