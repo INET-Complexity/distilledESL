@@ -15,13 +15,11 @@ public class BankBehaviour extends Behaviour {
 
     public Bank me;
     private double pendingToDeLever;
-    private double pendingPullFunding;
 
     public BankBehaviour(Bank me) {
         super(me);
         this.me = me;
         this.pendingToDeLever = 0.0;
-        this.pendingPullFunding = 0.0;
     }
 
     @Override

@@ -1,11 +1,18 @@
 package contracts;
 
 import agents.Agent;
+import demos.Parameters;
 
 public class AssetCollateral extends Asset implements CanBeCollateral {
 
+    private double haircut;
+
     public AssetCollateral(Agent assetParty, AssetType assetType, AssetMarket assetMarket, double amount) {
         super(assetParty, assetType, assetMarket, amount);
+        this.haircut = (assetType==AssetType.MBS) ? Parameters.HAIRCUT_MBS
+                : (assetType==AssetType.CORPORATE_BONDS) ? Parameters.HAIRCUT_CORPORATE_BONDS
+                    : (assetType==AssetType.EQUITIES) ? Parameters.HAIRCUT_EQUITIES
+                        : 0.0;
     }
 
     private double encumberedQuantity;
@@ -22,7 +29,7 @@ public class AssetCollateral extends Asset implements CanBeCollateral {
 
     @Override
     public double getHairCut() {
-        return 0;//TODO where do I get the haircuts from? My agent?
+        return haircut;
     }
 
     public double getMaxEncumberableQuantity() {

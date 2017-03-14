@@ -15,11 +15,17 @@ public class PullFunding extends Action {
 
     @Override
     public void perform() {
-        Request request = new Request(loan, getAmount(), 2);
-        //Todo: how many timesteps do we allow the counterparty to raise the liquidity to pay?
-        loan.getAssetParty().addToOutbox(request);
-        loan.getLiabilityParty().addToInbox(request);
-        loan.setCancelled(true);
+        if (loan.getLiabilityParty()==null) {
+            // If there's no counter-party, the payment can happen instantaneously
+            loan.payLoan(getAmount());
+        } else {
+            // If there is a counter-party, we must send a Request.
+            Request request = new Request(loan, getAmount(), 2);
+            //Todo: how many timesteps do we allow the counterparty to raise the liquidity to pay?
+            loan.getAssetParty().addToOutbox(request);
+            loan.getLiabilityParty().addToInbox(request);
+            loan.setCancelled(true);
+        }
     }
 
     @Override

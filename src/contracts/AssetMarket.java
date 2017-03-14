@@ -1,5 +1,7 @@
 package contracts;
 
+import demos.Parameters;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -26,9 +28,9 @@ public class AssetMarket {
         setPrice(Asset.AssetType.EXTERNAL, 1.0);
         setPrice(Asset.AssetType.MBS, 1.0);
 
-        priceImpacts.put(Asset.AssetType.MBS, 0.001);
-        priceImpacts.put(Asset.AssetType.EQUITIES, 0.001);
-        priceImpacts.put(Asset.AssetType.CORPORATE_BONDS, 0.001);
+        priceImpacts.put(Asset.AssetType.MBS, Parameters.PRICE_IMPACT_MBS);
+        priceImpacts.put(Asset.AssetType.EQUITIES, Parameters.PRICE_IMPACT_EQUITIES);
+        priceImpacts.put(Asset.AssetType.CORPORATE_BONDS, Parameters.PRICE_IMPACT_CORPORATE_BONDS);
 
     }
 
@@ -62,6 +64,10 @@ public class AssetMarket {
     private void computePriceImpact(Asset.AssetType assetType, double amountSold) {
         double newPrice = prices.get(assetType) * (1.0 - amountSold * priceImpacts.get(assetType));
         setPrice(assetType, newPrice);
+    }
+
+    private void computeHaircuts(Asset.AssetType assetType, double amountSold) {
+        //TODO
     }
 
     public double getPrice(Asset.AssetType assetType) {
