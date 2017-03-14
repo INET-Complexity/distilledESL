@@ -26,9 +26,9 @@ public class AssetMarket {
         setPrice(Asset.AssetType.EXTERNAL, 1.0);
         setPrice(Asset.AssetType.MBS, 1.0);
 
-        priceImpacts.put(Asset.AssetType.MBS, 0.02);
-        priceImpacts.put(Asset.AssetType.EQUITIES, 0.02);
-        priceImpacts.put(Asset.AssetType.CORPORATE_BONDS, 0.02);
+        priceImpacts.put(Asset.AssetType.MBS, 0.001);
+        priceImpacts.put(Asset.AssetType.EQUITIES, 0.001);
+        priceImpacts.put(Asset.AssetType.CORPORATE_BONDS, 0.001);
 
     }
 

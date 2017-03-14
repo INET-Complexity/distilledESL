@@ -3,6 +3,7 @@ package behaviours;
 import actions.Action;
 import actions.PayLoan;
 import agents.Agent;
+import agents.Bank;
 import contracts.Loan;
 
 import java.util.ArrayList;
@@ -12,6 +13,8 @@ public abstract class Behaviour {
     private Agent me;
     private ArrayList<Action> availableActions;
     private ArrayList<Action> chosenActions;
+    private double liabilitiesToPayOff;
+    private double maxLiabilitiesToPayOff;
 
     Behaviour (Agent me) {
         this.me = me;
@@ -41,8 +44,11 @@ public abstract class Behaviour {
         Action.print(availableActions);
 
         chosenActions = new ArrayList<>();
+        liabilitiesToPayOff = 0.0;
+        maxLiabilitiesToPayOff = maxLiabilitiesToPayOff();
 
         chooseActions();
+        decidePayOffActions();
         performActions(chosenActions);
 
         // Todo: tick here!
@@ -50,23 +56,25 @@ public abstract class Behaviour {
 
     }
 
-    double maxLiabilitiesToPayOff() {
+    private double maxLiabilitiesToPayOff() {
         return availableActions.stream()
                 .filter(PayLoan.class::isInstance)
                 .mapToDouble(Action::getMax).sum();
     }
 
-    // Should be called only once in the end!
     void payOffLiabilities(double amount) {
-        PayLoan payLoan = (PayLoan) findActionOfType(PayLoan.class);
+        assert(liabilitiesToPayOff+amount <= maxLiabilitiesToPayOff);
+        liabilitiesToPayOff += amount;
+    }
 
-        if (amount > payLoan.getMax()) {
-            payLoan.setAmount(payLoan.getMax());
-            chosenActions.add(payLoan);
-            payOffLiabilities(amount - payLoan.getMax());
-        } else {
-            payLoan.setAmount(amount);
-            chosenActions.add(payLoan);
+    private void decidePayOffActions() {
+        if (liabilitiesToPayOff > 0) {
+            ArrayList<Action> payLoanActions = getAllActionsOfType(PayLoan.class);
+
+            for (Action action : payLoanActions) {
+                action.setAmount(action.getMax() * liabilitiesToPayOff / maxLiabilitiesToPayOff);
+                addAction(action);
+            }
         }
     }
 

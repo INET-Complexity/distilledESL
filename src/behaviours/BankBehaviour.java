@@ -15,18 +15,20 @@ public class BankBehaviour extends Behaviour {
 
     public Bank me;
     private double pendingToDeLever;
+    private double pendingPullFunding;
 
     public BankBehaviour(Bank me) {
         super(me);
         this.me = me;
         this.pendingToDeLever = 0.0;
+        this.pendingPullFunding = 0.0;
     }
 
     @Override
     protected void chooseActions() {
 
-        // 1) Check matured requests to pull funding. If we can't meet them right now, default.
-        double maturedPullFunding = me.getPullFundingDue();
+        // 1) Check inbox for matured PullFunding requests. If we can't meet them right now, default.
+        double maturedPullFunding = me.getMaturedPullFunding();
         if (maturedPullFunding > 0) {
             if(me.getCash() >= maturedPullFunding) {
                 me.fulfilMaturedRequests();
@@ -36,7 +38,7 @@ public class BankBehaviour extends Behaviour {
             }
         }
 
-        // 2) Check inbox for (non-matured) requests to pull funding, find out how much liquidity is needed,
+        // 2) Check inbox for other PullFunding requests, find out how much liquidity is needed,
         // and pay all of them now if possible.
         double totalPullFunding = me.getTotalPullFunding();
         if (totalPullFunding > 0) {
@@ -51,6 +53,7 @@ public class BankBehaviour extends Behaviour {
         if (pendingToDeLever > 0) {
             double amountToDelever = min(pendingToDeLever, me.getCash());
             if (amountToDelever > 0) payOffLiabilities(amountToDelever);
+            pendingToDeLever = 0.0;
         }
 
         double liquidityToRaise = totalPullFunding;
@@ -75,6 +78,9 @@ public class BankBehaviour extends Behaviour {
         // 3) If we used up some of our cash buffer, we try to replenish it, so we add to the liquidity to raise.
         liquidityToRaise += me.getLCR_constraint().getLiquidityToRaise();
 
+        // Discount the liquidity that we are expecting from pull funding requests not yet met by the counter-parties.
+        liquidityToRaise -= me.getPendingPayments();
+
         // 4) If we decided we need to raise liquidity, we go through our available actions and select a set of actions
         // that will raise the required liquidity.
         if (liquidityToRaise > 0) {
@@ -90,10 +96,10 @@ public class BankBehaviour extends Behaviour {
                     }
                 }
 
-                double liquidity = min(nextAction.getMax(), liquidityToRaise);
-                nextAction.setAmount(liquidity);
+                double liquidityFromThisAction = min(nextAction.getMax(), liquidityToRaise);
+                nextAction.setAmount(liquidityFromThisAction);
                 addAction(nextAction);
-                liquidityToRaise -= liquidity;
+                liquidityToRaise -= liquidityFromThisAction;
 
             }
 

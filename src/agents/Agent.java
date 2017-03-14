@@ -14,26 +14,35 @@ public abstract class Agent {
     Ledger mainLedger;
     Behaviour behaviour;
     private HashSet<Request> requestInbox;
+    private HashSet<Request> requestOutbox;
+
 
     public Agent(String name) {
         this.name = name;
         mainLedger = new Ledger(this);
         requestInbox = new HashSet<>();
+        requestOutbox = new HashSet<>();
     }
 
-    public void sendRequest(Request request) {
+    public void addToInbox(Request request) {
         requestInbox.add(request);
     }
+    public void addToOutbox(Request request) {requestOutbox.add(request);}
 
     public double getTotalPullFunding() {
         return requestInbox.stream()
                 .mapToDouble(Request::getAmount).sum();
     }
 
-    public double getPullFundingDue() {
+    public double getMaturedPullFunding() {
         return requestInbox.stream()
                 .filter(Request::isDue)
-                .mapToDouble((Request::getAmount)).sum();
+                .mapToDouble(Request::getAmount).sum();
+    }
+
+    public double getPendingPayments() {
+        return requestInbox.stream()
+                .mapToDouble(Request::getAmount).sum();
     }
 
     public void fulfilAllRequests() {

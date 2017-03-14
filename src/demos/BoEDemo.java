@@ -28,6 +28,9 @@ public class BoEDemo {
         banks.get("Bank2").act();
         assetMarket.clearTheMarket();
         banks.get("Bank2").printBalanceSheet();
+        banks.get("Bank2").act();
+        banks.get("Bank2").act();
+
 
 
     }

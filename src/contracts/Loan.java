@@ -15,11 +15,13 @@ public class Loan extends Contract {
         this.assetParty = assetParty;
         this.liabilityParty = liabilityParty;
         this.principal = principal;
+        this.cancelled = false;
     }
 
     Agent assetParty;
     Agent liabilityParty;
     double principal;
+    boolean cancelled;
 
     public void payLoan(double amount) {
         if (liabilityParty!= null) liabilityParty.payLoan(amount, this);
@@ -41,6 +43,7 @@ public class Loan extends Contract {
     @Override
     public ArrayList<Action> getAvailableActions(Agent me) {
         if (!(assetParty==me || liabilityParty==me)) return null;
+        if (cancelled) return null;
 
         ArrayList<Action> availableActions = new ArrayList<>();
         if (assetParty==me) {
@@ -69,6 +72,10 @@ public class Loan extends Contract {
     public void liquidate() {
         ((Bank) assetParty).liquidateLoan(getValue(), VALUE_GIVEN_DEFAULT, this);
         principal = 0.0;
+    }
+
+    public void setCancelled(boolean cancelled) {
+        this.cancelled = cancelled;
     }
 }
 

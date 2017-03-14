@@ -32,7 +32,7 @@ public class Asset extends Contract {
         if (assetType == AssetType.EXTERNAL) return null; // External assets cannot be sold!
 
         ArrayList<Action> availableActions = new ArrayList<>();
-        if (assetParty == me) {
+        if (assetParty == me && quantity > 0) {
             availableActions.add(new SellAsset(this));
         }
         return availableActions;
