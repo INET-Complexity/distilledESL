@@ -1,15 +1,15 @@
 package agents;
 
-import actions.Action;
 import actions.HedgefundLeverageConstraint;
-import actions.SellAsset;
+import behaviours.Behaviour;
+import behaviours.HedgefundBehaviour;
 import contracts.*;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 
 public class Hedgefund extends Agent implements CanPledgeCollateral {
 
+    private HedgefundBehaviour behaviour;
     private HedgefundLeverageConstraint hedgefundLeverageConstraint;
     public final double cashBuffer = 15.0;
     //Todo just a number for the moment.
@@ -17,40 +17,24 @@ public class Hedgefund extends Agent implements CanPledgeCollateral {
     public Hedgefund(String name) {
         super(name);
         this.hedgefundLeverageConstraint = new HedgefundLeverageConstraint(this);
+        this.behaviour = new HedgefundBehaviour(this);
     }
 
-    //Todo: is this the best way to do this? This should really be in Behaviour
-    public void raiseLiquidity(double liquidityNeeded) {
-        ArrayList<Action> availableActions = getAvailableActions(this);
-
-        double initialAssetHoldings = mainLedger.getAssetValueOf(Asset.class);
-
-        for (Action action : availableActions) {
-            if (action instanceof SellAsset) {
-                action.setAmount(action.getMax()*liquidityNeeded/initialAssetHoldings);
-                action.print();
-                action.perform();
-            }
-        }
-
-    }
 
     @Override
     public void putMoreCollateral(double total, Repo repo) {
         // First, get a set of all my Assets that can be pledged as collateral
         HashSet<Contract> potentialCollateral = mainLedger.getAssetsOfType(AssetCollateral.class);
 
-        double maxHaircutValue = 0.0;
-        for (Contract contract : potentialCollateral) {
-            assert(contract instanceof CanBeCollateral);
-            CanBeCollateral asset = (CanBeCollateral) contract;
-            maxHaircutValue += asset.getMaxEncumberableValue() * (1.0 - asset.getHairCut());
-        }
+        double maxHaircutValue = potentialCollateral.stream()
+                .mapToDouble(contract -> ((CanBeCollateral)contract).getUnencumberedValue())
+                .sum();
+
 
         for (Contract contract : potentialCollateral) {
             CanBeCollateral asset = (CanBeCollateral) contract;
 
-            double quantityToPledge = total * asset.getMaxEncumberableValue() * (1.0 - asset.getHairCut()) / maxHaircutValue;
+            double quantityToPledge = total * asset.getUnencumberedValue() * (1.0 - asset.getHaircut()) / maxHaircutValue;
             repo.pledgeCollateral(asset, quantityToPledge);
 
         }
@@ -64,7 +48,7 @@ public class Hedgefund extends Agent implements CanPledgeCollateral {
         double totalCollateralValue = collateral.stream().mapToDouble(Contract::getValue).sum();
 
         for (Contract asset : collateral) {
-            averageHaircut += ((CanBeCollateral) asset).getHairCut() * asset.getValue() / totalCollateralValue;
+            averageHaircut += ((CanBeCollateral) asset).getHaircut() * asset.getValue() / totalCollateralValue;
         }
 
         return totalRepo / averageHaircut;
@@ -82,4 +66,8 @@ public class Hedgefund extends Agent implements CanPledgeCollateral {
         return hedgefundLeverageConstraint;
     }
 
+    @Override
+    public Behaviour getBehaviour() {
+        return behaviour;
+    }
 }

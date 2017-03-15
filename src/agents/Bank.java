@@ -1,13 +1,11 @@
 package agents;
 
-import actions.Action;
 import actions.LCR_Constraint;
 import actions.BankLeverageConstraint;
-import actions.SellAsset;
 import behaviours.BankBehaviour;
+import behaviours.Behaviour;
 import contracts.*;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 
 /**
@@ -19,28 +17,13 @@ public class Bank extends Agent implements CanPledgeCollateral {
 
     private BankLeverageConstraint bankLeverageConstraint;
     private LCR_Constraint lcr_constraint;
+    private BankBehaviour behaviour;
 
     public Bank(String name) {
         super(name);
         this.bankLeverageConstraint = new BankLeverageConstraint(this);
         this.lcr_constraint = new LCR_Constraint(this, 1.0, 1.0, 1.0, 20.0);
         this.behaviour = new BankBehaviour(this);
-    }
-
-    //Todo: is this the best way to do this? This should really be in Behaviour
-    public void raiseLiquidity(double liquidityNeeded) {
-        ArrayList<Action> availableActions = getAvailableActions(this);
-
-        double initialAssetHoldings = mainLedger.getAssetValueOf(Asset.class);
-
-        for (Action action : availableActions) {
-            if (action instanceof SellAsset) {
-                action.setAmount(action.getMax()*liquidityNeeded/initialAssetHoldings);
-                action.print();
-                action.perform();
-            }
-        }
-
     }
 
     @Override
@@ -52,13 +35,13 @@ public class Bank extends Agent implements CanPledgeCollateral {
         for (Contract contract : potentialCollateral) {
             assert(contract instanceof CanBeCollateral);
             CanBeCollateral asset = (CanBeCollateral) contract;
-            maxHaircutValue += asset.getMaxEncumberableValue() * (1.0 - asset.getHairCut());
+            maxHaircutValue += asset.getUnencumberedValue() * (1.0 - asset.getHaircut());
         }
 
         for (Contract contract : potentialCollateral) {
             CanBeCollateral asset = (CanBeCollateral) contract;
 
-            double quantityToPledge = total * asset.getMaxEncumberableValue() * (1.0 - asset.getHairCut()) / maxHaircutValue;
+            double quantityToPledge = total * asset.getUnencumberedValue() * (1.0 - asset.getHaircut()) / maxHaircutValue;
             repo.pledgeCollateral(asset, quantityToPledge);
 
         }
@@ -84,5 +67,10 @@ public class Bank extends Agent implements CanPledgeCollateral {
 
     public void setLCR_constraint(LCR_Constraint lcr_constraint) {
         this.lcr_constraint = lcr_constraint;
+    }
+
+    @Override
+    public Behaviour getBehaviour() {
+        return behaviour;
     }
 }

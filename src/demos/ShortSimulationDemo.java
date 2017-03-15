@@ -22,7 +22,6 @@ public class ShortSimulationDemo {
         initBank2(bank2);
         initHedgefund(hedgeFund);
         initLoans(bank1, bank2, hedgeFund);
-        initBehaviours(bank1, bank2, hedgeFund);
 
         runSchedule(bank1, bank2, hedgeFund);
 
@@ -53,12 +52,7 @@ public class ShortSimulationDemo {
 
     }
 
-    private static void initBehaviours(Bank bank1, Bank bank2, Bank hedgefund) {
-        bank1.setBehaviour(new BankBehaviour(bank1));
-        bank2.setBehaviour(new BankBehaviour(bank2));
-        hedgefund.setBehaviour(new BankBehaviour(hedgefund));
 
-    }
     private static void initBank1(Bank bank) {
         bank.addCash(20.0);
         bank.add(new Asset(bank, Asset.AssetType.EQUITIES, assetMarket, 17.0));

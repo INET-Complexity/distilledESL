@@ -22,7 +22,6 @@ public class CollateralDemo {
         initBank2(bank2);
         initHedgefund(hedgeFund);
         initRepos(bank1, bank2, hedgeFund);
-        initBehaviours(bank1, bank2, hedgeFund);
 
         runSchedule(bank1, bank2, hedgeFund);
 
@@ -53,12 +52,6 @@ public class CollateralDemo {
         bank2.printBalanceSheet();
     }
 
-    private static void initBehaviours(Bank bank1, Bank bank2, Hedgefund hedgefund) {
-        bank1.setBehaviour(new BankBehaviour(bank1));
-        bank2.setBehaviour(new BankBehaviour(bank2));
-        hedgefund.setBehaviour(new HedgefundBehaviour(hedgefund));
-
-    }
     private static void initBank1(Bank bank) {
         bank.addCash(20.0);//
         bank.add(new AssetCollateral(bank, Asset.AssetType.EXTERNAL, assetMarket, 17.0));

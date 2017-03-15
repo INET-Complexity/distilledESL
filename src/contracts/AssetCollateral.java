@@ -5,17 +5,12 @@ import demos.Parameters;
 
 public class AssetCollateral extends Asset implements CanBeCollateral {
 
-    private double haircut;
+    private double encumberedQuantity;
+
 
     public AssetCollateral(Agent assetParty, AssetType assetType, AssetMarket assetMarket, double amount) {
         super(assetParty, assetType, assetMarket, amount);
-        this.haircut = (assetType==AssetType.MBS) ? Parameters.HAIRCUT_MBS
-                : (assetType==AssetType.CORPORATE_BONDS) ? Parameters.HAIRCUT_CORPORATE_BONDS
-                    : (assetType==AssetType.EQUITIES) ? Parameters.HAIRCUT_EQUITIES
-                        : 0.0;
     }
-
-    private double encumberedQuantity;
 
     @Override
     public void encumber(double quantity) {
@@ -28,23 +23,14 @@ public class AssetCollateral extends Asset implements CanBeCollateral {
     }
 
     @Override
-    public double getHairCut() {
-        return haircut;
+    public double getHaircut() {
+        return assetMarket.getHaircut(getAssetType());
     }
 
-    public double getMaxEncumberableQuantity() {
+    public double getUnencumberedQuantity() {
         return getQuantity() - encumberedQuantity;
     }
 
-    public double getMaxEncumberableValue() {return getMaxEncumberableQuantity() * getPrice();}
+    public double getUnencumberedValue() {return getUnencumberedQuantity() * getPrice();}
 
-//    @Override
-//    public ArrayList<Action> getAvailableActions(Agent me) {
-//        ArrayList<Action> availableActions = super.getAvailableActions(me);
-//        if (getMaxEncumberableQuantity() > 0) {
-//            availableActions.add(new PledgeAsCollateral(this));
-//        }
-//
-//        return null;
-//    }
 }

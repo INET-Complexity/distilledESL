@@ -24,7 +24,7 @@ public class Asset extends Contract {
     private Agent assetParty;
     private double quantity;
     private AssetType assetType;
-    private AssetMarket assetMarket;
+    protected AssetMarket assetMarket;
     private double price;
 
     @Override
@@ -78,6 +78,7 @@ public class Asset extends Contract {
     public double getPrice() {
         return price;
     }
+
     private double getMarketPrice() {
         return assetMarket.getPrice(assetType);
     }

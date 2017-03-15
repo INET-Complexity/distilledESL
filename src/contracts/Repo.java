@@ -1,7 +1,5 @@
 package contracts;
 
-import actions.Action;
-import actions.MarginCall;
 import agents.Agent;
 import agents.CanPledgeCollateral;
 
@@ -55,7 +53,7 @@ public class Repo extends Loan {
             CanBeCollateral asset = entry.getKey();
             Double quantity = entry.getValue();
 
-            value += asset.getPrice() * quantity * (1.0 - asset.getHairCut());
+            value += asset.getPrice() * quantity * (1.0 - asset.getHaircut());
         }
 
         return value;
@@ -70,7 +68,7 @@ public class Repo extends Loan {
 
         for (Map.Entry<CanBeCollateral, Double> entry : collateral.entrySet()) {
             CanBeCollateral asset = entry.getKey();
-            double quantityToUnpledge = collateral.get(asset) * (1 - asset.getHairCut()) * excessValue / totalValue;
+            double quantityToUnpledge = collateral.get(asset) * (1 - asset.getHaircut()) * excessValue / totalValue;
             unpledgeCollateral(asset, quantityToUnpledge);
         }
     }

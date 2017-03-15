@@ -1,7 +1,5 @@
 package actions;
 
-import agents.Agent;
-import agents.Bank;
 import contracts.Asset;
 import contracts.AssetCollateral;
 
@@ -24,7 +22,7 @@ public class SellAsset extends Action {
     public double getMax() {
         if (asset instanceof AssetCollateral) {
             // Only unencumbered assets can be sold!
-            return ((AssetCollateral)asset).getMaxEncumberableValue();
+            return ((AssetCollateral)asset).getUnencumberedValue();
         } else {
             return asset.getValue();
         }
