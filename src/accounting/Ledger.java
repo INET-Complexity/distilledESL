@@ -44,9 +44,6 @@ public class Ledger implements LedgerAPI {
         contractsToAssetAccounts = new HashMap<>();
         contractsToLiabilityAccounts = new HashMap<>();
 
-        // Not sure whether I should be passing the owner...
-        this.owner = owner;
-
         // A book is initially created with a cash account and an equityAccounts account (it's the simplest possible book)
         cashAccount = new Account("cash", AccountType.ASSET);
         equityAccount = new Account("equityAccounts", AccountType.EQUITY);
@@ -57,7 +54,6 @@ public class Ledger implements LedgerAPI {
 
     private HashSet<Contract> allAssets;
     private HashSet<Contract> allLiabilities;
-    private Agent owner;
     private HashSet<Account> assetAccounts;
     private HashSet<Account> liabilityAccounts;
     private HashSet<Account> equityAccounts;
@@ -243,13 +239,11 @@ public class Ledger implements LedgerAPI {
     public ArrayList<Action> getAvailableActions(Agent me) {
         ArrayList<Action> availableActions = new ArrayList<>();
         for (Contract contract : allAssets) {
-            ArrayList<Action> actions = contract.getAvailableActions(me);
-            if (actions != null) availableActions.addAll(actions);
+            availableActions.addAll(contract.getAvailableActions(me));
         }
 
         for (Contract contract : allLiabilities) {
-            ArrayList<Action> actions = contract.getAvailableActions(me);
-            if (actions != null) availableActions.addAll(actions);
+            availableActions.addAll(contract.getAvailableActions(me));
         }
 
         return availableActions;
@@ -301,7 +295,7 @@ public class Ledger implements LedgerAPI {
 
         double valueLost = (1 - valueFraction) * initialValue;
 
-        // First, we devalue the loan :(
+        // First, we devalue the loan
         // (dr equity, cr asset)
         Account.doubleEntry(equityAccount, assetLoanAccount, valueLost);
 
@@ -311,23 +305,18 @@ public class Ledger implements LedgerAPI {
     }
 
     public void printBalanceSheet() {
-        System.out.println("Asset accounts:");
-        System.out.println("---------------");
+        System.out.println("Asset accounts:\n---------------");
         for (Account account : assetAccounts) {
             System.out.println(account.getName()+" -> "+ String.format( "%.2f", account.getBalance()));
         }
         System.out.println("TOTAL ASSETS: "+ String.format( "%.2f", getAssetValue()));
-        System.out.println();
 
-        System.out.println("Liability accounts:");
-        System.out.println("---------------");
+        System.out.println("\nLiability accounts:\n---------------");
         for (Account account : liabilityAccounts) {
             System.out.println(account.getName()+" -> "+ String.format( "%.2f", account.getBalance()));
         }
         System.out.println("TOTAL LIABILITIES: "+ String.format( "%.2f", getLiabilityValue()));
-        System.out.println();
-        System.out.println("TOTAL EQUITY: "+String.format("%.2f", getEquityValue()));
-        System.out.println();
+        System.out.println("\nTOTAL EQUITY: "+String.format("%.2f", getEquityValue()));
     }
 
 

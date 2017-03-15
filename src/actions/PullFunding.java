@@ -1,7 +1,5 @@
 package actions;
 
-import agents.Agent;
-import agents.Bank;
 import agents.Request;
 import contracts.Loan;
 

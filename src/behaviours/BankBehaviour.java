@@ -1,10 +1,10 @@
 package behaviours;
 
-import agents.Bank;
 import actions.Action;
-import actions.PullFunding;
 import actions.PayLoan;
+import actions.PullFunding;
 import actions.SellAsset;
+import agents.Bank;
 
 import java.util.ArrayList;
 
@@ -13,7 +13,7 @@ import static java.lang.Math.min;
 
 public class BankBehaviour extends Behaviour {
 
-    public Bank me;
+    private Bank me;
     private double pendingToDeLever;
 
     public BankBehaviour(Bank me) {
@@ -26,9 +26,9 @@ public class BankBehaviour extends Behaviour {
     protected void chooseActions() {
 
         // 1) Check inbox for matured PullFunding requests. If we can't meet them right now, default.
-        double maturedPullFunding = me.getMaturedPullFunding();
+        double maturedPullFunding = me.getMaturedPayments();
         if (maturedPullFunding > 0) {
-            if(me.getCash() >= maturedPullFunding) {
+            if (me.getCash() >= maturedPullFunding) {
                 me.fulfilMaturedRequests();
             } else {
                 //Todo: emergency procedure?
@@ -40,10 +40,10 @@ public class BankBehaviour extends Behaviour {
         // and pay all of them now if possible.
         double totalPullFunding = me.getTotalPullFunding();
         if (totalPullFunding > 0) {
-           if(me.getCash() >= totalPullFunding) {
-               me.fulfilAllRequests();
-               totalPullFunding = 0.0;
-           }
+            if (me.getCash() >= totalPullFunding) {
+                me.fulfilAllRequests();
+                totalPullFunding = 0.0;
+            }
         }
 
         // 3) If we were trying to de-lever further from the previous timestep, we do it now. We break the LCR
@@ -108,42 +108,6 @@ public class BankBehaviour extends Behaviour {
 
     }
 
-//
-//    /**
-//     *
-//     * @param liquidityExpected the liquidity that we tried to raise in the previous time-step. Note that we don't know
-//     *                          if we succeeded in raising it since we don't know 1) whether the funding we tried
-//     *                          to pull was actually paid back, and 2) what price we obtained from the sale of assets
-//     * @return the amount of liquidity we can use to de-lever
-//     */
-//    private double liquidityRaised(double liquidityExpected) {
-//        double amountToDelever = 0.0;
-//
-//        if (liquidityExpected > 0) {
-//            // We raised some liquidity from the previous time-step; we must use it to de-lever now.
-//
-//            if (getLiquidityAboveLCR() > liquidityExpected) {
-//                // We have enough liquidity; we use it.
-//                amountToDelever = liquidityExpected;
-//            } else {
-//                // We don't have as much liquidity as we expected.
-//                System.out.println("We did not raise as much liquidity as we expected.\nExpected: "+
-//                        liquidityExpected +"\nAvailable: "+(me.getCash()-me.getLCR_constraint().getCashTarget()));
-//
-//                if (me.getCash() > liquidityExpected) {
-//                    // If we have enough cash, we use up the LCR buffer and de-lever the expected amount.
-//                    System.out.println("We will use some of the LCR buffer to de-lever");
-//                    amountToDelever = liquidityExpected;
-//                } else {
-//                    // If we don't have enough cash, we use it all up.
-//                    System.out.println("We do not have enough cash to de-lever as much as expected. We will deplete the cash reserve.");
-//                    amountToDelever = me.getCash();
-//                }
-//            }
-//
-//        }
-//        return amountToDelever;
-//    }
 
     private double getLiquidityAboveLCR() {
         return max(me.getCash() - me.getLCR_constraint().getCashTarget(), 0.0);
@@ -152,14 +116,14 @@ public class BankBehaviour extends Behaviour {
 
     public void triggerDefault() {
         ArrayList<Action> availableActions = me.getAvailableActions(me);
-        for (Action action : availableActions ) {
+        for (Action action : availableActions) {
             // Sell every asset!
             if (action instanceof SellAsset) {
                 action.setAmount(action.getMax());
                 action.perform();
             } else if (action instanceof PayLoan) {
                 // Loans must be terminated and changed into assets.
-                ((PayLoan)action).getLoan().liquidate();
+                ((PayLoan) action).getLoan().liquidate();
             } // all other actions are ignored
         }
 

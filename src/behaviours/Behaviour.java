@@ -3,8 +3,6 @@ package behaviours;
 import actions.Action;
 import actions.PayLoan;
 import agents.Agent;
-import agents.Bank;
-import contracts.Loan;
 
 import java.util.ArrayList;
 import java.util.stream.Collectors;

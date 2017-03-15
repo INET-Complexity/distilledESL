@@ -5,6 +5,8 @@ import actions.Action;
 import actions.SellAsset;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class Asset extends Contract {
 
@@ -28,13 +30,11 @@ public class Asset extends Contract {
     private double price;
 
     @Override
-    public ArrayList<Action> getAvailableActions(Agent me) {
-        if (assetType == AssetType.EXTERNAL) return null; // External assets cannot be sold!
+    public List<Action> getAvailableActions(Agent me) {
+        if (!(assetParty==me) || !(quantity >0) || assetType==AssetType.EXTERNAL) return Collections.emptyList();
 
         ArrayList<Action> availableActions = new ArrayList<>();
-        if (assetParty == me && quantity > 0) {
-            availableActions.add(new SellAsset(this));
-        }
+        availableActions.add(new SellAsset(this));
         return availableActions;
     }
 
@@ -70,7 +70,6 @@ public class Asset extends Contract {
     }
 
 
-    @Override
     public double getValue() {
         return quantity*price;
     }

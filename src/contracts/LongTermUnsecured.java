@@ -4,6 +4,7 @@ import actions.Action;
 import agents.Agent;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class LongTermUnsecured extends Contract {
 
@@ -25,13 +26,13 @@ public class LongTermUnsecured extends Contract {
         return liabilityParty;
     }
 
-    @Override
     public double getValue() {
         return amount;
     }
 
     @Override
-    public ArrayList<Action> getAvailableActions(Agent me) {
-        return null;
+    public List<Action> getAvailableActions(Agent me) {
+
+        return new ArrayList<>();
     }
 }

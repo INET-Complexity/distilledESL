@@ -3,7 +3,8 @@ package contracts;
 import actions.Action;
 import agents.Agent;
 
-import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class Deposit extends Contract {
 
@@ -27,13 +28,12 @@ public class Deposit extends Contract {
         return holder;
     }
 
-    @Override
     public double getValue() {
         return amount;
     }
 
     @Override
-    public ArrayList<Action> getAvailableActions(Agent me) {
-        return null;
+    public List<Action> getAvailableActions(Agent me) {
+        return Collections.emptyList();
     }
 }

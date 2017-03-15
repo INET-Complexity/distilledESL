@@ -1,10 +1,11 @@
 package demos;
 
-import agents.Bank;
-import actions.LCR_Constraint;
-import behaviours.BankBehaviour;
 import actions.BankLeverageConstraint;
-import contracts.*;
+import actions.LCR_Constraint;
+import agents.Bank;
+import contracts.Asset;
+import contracts.AssetMarket;
+import contracts.Loan;
 
 public class ShortSimulationDemo {
 

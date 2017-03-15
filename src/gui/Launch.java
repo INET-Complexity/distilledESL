@@ -15,12 +15,7 @@ public class Launch extends Application {
     public void start(Stage primaryStage) throws Exception {
         Button button = new Button();
         button.setText("Start!");
-        button.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                ShortSimulationDemo.main(null);
-            }
-        });
+        button.setOnAction(event -> ShortSimulationDemo.main(null));
 
         StackPane root = new StackPane();
         root.getChildren().add(button);

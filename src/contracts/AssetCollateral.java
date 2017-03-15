@@ -1,7 +1,6 @@
 package contracts;
 
 import agents.Agent;
-import demos.Parameters;
 
 public class AssetCollateral extends Asset implements CanBeCollateral {
 

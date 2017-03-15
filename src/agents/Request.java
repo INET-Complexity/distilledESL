@@ -1,26 +1,28 @@
 package agents;
 
+import contracts.Contract;
 import contracts.Loan;
+import contracts.Shares;
 
 public class Request {
-    private Loan loan;
+    private Contract contract;
     private double amount;
     private boolean fulfilled = false;
     private int timeLeftToPay;
 
-    public Request(Loan loan, double amount, int timeLeftToPay) {
-        this.loan = loan;
+    public Request(Contract contract, double amount, int timeLeftToPay) {
+        this.contract = contract;
         this.amount = amount;
         this.timeLeftToPay = timeLeftToPay;
     }
 
     public void fulfil() {
-        loan.payLoan(amount);
+        if (contract instanceof Loan) {
+            ((Loan) contract).payLoan(amount);
+        } else if (contract instanceof Shares) {
+            ((Shares) contract).redeem(amount);
+        }
         fulfilled = true;
-    }
-
-    public Loan getLoan() {
-        return loan;
     }
 
     public double getAmount() {

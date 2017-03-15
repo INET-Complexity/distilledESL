@@ -1,6 +1,5 @@
 package actions;
 
-import agents.Agent;
 import contracts.Loan;
 
 /**

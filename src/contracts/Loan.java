@@ -1,12 +1,13 @@
 package contracts;
 
 import agents.Agent;
-import agents.Bank;
 import actions.Action;
 import actions.PullFunding;
 import actions.PayLoan;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class Loan extends Contract {
     private static final double VALUE_GIVEN_DEFAULT = 0.30;
@@ -21,7 +22,7 @@ public class Loan extends Contract {
     Agent assetParty;
     Agent liabilityParty;
     double principal;
-    boolean cancelled;
+    private boolean cancelled;
 
     public void payLoan(double amount) {
         if (liabilityParty!= null) liabilityParty.payLoan(amount, this);
@@ -41,14 +42,13 @@ public class Loan extends Contract {
     }
 
     @Override
-    public ArrayList<Action> getAvailableActions(Agent me) {
-        if (!(assetParty==me || liabilityParty==me)) return null;
-        if (cancelled) return null;
+    public List<Action> getAvailableActions(Agent me) {
+        if (cancelled) return Collections.emptyList();
 
         ArrayList<Action> availableActions = new ArrayList<>();
         if (assetParty==me) {
             availableActions.add(new PullFunding(this));
-        } else {
+        } else if (liabilityParty==me){
             availableActions.add(new PayLoan(this));
         }
         return availableActions;
@@ -64,13 +64,12 @@ public class Loan extends Contract {
         return liabilityParty;
     }
 
-    @Override
     public double getValue() {
         return principal;
     }
 
     public void liquidate() {
-        ((Bank) assetParty).liquidateLoan(getValue(), VALUE_GIVEN_DEFAULT, this);
+        assetParty.liquidateLoan(getValue(), VALUE_GIVEN_DEFAULT, this);
         principal = 0.0;
     }
 

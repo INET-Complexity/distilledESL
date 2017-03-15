@@ -1,12 +1,5 @@
 package accounting;
 
-import agents.Agent;
-import actions.Action;
-import contracts.Contract;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-
 class Account {
 
     private Account(String name, AccountType accountType, Double startingBalance) {

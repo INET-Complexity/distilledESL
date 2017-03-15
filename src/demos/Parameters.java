@@ -13,6 +13,8 @@ public class Parameters {
     public static double PRICE_IMPACT_CORPORATE_BONDS = 0.001;
     public static double PRICE_IMPACT_EQUITIES = 0.001;
 
+    public static double ASSET_MANAGER_LIQUIDITY_FRACTION = 0.05;
+
 
     public static double getInitialHaircut(Asset.AssetType assetType) {
         switch (assetType) {

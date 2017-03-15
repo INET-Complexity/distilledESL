@@ -26,7 +26,7 @@ public class HedgefundBehaviour extends Behaviour {
     protected void chooseActions() {
 
         // 1) Check matured requests to pull funding. If we can't meet them right now, default.
-        double maturedPullFunding = me.getMaturedPullFunding();
+        double maturedPullFunding = me.getMaturedPayments();
         if (maturedPullFunding > 0) {
             if(me.getCash() >= maturedPullFunding) {
                 me.fulfilMaturedRequests();

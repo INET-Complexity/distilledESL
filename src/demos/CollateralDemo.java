@@ -1,12 +1,10 @@
 package demos;
 
+import actions.BankLeverageConstraint;
 import actions.HedgefundLeverageConstraint;
 import actions.LCR_Constraint;
-import actions.BankLeverageConstraint;
 import agents.Bank;
 import agents.Hedgefund;
-import behaviours.BankBehaviour;
-import behaviours.HedgefundBehaviour;
 import contracts.*;
 
 public class CollateralDemo {

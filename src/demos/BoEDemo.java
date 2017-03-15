@@ -32,12 +32,7 @@ public class BoEDemo {
         banks.get("Bank2").act();
 
 
-
     }
-
-
-
-
 
 
     private static void initialise() {
@@ -105,8 +100,6 @@ public class BoEDemo {
         lender.add(loan);
         borrower.add(loan);
     }
-
-
 
 
 }

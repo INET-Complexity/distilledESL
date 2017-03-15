@@ -36,7 +36,7 @@ public abstract class Agent {
                 .mapToDouble(Request::getAmount).sum();
     }
 
-    public double getMaturedPullFunding() {
+    public double getMaturedPayments() {
         return requestInbox.stream()
                 .filter(Request::isDue)
                 .mapToDouble(Request::getAmount).sum();
