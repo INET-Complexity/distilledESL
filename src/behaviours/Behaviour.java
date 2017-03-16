@@ -35,7 +35,7 @@ public abstract class Behaviour {
     protected abstract void chooseActions();
 
     public void act() {
-        System.out.println(me.getName()+" is acting.");
+        System.out.println("\n"+me.getName()+" is acting.");
         availableActions = me.getAvailableActions(me);
         System.out.println();
         System.out.println("My available actions are: ");

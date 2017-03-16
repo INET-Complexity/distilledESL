@@ -20,7 +20,7 @@ public class Request {
         if (contract instanceof Loan) {
             ((Loan) contract).payLoan(amount);
         } else if (contract instanceof Shares) {
-            ((Shares) contract).redeem(amount);
+            ((Shares) contract).redeem((int) amount);
         }
         fulfilled = true;
     }

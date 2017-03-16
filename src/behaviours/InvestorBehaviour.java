@@ -22,7 +22,10 @@ public class InvestorBehaviour extends Behaviour {
 
     @Override
     protected void chooseActions() {
-        // For each Shares owned, find out the AssetManager's NAV
+        // Investors only act if INVESTOR_REDEMPTION is enabled
+        if ( ! Parameters.INVESTOR_REDEMPTION) return;
+
+        // Get all Shares owned
         ArrayList<Action> redeemActions = getAllActionsOfType(RedeemShares.class);
 
         for (Action action : redeemActions) {
@@ -30,11 +33,12 @@ public class InvestorBehaviour extends Behaviour {
             Shares shares =  redeemAction.getShares();
             CanIssueShares firm = (CanIssueShares) shares.getLiabilityParty();
 
+            // We only redeem shares if we have a value for the 'previous NAV'.
             if (previousNAVs.containsKey(firm)) {
-                // We only redeem shares if we have a value for the 'previous NAV'.
                 double previousNAV = previousNAVs.get(firm);
                 double currentNAV = firm.getNetAssetValue();
 
+                // We use the previous NAV and the current NAV to compute the fraction of shares to redeem
                 double fractionToRedeem = Parameters.REDEMPTIONS_C1 * (
                         Math.exp(Parameters.REDEMPTIONS_C2
                                 * Math.min(-100.0 * (currentNAV-previousNAV) / currentNAV, 0.0)) - 1)

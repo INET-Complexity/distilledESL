@@ -93,7 +93,7 @@ public abstract class Agent {
     }
 
     public void devalueAsset(Asset asset, double valueLost) {
-        System.out.println(getName() + " made a loss of " + valueLost + " from the sale of an asset of type " + asset.getAssetType());
+        System.out.println(getName() + " made a loss of " + String.format("%.2f", valueLost) + " from the sale of " + asset.getAssetType());
         mainLedger.devalueAsset(valueLost, asset);
     }
 
