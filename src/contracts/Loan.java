@@ -16,7 +16,6 @@ public class Loan extends Contract {
         this.assetParty = assetParty;
         this.liabilityParty = liabilityParty;
         this.principal = principal;
-        this.cancelled = false;
     }
 
     Agent assetParty;
@@ -43,7 +42,7 @@ public class Loan extends Contract {
 
     @Override
     public List<Action> getAvailableActions(Agent me) {
-        if (cancelled) return Collections.emptyList();
+        if (!(principal > 0)) return Collections.emptyList();
 
         ArrayList<Action> availableActions = new ArrayList<>();
         if (assetParty==me) {

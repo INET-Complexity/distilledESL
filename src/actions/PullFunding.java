@@ -2,6 +2,7 @@ package actions;
 
 import agents.Request;
 import contracts.Loan;
+import demos.Parameters;
 
 public class PullFunding extends Action {
 
@@ -13,16 +14,15 @@ public class PullFunding extends Action {
 
     @Override
     public void perform() {
-        if (loan.getLiabilityParty()==null) {
-            // If there's no counter-party, the payment can happen instantaneously
-            loan.payLoan(getAmount());
+        if (loan.getLiabilityParty()==null || !Parameters.FUNDING_CONTAGION) {
+            // If there's no counter-party OR if there's no funding contagion, the payment can happen instantaneously
+            loan.getAssetParty().pullFunding(getAmount(), loan);
         } else {
-            // If there is a counter-party, we must send a Request.
+            // If there is a counter-party AND we have funding contagion, we must send a Request.
             Request request = new Request(loan, getAmount(), 2);
             //Todo: how many timesteps do we allow the counterparty to raise the liquidity to pay?
             loan.getAssetParty().addToOutbox(request);
             loan.getLiabilityParty().addToInbox(request);
-            loan.setCancelled(true);
         }
     }
 

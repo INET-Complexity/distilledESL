@@ -12,4 +12,5 @@ public class CashProvider extends Agent {
     public Behaviour getBehaviour() {
         return null;
     }
+    // Todo: run from banks in trouble!
 }

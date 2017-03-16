@@ -54,8 +54,8 @@ public class AssetMarket {
     public void clearTheMarket() {
         System.out.println("\nMARKET CLEARING\n");
         for (Map.Entry<Asset.AssetType, Double> entry : amountsSold.entrySet()) {
-            computePriceImpact(entry.getKey(), entry.getValue());
-            computeHaircut(entry.getKey(), entry.getValue());
+            if (Parameters.FIRESALE_CONTAGION) computePriceImpact(entry.getKey(), entry.getValue());
+            if (Parameters.HAIRCUT_CONTAGION) computeHaircut(entry.getKey(), entry.getValue());
         }
 
         amountsSold.clear();

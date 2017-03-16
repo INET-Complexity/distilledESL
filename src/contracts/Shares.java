@@ -25,9 +25,9 @@ public class Shares extends Contract {
         assert(issuer instanceof Agent);
     }
 
-    public void redeem(double amount) {
-        assert(amount <= numberOfShares);
-        numberOfShares -= amount;
+    public void redeem(int numberToRedeem) {
+        assert(numberToRedeem <= numberOfShares);
+        numberOfShares -= numberToRedeem;
         if (numberOfShares == 0) {//todo: finite precision
             // todo: destroy shares?
         }

@@ -8,29 +8,30 @@ import contracts.Shares;
 public class AssetManager extends Agent implements CanIssueShares {
 
     private AssetManagerBehaviour behaviour;
-    private int nShares;
-    private boolean nSharesModified;
 
     public AssetManager(String name) {
 
         super(name);
         this.behaviour = new AssetManagerBehaviour(this);
-        this.nSharesModified = true;
+
     }
 
     @Override
     public void add(Contract contract) {
         super.add(contract);
-        if (contract instanceof Shares) nSharesModified = true;
     }
 
     @Override
     public double getNetAssetValue() {
-        if (nSharesModified) nShares = mainLedger.getLiabilitiesOfType(Shares.class).stream()
-                .mapToInt(contract -> ((Shares) contract).getNumberOfShares()).sum();
-        nSharesModified = false;
+        int nShares = getnShares();
 
-        return 1.0 * getAssetValue() / nShares;
+        return (nShares > 0) ? 1.0 * getAssetValue() / nShares : -1.0;
+    }
+
+    @Override
+    public int getnShares() {
+        return mainLedger.getLiabilitiesOfType(Shares.class).stream()
+                .mapToInt(contract -> ((Shares) contract).getNumberOfShares()).sum();
     }
 
 
