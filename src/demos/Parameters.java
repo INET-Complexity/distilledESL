@@ -9,6 +9,7 @@ public class Parameters {
     public static boolean FUNDING_CONTAGION = true;
     public static boolean FIRESALE_CONTAGION = true;
     public static boolean INVESTOR_REDEMPTION = true;
+    public static boolean INTERBANK_CONTAGION = true;
 
     // Haircuts
     public static double HAIRCUT_MBS = 0.1;
@@ -17,6 +18,8 @@ public class Parameters {
 
     // Cash Provider
     public static double HAIRCUT_SLOPE = 0.1;
+    public static double LEVERAGE_THRESHOLD_TO_RUN = 0.2;
+    public static double FRACTION_TO_RUN = 0.3;
 
     // Price impacts
     public static double PRICE_IMPACT_MBS = 0.001;

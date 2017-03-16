@@ -19,7 +19,11 @@ public abstract class Behaviour {
     }
 
     private void performActions(ArrayList<Action> chosenActions) {
-        if (chosenActions==null) return;
+        if (chosenActions.isEmpty()){
+            System.out.println(me.getName()+" does nothing this round.");
+            return;
+        }
+
         for (Action action : chosenActions) {
             action.print();
             action.perform();

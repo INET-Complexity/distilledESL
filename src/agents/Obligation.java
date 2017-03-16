@@ -4,13 +4,14 @@ import contracts.Contract;
 import contracts.Loan;
 import contracts.Shares;
 
-public class Request {
+public class Obligation {
     private Contract contract;
     private double amount;
     private boolean fulfilled = false;
     private int timeLeftToPay;
+    private boolean arrived = false;
 
-    public Request(Contract contract, double amount, int timeLeftToPay) {
+    public Obligation(Contract contract, double amount, int timeLeftToPay) {
         this.contract = contract;
         this.amount = amount;
         this.timeLeftToPay = timeLeftToPay;
@@ -41,8 +42,11 @@ public class Request {
         return timeLeftToPay==0;
     }
 
+    public boolean hasArrived() { return arrived;}
+
     public void tick() {
-        timeLeftToPay -= 1;
+        if (!arrived) arrived = true;
+        else timeLeftToPay -= 1;
         //Todo: this is in timesteps. Might move to some other unit of time.
     }
 }

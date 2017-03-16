@@ -19,7 +19,7 @@ public class AssetManagerBehaviour extends Behaviour {
     @Override
     protected void chooseActions() {
         // 1) Check inbox for matured Redeem requests. If we can't meet them right now, default.
-        double maturedRedemptions = me.getMaturedPayments();
+        double maturedRedemptions = me.getMaturedObligations();
         if (maturedRedemptions > 0) {
             if (me.getCash() >= maturedRedemptions) {
                 me.fulfilMaturedRequests();
@@ -31,7 +31,7 @@ public class AssetManagerBehaviour extends Behaviour {
 
         // 2) Check inbox for other Redeem requests, find out how much liquidity is needed,
         // and pay all of them now if possible.
-        double totalRedemptions = me.getTotalPullFunding();
+        double totalRedemptions = me.getPendingObligations();
         if (totalRedemptions > 0) {
             if (me.getCash() >= totalRedemptions) {
                 me.fulfilAllRequests();

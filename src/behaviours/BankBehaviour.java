@@ -26,7 +26,7 @@ public class BankBehaviour extends Behaviour {
     protected void chooseActions() {
 
         // 1) Check inbox for matured PullFunding requests. If we can't meet them right now, default.
-        double maturedPullFunding = me.getMaturedPayments();
+        double maturedPullFunding = me.getMaturedObligations();
         if (maturedPullFunding > 0) {
             if (me.getCash() >= maturedPullFunding) {
                 me.fulfilMaturedRequests();
@@ -38,7 +38,7 @@ public class BankBehaviour extends Behaviour {
 
         // 2) Check inbox for other PullFunding requests, find out how much liquidity is needed,
         // and pay all of them now if possible.
-        double totalPullFunding = me.getTotalPullFunding();
+        double totalPullFunding = me.getPendingObligations();
         if (totalPullFunding > 0) {
             if (me.getCash() >= totalPullFunding) {
                 me.fulfilAllRequests();
@@ -77,7 +77,7 @@ public class BankBehaviour extends Behaviour {
         liquidityToRaise += me.getLCR_constraint().getLiquidityToRaise();
 
         // Discount the liquidity that we are expecting from pull funding requests not yet met by the counter-parties.
-        liquidityToRaise -= me.getPendingPayments();
+        liquidityToRaise -= me.getPendingObligations();
 
         // 4) If we decided we need to raise liquidity, we go through our available actions and select a set of actions
         // that will raise the required liquidity.

@@ -12,61 +12,60 @@ import java.util.HashSet;
 public abstract class Agent {
     Ledger mainLedger;
     private String name;
-    private HashSet<Request> requestInbox;
-    private HashSet<Request> requestOutbox;
+    private HashSet<Obligation> obligationInbox;
+    private HashSet<Obligation> obligationOutbox;
 
 
     public Agent(String name) {
         this.name = name;
         mainLedger = new Ledger(this);
-        requestInbox = new HashSet<>();
-        requestOutbox = new HashSet<>();
+        obligationInbox = new HashSet<>();
+        obligationOutbox = new HashSet<>();
     }
 
-    public void addToInbox(Request request) {
-        requestInbox.add(request);
+    public void addToInbox(Obligation obligation) {
+        obligationInbox.add(obligation);
     }
 
-    public void addToOutbox(Request request) {
-        requestOutbox.add(request);
+    public void addToOutbox(Obligation obligation) {
+        obligationOutbox.add(obligation);
     }
 
-    public double getTotalPullFunding() {
-        return requestInbox.stream()
-                .mapToDouble(Request::getAmount).sum();
+    public double getMaturedObligations() {
+        return obligationInbox.stream()
+                .filter(Obligation::hasArrived)
+                .filter(Obligation::isDue)
+                .mapToDouble(Obligation::getAmount).sum();
     }
 
-    public double getMaturedPayments() {
-        return requestInbox.stream()
-                .filter(Request::isDue)
-                .mapToDouble(Request::getAmount).sum();
-    }
-
-    public double getPendingPayments() {
-        return requestInbox.stream()
-                .mapToDouble(Request::getAmount).sum();
+    public double getPendingObligations() {
+        return obligationInbox.stream()
+                .filter(Obligation::hasArrived)
+                .mapToDouble(Obligation::getAmount).sum();
     }
 
     public void fulfilAllRequests() {
-        for (Request request : requestInbox) {
-            request.fulfil();
-            requestInbox.remove(request);
+        for (Obligation obligation : obligationInbox) {
+            obligation.fulfil();
         }
     }
 
     public void fulfilMaturedRequests() {
-        for (Request request : requestInbox) {
-            if (request.isDue()) {
-                request.fulfil();
-                requestInbox.remove(request);
+        for (Obligation obligation : obligationInbox) {
+            if (obligation.isDue()) {
+                obligation.fulfil();
             }
         }
     }
 
     public void tick() {
-        for (Request request : requestInbox) {
-            request.tick();
+        // Remove all fulfilled requests
+        obligationInbox.removeIf(Obligation::isFulfilled);
+
+        for (Obligation obligation : obligationInbox) {
+            obligation.tick();
         }
+
     }
 
     public String getName() {
@@ -84,8 +83,8 @@ public abstract class Agent {
      * @param loan   the loan we are paying back
      */
     public void payLoan(double amount, Contract loan) {
+        assert(getCash() >= amount);
         mainLedger.payLiability(amount, loan);
-        //Todo: throw an exception
     }
 
     public void sellAssetForValue(Asset asset, double value) {
