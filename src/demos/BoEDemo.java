@@ -21,12 +21,11 @@ public class BoEDemo {
 
     private static void runSchedule() {
 
-        timeStep++;
-        System.out.println("\nTime step: "+timeStep+"\n^^^^^^^^^^^^^");
-        assetMarket.shockPrice(Parameters.ASSET_TO_SHOCK, Parameters.INITIAL_SHOCK);
-        //Todo: we need three different External Assets.
+//        assetMarket.shockPrice(Parameters.ASSET_TO_SHOCK, Parameters.INITIAL_SHOCK);
 
         while (timeStep< Parameters.SIMULATION_TIMESTEPS) {
+            timeStep++;
+            System.out.println("\nTime step: "+timeStep+"\n^^^^^^^^^^^^^");
 
             for (Agent agent : allAgents) {
                 agent.act();
@@ -34,7 +33,6 @@ public class BoEDemo {
 
             assetMarket.clearTheMarket();
             recorder.record();
-            timeStep++;
         }
     }
 
@@ -96,7 +94,7 @@ public class BoEDemo {
         initInterBankLoan(bank2, bank3, 20.0);
 
         initInterBankLoan(bank3, bank1, 20.0);
-        initInterBankLoan(bank3, bank1, 20.0);
+        initInterBankLoan(bank3, bank2, 20.0);
 
 
         initShares(inv1, am1, 200);
@@ -176,7 +174,7 @@ public class BoEDemo {
 
 
     private static void initShares(Agent owner, CanIssueShares issuer, int number) {
-        Shares shares = new Shares(owner, issuer, number);
+        Shares shares = issuer.issueShares(owner, number);
         owner.add(shares);
         ((Agent) issuer).add(shares);
     }

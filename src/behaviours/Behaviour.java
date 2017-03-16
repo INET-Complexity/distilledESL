@@ -45,6 +45,8 @@ public abstract class Behaviour {
         // Todo: tick here!
         me.tick();
 
+        me.printBalanceSheet();
+
         availableActions = me.getAvailableActions(me);
         System.out.println("My available actions are: ");
         Action.print(availableActions);

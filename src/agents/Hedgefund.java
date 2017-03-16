@@ -4,6 +4,7 @@ import actions.HedgefundLeverageConstraint;
 import behaviours.Behaviour;
 import behaviours.HedgefundBehaviour;
 import contracts.*;
+import demos.Parameters;
 
 import java.util.HashSet;
 
@@ -11,7 +12,6 @@ public class Hedgefund extends Agent implements CanPledgeCollateral {
 
     private HedgefundBehaviour behaviour;
     private HedgefundLeverageConstraint hedgefundLeverageConstraint;
-    public final double cashBuffer = 15.0;
     //Todo just a number for the moment.
 
     public Hedgefund(String name) {
@@ -47,17 +47,16 @@ public class Hedgefund extends Agent implements CanPledgeCollateral {
     }
 
     public double getEffectiveMinLeverage() {
-        double totalRepo = mainLedger.getLiabilityValueOf(Repo.class);
-        double averageHaircut = 0.0;
-
         HashSet<Contract> collateral = mainLedger.getAssetsOfType(CanBeCollateral.class);
         double totalCollateralValue = collateral.stream().mapToDouble(Contract::getValue).sum();
 
+        double effectiveAverageHaircut = 0.0;
+
         for (Contract asset : collateral) {
-            averageHaircut += ((CanBeCollateral) asset).getHaircut() * asset.getValue() / totalCollateralValue;
+            effectiveAverageHaircut += ((CanBeCollateral) asset).getHaircut() * asset.getValue() / totalCollateralValue;
         }
 
-        return totalRepo / averageHaircut;
+        return effectiveAverageHaircut;
     }
 
     public void withdrawCollateral(double excessValue, Repo repo) {
@@ -76,4 +75,14 @@ public class Hedgefund extends Agent implements CanPledgeCollateral {
     public Behaviour getBehaviour() {
         return behaviour;
     }
+
+    public double getCashBuffer() {
+        return getAssetValue() * Parameters.HF_CASH_BUFFER_AS_FRACTION_OF_ASSETS;
+    }
+
+    public double getCashTarget() {
+        return getAssetValue() * Parameters.HF_CASH_TARGET_AS_FRACTION_OF_ASSETS;
+    }
+
+
 }

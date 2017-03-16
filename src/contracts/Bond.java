@@ -21,6 +21,11 @@ public class Bond extends Contract {
         liabilityParty.add(this);
     }
 
+    @Override
+    public String getName(Agent me) {
+        return "Bond. NOT IMPLEMENTED WHY ARE YOU USING ME???";
+    }
+
     /**
      * Available actions for a bond include:
      * if this bond is encumbered, or if agent is not a party, none.

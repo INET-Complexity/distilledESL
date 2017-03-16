@@ -29,10 +29,15 @@ public class Parameters {
 
     // Cash Provider
     public static double HAIRCUT_SLOPE = 0.1;
-    public static double LEVERAGE_THRESHOLD_TO_RUN = 0.2;
-    public static double LCR_THRESHOLD_TO_RUN = 0.2;
+    public static double LEVERAGE_THRESHOLD_TO_RUN = 0.01;
+    public static double LCR_THRESHOLD_TO_RUN = 0.01;
     //TODO: REMANE
     public static double CP_FRACTION_TO_RUN = 0.3;
+
+    // Hedgefund parameters
+    public static double HF_CASH_BUFFER_AS_FRACTION_OF_ASSETS = 0.05;
+    public static double HF_CASH_TARGET_AS_FRACTION_OF_ASSETS = 0.10;
+
 
     // Depositor Run
     public static double DEP_LEVERAGE_THRESHOLD_TO_RUN = 0.2;

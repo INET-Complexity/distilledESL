@@ -19,6 +19,11 @@ public class Deposit extends Contract {
     }
 
     @Override
+    public String getName(Agent me) {
+        return "Deposits";
+    }
+
+    @Override
     public Agent getAssetParty() {
         return depositor;
     }

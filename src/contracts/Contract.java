@@ -10,4 +10,5 @@ public abstract class Contract {
     public abstract Agent getLiabilityParty();
     public abstract double getValue();
     public abstract List<Action> getAvailableActions(Agent me);
+    public abstract String getName(Agent me);
 }

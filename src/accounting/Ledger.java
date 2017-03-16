@@ -260,7 +260,7 @@ public class Ledger implements LedgerAPI {
         for (Contract contract : allAssets) {
             Asset asset = (Asset) contract;
             if (asset.priceFell()) {
-                devalueAsset(asset.valueLost(), asset);
+                devalueAsset(asset, asset.valueLost());
                 asset.updatePrice();
             }
         }
@@ -270,14 +270,32 @@ public class Ledger implements LedgerAPI {
      * if an Asset loses value, I must debit equity and credit asset
      * @param valueLost the value lost
      */
-    public void devalueAsset(double valueLost, Contract asset) {
+    public void devalueAsset(Contract asset, double valueLost) {
         Account assetAccount = contractsToAssetAccounts.get(asset.getClass());
 
         // (dr equityAccounts, cr assetAccounts)
         Account.doubleEntry(equityAccount, assetAccount, valueLost);
 
         //Todo: perform a check here that the Asset account balances match the value of the assets. (?)
+    }
 
+    public void appreciateAsset(Contract asset, double valueLost) {
+        Account assetAccount = contractsToAssetAccounts.get(asset.getClass());
+        Account.doubleEntry(assetAccount, equityAccount, valueLost);
+    }
+
+    public void devalueLiability(Contract liability, double valueLost) {
+        Account liabilityAccount = contractsToLiabilityAccounts.get(liability.getClass());
+
+        // (dr equityAccounts, cr assetAccounts)
+        Account.doubleEntry(liabilityAccount, equityAccount, valueLost);
+    }
+
+    public void appreciateLiability(Contract liability, double valueLost) {
+        Account liabilityAccount = contractsToLiabilityAccounts.get(liability.getClass());
+
+        // (dr equityAccounts, cr assetAccounts)
+        Account.doubleEntry(equityAccount, liabilityAccount, valueLost);
     }
 
     /**
@@ -304,16 +322,23 @@ public class Ledger implements LedgerAPI {
         Account.doubleEntry(cashAccount, assetLoanAccount, initialValue - valueLost);
     }
 
-    public void printBalanceSheet() {
+    public void printBalanceSheet(Agent me) {
         System.out.println("Asset accounts:\n---------------");
         for (Account account : assetAccounts) {
             System.out.println(account.getName()+" -> "+ String.format( "%.2f", account.getBalance()));
+        }
+        System.out.println("Breakdown: ");
+        for (Contract contract : allAssets) {
+            System.out.println("\t"+contract.getName(me)+" > "+contract.getValue());
         }
         System.out.println("TOTAL ASSETS: "+ String.format( "%.2f", getAssetValue()));
 
         System.out.println("\nLiability accounts:\n---------------");
         for (Account account : liabilityAccounts) {
             System.out.println(account.getName()+" -> "+ String.format( "%.2f", account.getBalance()));
+        }
+        for (Contract contract : allLiabilities) {
+            System.out.println("\t"+contract.getName(me)+" > "+contract.getValue());
         }
         System.out.println("TOTAL LIABILITIES: "+ String.format( "%.2f", getLiabilityValue()));
         System.out.println("\nTOTAL EQUITY: "+String.format("%.2f", getEquityValue()));

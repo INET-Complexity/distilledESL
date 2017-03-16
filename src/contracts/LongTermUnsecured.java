@@ -17,6 +17,11 @@ public class LongTermUnsecured extends Contract {
     }
 
     @Override
+    public String getName(Agent me) {
+        return "Long term unsecured liabilities";
+    }
+
+    @Override
     public Agent getAssetParty() {
         return null;
     }

@@ -64,5 +64,7 @@ public class AssetManagerBehaviour extends Behaviour {
                 }
             }
         }
+
+        me.revalueAllExistingShares();
     }
 }

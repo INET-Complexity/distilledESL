@@ -1,6 +1,12 @@
 package accounting;
 
+import contracts.Contract;
+
 class Account {
+
+    private double balance;
+    private AccountType accountType;
+    private String name;
 
     private Account(String name, AccountType accountType, Double startingBalance) {
         this.name = name;
@@ -9,27 +15,21 @@ class Account {
     }
 
     Account(String name, AccountType accountType) {
-        this(name,accountType,0.0);
+        this(name, accountType, 0.0);
     }
-
-    private double balance;
 
     static void doubleEntry(Account debitAccount, Account creditAccount, double amount) {
         debitAccount.debit(amount);
         creditAccount.credit(amount);
     }
 
-//    private Collateral collateralType;
-    private AccountType accountType;
-    private String name;
-
-
     /**
      * A Debit is a positive change for ASSET and EXPENSES accounts, and negative for the rest.
+     *
      * @param amount the amount to debit
      */
     private void debit(double amount) {
-        if ((accountType==AccountType.ASSET) || (accountType==AccountType.EXPENSES)) {
+        if ((accountType == AccountType.ASSET) || (accountType == AccountType.EXPENSES)) {
             balance += amount;
         } else {
             balance -= amount;
@@ -38,10 +38,11 @@ class Account {
 
     /**
      * A Credit is a negative change for ASSET and EXPENSES accounts, and positive for the rest.
+     *
      * @param amount the amount to credit
      */
     private void credit(double amount) {
-        if ((accountType==AccountType.ASSET) || (accountType==AccountType.EXPENSES)) {
+        if ((accountType == AccountType.ASSET) || (accountType == AccountType.EXPENSES)) {
             balance -= amount;
         } else {
             balance += amount;

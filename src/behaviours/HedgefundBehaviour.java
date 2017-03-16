@@ -54,10 +54,13 @@ public class HedgefundBehaviour extends Behaviour {
 
         double liquidityToRaise = totalPullFunding;
 
+        System.out.println("\nCurrent leverage: " + String.format("%.2f", me.getLeverage()) +
+            ", minimum leverage: " + String.format("%.2f", me.getEffectiveMinLeverage()) +
+            ", leverage buffer: " + String.format("%.2f", me.getHedgefundLeverageConstraint().getLeverageBuffer())) ;
         // 4) If leverage is below buffer, we must de-lever further, and potentially raise liquidity.
         if (me.getHedgefundLeverageConstraint().isBelowBuffer()) {
             double amountToDelever = me.getHedgefundLeverageConstraint().getAmountToDelever();
-            System.out.println("My minimum leverage is: "+me.getEffectiveMinLeverage());
+
             System.out.println("\nWe are below our effective minimum leverage. Amount to de-lever: " + amountToDelever);
             double availableNow = min(me.getCash(), amountToDelever);
 
@@ -69,14 +72,24 @@ public class HedgefundBehaviour extends Behaviour {
 
             if (availableNow > 0) payOffLiabilities(availableNow);
             liquidityToRaise += amountToDelever - availableNow;
+        } else {
+            System.out.println("We are above the leverage buffer, no need to act.");
         }
 
         // 5) We try to raise an extra amount of liquidity, to replenish the liquidity buffer.
-        liquidityToRaise += max(0.0, me.cashBuffer - me.getCash());
+        double replenishBuffer = (me.getCash() < me.getCashBuffer()) ? me.getCashTarget() - me.getCash() : 0.0;
+
+        if (replenishBuffer >0 ) System.out.println("\nCurrent liquidity is " + me.getCash() +
+            ", cash buffer is " + me.getCashBuffer() +
+                ", cash target is "+me.getCashTarget()+", we must raise an amount " + replenishBuffer);
+
+        liquidityToRaise += replenishBuffer;
 
         // 6) If we decided we need to raise liquidity, we need to select a set of actions that will raise that liquidity.
         // A hedgefund's actions include just firesales of unencumbered assets, which it performs proportionally.
         if (liquidityToRaise > 0) {
+
+            System.out.println("\nRaising a total liquidity of "+liquidityToRaise);
 
             ArrayList<Action> sellAssetActions = getAllActionsOfType(SellAsset.class);
             double totalSellableAssets = sellAssetActions.stream()

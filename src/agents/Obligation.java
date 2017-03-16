@@ -28,7 +28,7 @@ public class Obligation {
                     contract.getAssetParty().getName()+
                     " an amount "+String.format("%.2f", amount)+".");
         } else if (contract instanceof Shares) {
-            ((Shares) contract).redeem((int) amount);
+            ((Shares) contract).cashIn(amount);
             System.out.println(contract.getLiabilityParty().getName()+" has fulfilled an obligation to redeem shares and pay " +
                     contract.getAssetParty().getName()+
                     " an amount "+String.format("%.2f", amount)+".");

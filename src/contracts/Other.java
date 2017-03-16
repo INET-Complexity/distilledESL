@@ -19,6 +19,11 @@ public class Other extends Contract {
     }
 
     @Override
+    public String getName(Agent me) {
+        return "Other";
+    }
+
+    @Override
     public Agent getAssetParty() {
         return assetParty;
     }

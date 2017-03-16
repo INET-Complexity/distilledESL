@@ -22,6 +22,10 @@ public class Asset extends Contract {
         this(assetParty,assetType, assetMarket, 0.0);
     }
 
+    @Override
+    public String getName(Agent me) {
+        return "Asset of type "+assetType;
+    }
 
     private Agent assetParty;
     private double quantity;

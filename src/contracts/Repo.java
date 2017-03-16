@@ -20,6 +20,12 @@ public class Repo extends Loan {
         this.collateral = new HashMap<>();
     }
 
+    @Override
+    public String getName(Agent me) {
+        if (me==assetParty) return "Reverse-repo to "+liabilityParty.getName();
+        else return "Repo from "+assetParty.getName();
+    }
+
     public void pledgeCollateral(CanBeCollateral asset, double quantity) {
         asset.encumber(quantity);
 

@@ -89,17 +89,29 @@ public abstract class Agent {
      * @param amount the amount to pay back of this loan
      * @param loan   the loan we are paying back
      */
-    public void payLoan(double amount, Contract loan) {
+    public void payLiability(double amount, Contract loan) {
         assert(getCash() >= amount);
         mainLedger.payLiability(amount, loan);
     }
 
-    public void sellAssetForValue(Asset asset, double value) {
+    public void sellAssetForValue(Contract asset, double value) {
         mainLedger.sellAsset(value, asset.getClass());
     }
 
-    public void devalueAsset(Asset asset, double valueLost) {
-        mainLedger.devalueAsset(valueLost, asset);
+    public void devalueAsset(Contract asset, double valueLost) {
+        mainLedger.devalueAsset(asset, valueLost);
+    }
+
+    public void appreciateAsset(Contract asset, double valueLost) {
+        mainLedger.appreciateAsset(asset, valueLost);
+    }
+
+    public void devalueLiability(Contract asset, double valueLost) {
+        mainLedger.devalueLiability(asset, valueLost);
+    }
+
+    public void appreciateLiability(Contract asset, double valueLost) {
+        mainLedger.appreciateLiability(asset, valueLost);
     }
 
     public void add(Contract contract) {
@@ -160,12 +172,9 @@ public abstract class Agent {
     }
 
     public void printBalanceSheet() {
-        System.out.println();
-        System.out.println("Balance Sheet of " + getName());
-        System.out.println("**************************");
-        mainLedger.printBalanceSheet();
+        System.out.println("\nBalance Sheet of " +getName()+"\n**************************");
+        mainLedger.printBalanceSheet(this);
         System.out.println("Leverage ratio: " + String.format("%.2f", 100 * getLeverage()) + "%");
-        System.out.println();
     }
 
     public void runMarginCalls() throws FailedMarginCallException {

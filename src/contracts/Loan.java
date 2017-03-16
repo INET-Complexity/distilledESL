@@ -22,8 +22,14 @@ public class Loan extends Contract {
         this.principal = principal;
     }
 
+    @Override
+    public String getName(Agent me) {
+        if (me==assetParty) return "Loan to "+liabilityParty.getName();
+        else return "Loan from "+assetParty.getName();
+    }
+
     public void payLoan(double amount) {
-        if (liabilityParty != null) liabilityParty.payLoan(amount, this);
+        if (liabilityParty != null) liabilityParty.payLiability(amount, this);
         if (assetParty != null) assetParty.pullFunding(amount, this);
         reducePrincipal(amount);
     }
