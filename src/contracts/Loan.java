@@ -68,7 +68,7 @@ public class Loan extends Contract {
     }
 
     public void liquidate() {
-        assetParty.liquidateLoan(getValue(), (1.0 - Parameters.LOSS_GIVEN_DEFAULT), this);
+        assetParty.liquidateLoan(getValue(), (1.0 - Parameters.INTERBANK_LOSS_GIVEN_DEFAULT), this);
         principal = 0.0;
     }
 

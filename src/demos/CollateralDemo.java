@@ -32,7 +32,7 @@
 //        hedgefund.printBalanceSheet();
 //
 //        System.out.println("Shock arrives!");
-//        assetMarket.shockPrice(Asset.AssetType.EXTERNAL, 1.0*(17-15)/17);
+//        assetMarket.shockPrice(Asset.AssetType.EXTERNAL1, 1.0*(17-15)/17);
 //        updateAssetPrices(bank1, bank2, hedgefund);
 //        bank1.printBalanceSheet();
 //
@@ -52,7 +52,7 @@
 //
 //    private static void initBank1(Bank bank) {
 //        bank.addCash(20.0);//
-//        bank.add(new AssetCollateral(bank, Asset.AssetType.EXTERNAL, assetMarket, 17.0));
+//        bank.add(new AssetCollateral(bank, Asset.AssetType.EXTERNAL1, assetMarket, 17.0));
 //        bank.add(new AssetCollateral(bank, Asset.AssetType.MBS, assetMarket, 40.0));
 //        bank.setBankLeverageConstraint(new BankLeverageConstraint(bank, 5.0/100, 3.0/100, 1.0/100));
 //        bank.setLCR_constraint(new LCR_Constraint(bank, 1.0, 1.0, 1.0, 20.0));

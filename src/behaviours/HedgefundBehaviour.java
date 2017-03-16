@@ -57,6 +57,7 @@ public class HedgefundBehaviour extends Behaviour {
         // 4) If leverage is below buffer, we must de-lever further, and potentially raise liquidity.
         if (me.getHedgefundLeverageConstraint().isBelowBuffer()) {
             double amountToDelever = me.getHedgefundLeverageConstraint().getAmountToDelever();
+            System.out.println("My minimum leverage is: "+me.getEffectiveMinLeverage());
             System.out.println("\nWe are below our effective minimum leverage. Amount to de-lever: " + amountToDelever);
             double availableNow = min(me.getCash(), amountToDelever);
 

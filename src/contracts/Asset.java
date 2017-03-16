@@ -31,7 +31,10 @@ public class Asset extends Contract {
 
     @Override
     public List<Action> getAvailableActions(Agent me) {
-        if (!(assetParty==me) || !(quantity >0) || assetType==AssetType.EXTERNAL) return Collections.emptyList();
+        if (!(assetParty==me) || !(quantity >0)
+                || (assetType==AssetType.EXTERNAL1)
+                || (assetType==AssetType.EXTERNAL2)
+                || (assetType==AssetType.EXTERNAL3)) return Collections.emptyList();
 
         ArrayList<Action> availableActions = new ArrayList<>();
         availableActions.add(new SellAsset(this));
@@ -99,7 +102,10 @@ public class Asset extends Contract {
         MBS,
         EQUITIES,
         CORPORATE_BONDS,
-        EXTERNAL
+        EXTERNAL1,
+        EXTERNAL2,
+        EXTERNAL3
+        //TODO: mark the three external assets as non tradable.
     }
 
     public AssetType getAssetType() {

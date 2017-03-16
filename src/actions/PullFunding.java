@@ -20,7 +20,7 @@ public class PullFunding extends Action {
     public void perform() {
         loan.increaseFundingPulled(getAmount());
 
-        if (loan.getLiabilityParty()==null || !Parameters.FUNDING_CONTAGION) {
+        if (loan.getLiabilityParty()==null || !Parameters.FUNDING_CONTAGION_HEDGEFUND) {
             // If there's no counter-party OR if there's no funding contagion, the payment can happen instantaneously
             loan.payLoan(getAmount());
         } else {

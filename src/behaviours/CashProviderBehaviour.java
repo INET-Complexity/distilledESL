@@ -20,6 +20,7 @@ public class CashProviderBehaviour extends Behaviour {
     @Override
     protected void chooseActions() {
         if (Parameters.CASH_PROVIDER_RUNS) {
+            //TODO: And if the bank is not in its current trial period. Do this for each bank!
             // Get all the pull funding actions available
             ArrayList<Action> pullFundingActions = getAllActionsOfType(PullFunding.class);
 
@@ -28,8 +29,9 @@ public class CashProviderBehaviour extends Behaviour {
 
                 // Check if the leverage of the bank we are lending money to is below the threshold.
                 if (pullFundingAction.getLoan().getLiabilityParty().getLeverage() < Parameters.LEVERAGE_THRESHOLD_TO_RUN) {
+                    // TODO: or IF THE LCR IS BELOW THE THRESHOLD
                     // If it is, withdraw a fixed fraction of funding to this bank.
-                    pullFundingAction.setAmount(pullFundingAction.getMax() * Parameters.FRACTION_TO_RUN);
+                    pullFundingAction.setAmount(pullFundingAction.getMax() * Parameters.CP_FRACTION_TO_RUN);
                     addAction(pullFundingAction);
                 }
 

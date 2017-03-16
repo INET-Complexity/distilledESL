@@ -21,6 +21,7 @@ public class Recorder {
     private ArrayList<Asset.AssetType> assetTypes;
 
     private int timestep;
+    private String marketHeader;
 
     public Recorder(HashSet<Agent> allAgents, AssetMarket market) {
         this.allAgents = allAgents;
@@ -40,18 +41,17 @@ public class Recorder {
             statisticsFile = new PrintWriter("statisticsFile.csv");
 
             assetTypes = market.getAssetTypes();
-            String header = "Timestep";
+            marketHeader = "Timestep";
 
             for (Asset.AssetType assetType : assetTypes) {
-                header = header + ", price_" + assetType ;
+                marketHeader = marketHeader + ", price_" + assetType;
             }
 
             for (Asset.AssetType assetType : assetTypes) {
-                header = header + ", haircut_" + assetType ;
+                marketHeader = marketHeader + ", haircut_" + assetType;
             }
 
-            System.out.println(header);
-            marketFile.println(header);
+            marketFile.println(marketHeader);
 
 
         } catch (FileNotFoundException e) {
@@ -66,14 +66,14 @@ public class Recorder {
         String line = Integer.toString(timestep);
 
         for (Asset.AssetType assetType : assetTypes) {
-            line = line + ", " + Double.toString(market.getPrice(assetType)) ;
+            line = line + ", " + Double.toString(market.getPrice(assetType));
         }
 
         for (Asset.AssetType assetType : assetTypes) {
-            line = line + ", " + Double.toString(market.getHaircut(assetType)) ;
+            line = line + ", " + Double.toString(market.getHaircut(assetType));
         }
 
-        System.out.println(line);
+        System.out.println("Market conditions: \n"+line);
         marketFile.println(line);
 
     }

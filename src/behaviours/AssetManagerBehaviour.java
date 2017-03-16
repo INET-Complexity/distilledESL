@@ -40,7 +40,7 @@ public class AssetManagerBehaviour extends Behaviour {
         }
 
         // 3) We must raise an amount of liquidity equal to totalRedemptions plus a fraction.
-        double liquidityToRaise = totalRedemptions * (1.0 + Parameters.ASSET_MANAGER_LIQUIDITY_FRACTION);
+        double liquidityToRaise = totalRedemptions * (1.0 + Parameters.AM_EXTRA_LIQUIDITY_FRACTION_WHEN_REDEMPTION);
 
 
         // We raise the liquidity by selling assets proportionally to initial holdings.

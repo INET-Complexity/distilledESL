@@ -94,7 +94,7 @@ public class ShortSimulationDemo {
 
 
     private static void shockExternalAsset(double percentage) {
-        assetMarket.shockPrice(Asset.AssetType.EXTERNAL, percentage);
+        assetMarket.shockPrice(Asset.AssetType.EXTERNAL1, percentage);
     }
 
     private static void updateAssetPrices(Bank bank1, Bank bank2, Bank hedgefund) {
