@@ -2,9 +2,7 @@ package contracts;
 
 import demos.Parameters;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.*;
 
 public class AssetMarket {
     private HashMap<Asset.AssetType, Double> prices;
@@ -114,5 +112,16 @@ public class AssetMarket {
             asset.clearSale(quantity);
         }
 
+    }
+
+    public ArrayList<Asset.AssetType> getAssetTypes() {
+        ArrayList<Asset.AssetType> assetTypesArray = new ArrayList<>();
+
+        Set<Asset.AssetType> assetTypes = prices.keySet();
+        for (Asset.AssetType type : assetTypes) {
+            assetTypesArray.add(type);
+        }
+
+        return assetTypesArray;
     }
 }

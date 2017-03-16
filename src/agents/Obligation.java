@@ -10,11 +10,15 @@ public class Obligation {
     private boolean fulfilled = false;
     private int timeLeftToPay;
     private boolean arrived = false;
+    private Agent from;
+    private Agent to;
 
     public Obligation(Contract contract, double amount, int timeLeftToPay) {
         this.contract = contract;
         this.amount = amount;
         this.timeLeftToPay = timeLeftToPay;
+        this.from = contract.getAssetParty();
+        this.to = contract.getLiabilityParty();
     }
 
     public void fulfil() {
@@ -51,8 +55,19 @@ public class Obligation {
     public boolean hasArrived() { return arrived;}
 
     public void tick() {
-        if (!arrived) arrived = true;
+        if (!arrived) {
+            arrived = true;
+            System.out.println("Obligation received from "+from.getName()+".\n");
+        }
         else timeLeftToPay -= 1;
         //Todo: this is in timesteps. Might move to some other unit of time.
+    }
+
+    public Agent getFrom() {
+        return from;
+    }
+
+    public Agent getTo() {
+        return to;
     }
 }

@@ -31,12 +31,7 @@ public class Bank extends Agent implements CanPledgeCollateral {
         // First, get a set of all my Assets that can be pledged as collateral
         HashSet<Contract> potentialCollateral = mainLedger.getAssetsOfType(AssetCollateral.class);
 
-        double maxHaircutValue = 0.0;
-        for (Contract contract : potentialCollateral) {
-            assert(contract instanceof CanBeCollateral);
-            CanBeCollateral asset = (CanBeCollateral) contract;
-            maxHaircutValue += asset.getUnencumberedValue() * (1.0 - asset.getHaircut());
-        }
+        double maxHaircutValue = getMaxUnencumberedHaircuttedCollateral();
 
         for (Contract contract : potentialCollateral) {
             CanBeCollateral asset = (CanBeCollateral) contract;
@@ -47,6 +42,14 @@ public class Bank extends Agent implements CanPledgeCollateral {
         }
     }
 
+    @Override
+    public double getMaxUnencumberedHaircuttedCollateral() {
+        return mainLedger.getAssetsOfType(AssetCollateral.class).stream()
+                .mapToDouble(asset ->
+                        ((CanBeCollateral) asset).getUnencumberedValue() *
+                                (1.0 - ((CanBeCollateral) asset).getHaircut()))
+                .sum();
+    }
 
     public void withdrawCollateral(double excessValue, Repo repo) {
         repo.unpledgeProportionally(excessValue);

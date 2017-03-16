@@ -18,13 +18,15 @@ public class PullFunding extends Action {
 
     @Override
     public void perform() {
+        loan.increaseFundingPulled(getAmount());
+
         if (loan.getLiabilityParty()==null || !Parameters.FUNDING_CONTAGION) {
             // If there's no counter-party OR if there's no funding contagion, the payment can happen instantaneously
-            loan.getAssetParty().pullFunding(getAmount(), loan);
+            loan.payLoan(getAmount());
         } else {
             // If there is a counter-party AND we have funding contagion, we must send a Obligation.
-            Obligation obligation = new Obligation(loan, getAmount(), 2);
-            //Todo: how many timesteps do we allow the counterparty to raise the liquidity to pay?
+            Obligation obligation = new Obligation(loan, getAmount(), Parameters.TIMESTEPS_TO_PAY);
+
             loan.getAssetParty().addToOutbox(obligation);
             loan.getLiabilityParty().addToInbox(obligation);
         }
@@ -32,7 +34,7 @@ public class PullFunding extends Action {
 
     @Override
     public double getMax() {
-        return loan.getValue();
+        return (loan.getValue() - loan.getFundingAlreadyPulled());
     }
 
     @Override

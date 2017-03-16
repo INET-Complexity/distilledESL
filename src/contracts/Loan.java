@@ -4,13 +4,17 @@ import agents.Agent;
 import actions.Action;
 import actions.PullFunding;
 import actions.PayLoan;
+import demos.Parameters;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 public class Loan extends Contract {
-    private static final double VALUE_GIVEN_DEFAULT = 0.30;
+    protected Agent assetParty;
+    protected Agent liabilityParty;
+    protected double principal;
+    private double fundingAlreadyPulled = 0;
 
     public Loan(Agent assetParty, Agent liabilityParty, double principal) {
         this.assetParty = assetParty;
@@ -18,19 +22,16 @@ public class Loan extends Contract {
         this.principal = principal;
     }
 
-    Agent assetParty;
-    Agent liabilityParty;
-    double principal;
-
     public void payLoan(double amount) {
-        if (liabilityParty!= null) liabilityParty.payLoan(amount, this);
-        if (assetParty!= null) assetParty.pullFunding(amount, this);
+        if (liabilityParty != null) liabilityParty.payLoan(amount, this);
+        if (assetParty != null) assetParty.pullFunding(amount, this);
         reducePrincipal(amount);
     }
 
     private void reducePrincipal(double amount) {
-        assert(amount <= principal);
+        assert (amount <= principal);
         principal -= amount;
+        fundingAlreadyPulled -= amount;
 
         if (principal < 0.01) {
             System.out.println("This loan has been fully repaid.");
@@ -41,12 +42,12 @@ public class Loan extends Contract {
 
     @Override
     public List<Action> getAvailableActions(Agent me) {
-        if (!(principal > 0)) return Collections.emptyList();
+        if (!(principal > 0) || !(principal > fundingAlreadyPulled)) return Collections.emptyList();
 
         ArrayList<Action> availableActions = new ArrayList<>();
-        if (assetParty==me) {
+        if (assetParty == me) {
             availableActions.add(new PullFunding(this));
-        } else if (liabilityParty==me){
+        } else if (liabilityParty == me) {
             availableActions.add(new PayLoan(this));
         }
         return availableActions;
@@ -67,10 +68,17 @@ public class Loan extends Contract {
     }
 
     public void liquidate() {
-        assetParty.liquidateLoan(getValue(), VALUE_GIVEN_DEFAULT, this);
+        assetParty.liquidateLoan(getValue(), (1.0 - Parameters.LOSS_GIVEN_DEFAULT), this);
         principal = 0.0;
     }
 
+    public void increaseFundingPulled(double fundingPulled) {
+        fundingAlreadyPulled += fundingPulled;
+    }
+
+    public double getFundingAlreadyPulled() {
+        return fundingAlreadyPulled;
+    }
 }
 
 

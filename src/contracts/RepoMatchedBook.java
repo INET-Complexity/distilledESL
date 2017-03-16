@@ -10,5 +10,12 @@ public class RepoMatchedBook extends Repo {
         this.secondRepo = secondRepo;
     }
 
+    @Override
+    public void marginCall() throws FailedMarginCallException {
+        // If someone asks me to perform a margin call, I just ask the matchbook repo to perform one.
+        secondRepo.marginCall();
 
+        // If the margin call fails, then the Repo has defaulted!
+        //TODO What to do when matched book margin call fails?
+    }
 }

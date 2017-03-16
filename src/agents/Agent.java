@@ -5,6 +5,8 @@ import actions.Action;
 import behaviours.Behaviour;
 import contracts.Asset;
 import contracts.Contract;
+import contracts.FailedMarginCallException;
+import contracts.Repo;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -24,7 +26,10 @@ public abstract class Agent {
     }
 
     public void addToInbox(Obligation obligation) {
+
         obligationInbox.add(obligation);
+        System.out.println("Obligation sent from "+obligation.getFrom().getName() +
+                " to "+obligation.getTo().getName());
     }
 
     public void addToOutbox(Obligation obligation) {
@@ -48,13 +53,13 @@ public abstract class Agent {
 
     public void fulfilAllRequests() {
         for (Obligation obligation : obligationInbox) {
-            if (! obligation.isFulfilled()) obligation.fulfil();
+            if (! obligation.isFulfilled() && obligation.hasArrived()) obligation.fulfil();
         }
     }
 
     public void fulfilMaturedRequests() {
         for (Obligation obligation : obligationInbox) {
-            if (obligation.isDue() && ! obligation.isFulfilled()) {
+            if (obligation.isDue() && ! obligation.isFulfilled() && obligation.hasArrived()) {
                 obligation.fulfil();
             }
         }
@@ -154,7 +159,6 @@ public abstract class Agent {
         return mainLedger.getEquityValue();
     }
 
-
     public void printBalanceSheet() {
         System.out.println();
         System.out.println("Balance Sheet of " + getName());
@@ -162,6 +166,14 @@ public abstract class Agent {
         mainLedger.printBalanceSheet();
         System.out.println("Leverage ratio: " + String.format("%.2f", 100 * getLeverage()) + "%");
         System.out.println();
+    }
+
+    public void runMarginCalls() throws FailedMarginCallException {
+        HashSet<Contract> repoContracts = mainLedger.getAssetsOfType(Repo.class);
+        for (Contract contract : repoContracts) {
+            Repo repo = (Repo) contract;
+            repo.marginCall(); // Throws exception if it fails.
+        }
     }
 
 

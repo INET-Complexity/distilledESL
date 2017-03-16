@@ -5,6 +5,7 @@ import actions.PayLoan;
 import actions.PullFunding;
 import actions.SellAsset;
 import agents.Bank;
+import contracts.FailedMarginCallException;
 
 import java.util.ArrayList;
 
@@ -25,7 +26,7 @@ public class BankBehaviour extends Behaviour {
     @Override
     protected void chooseActions() {
 
-        // 1) Check inbox for matured PullFunding requests. If we can't meet them right now, default.
+        // Check inbox for matured PullFunding requests. If we can't meet them right now, default.
         double maturedPullFunding = me.getMaturedObligations();
         if (maturedPullFunding > 0) {
             System.out.println("We have matured payment obligations for a total of "+String.format("%.2f", maturedPullFunding));
@@ -34,10 +35,11 @@ public class BankBehaviour extends Behaviour {
             } else {
                 //Todo: emergency procedure?
                 triggerDefault();
+                return;
             }
         }
 
-        // 2) Check inbox for other PullFunding requests, find out how much liquidity is needed,
+        // Check inbox for other PullFunding requests, find out how much liquidity is needed,
         // and pay all of them now if possible.
         double totalPullFunding = me.getPendingObligations();
         if (totalPullFunding > 0) {
@@ -46,6 +48,15 @@ public class BankBehaviour extends Behaviour {
                 me.fulfilAllRequests();
                 totalPullFunding = 0.0;
             }
+        }
+
+        // Run margin calls and pledge/unpledge collateral as needed. If any margin call fails, default.
+        try {
+            me.runMarginCalls();
+        } catch (FailedMarginCallException e) {
+            // If any margin call failed, DEFAULT!
+            triggerDefault(); //TODO; how to abort execution of 'chooseAvailableActions'?
+            return;
         }
 
         // 3) If we were trying to de-lever further from the previous timestep, we do it now. We break the LCR
@@ -117,17 +128,6 @@ public class BankBehaviour extends Behaviour {
 
 
     public void triggerDefault() {
-        ArrayList<Action> availableActions = me.getAvailableActions(me);
-        for (Action action : availableActions) {
-            // Sell every asset!
-            if (action instanceof SellAsset) {
-                action.setAmount(action.getMax());
-                action.perform();
-            } else if (action instanceof PayLoan) {
-                // Loans must be terminated and changed into assets.
-                ((PayLoan) action).getLoan().liquidate();
-            } // all other actions are ignored
-        }
 
     }
 

@@ -21,13 +21,14 @@ public abstract class Behaviour {
     private void performActions(ArrayList<Action> chosenActions) {
         if (chosenActions.isEmpty()){
             System.out.println(me.getName()+" does nothing this round.");
-            return;
         }
 
         for (Action action : chosenActions) {
             action.print();
             action.perform();
         }
+
+        System.out.println(me.getName()+" is done.\n*************");
     }
 
     private void performAction(Action action) {
@@ -39,9 +40,12 @@ public abstract class Behaviour {
     protected abstract void chooseActions();
 
     public void act() {
-        System.out.println("\n"+me.getName()+" is acting.");
+        System.out.println("\n"+me.getName()+" is acting.\n");
+
+        // Todo: tick here!
+        me.tick();
+
         availableActions = me.getAvailableActions(me);
-        System.out.println();
         System.out.println("My available actions are: ");
         Action.print(availableActions);
 
@@ -53,8 +57,6 @@ public abstract class Behaviour {
         decidePayOffActions();
         performActions(chosenActions);
 
-        // Todo: tick here!
-        me.tick();
 
     }
 

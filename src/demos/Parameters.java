@@ -11,6 +11,8 @@ public class Parameters {
     public static boolean INVESTOR_REDEMPTION = true;
     public static boolean INTERBANK_CONTAGION = true;
 
+    public static boolean CASH_PROVIDER_RUNS = true;
+
     // Haircuts
     public static double HAIRCUT_MBS = 0.1;
     public static double HAIRCUT_CORPORATE_BONDS = 0.1;
@@ -32,6 +34,11 @@ public class Parameters {
     // Investor
     public static double REDEMPTIONS_C1 = 20;
     public static double REDEMPTIONS_C2 = 6;
+
+    public static double LOSS_GIVEN_DEFAULT = 0.4;
+    public static int TIMESTEPS_TO_PAY = 3;
+
+    public static int N_TIMESTEPS = 4;
 
 
     // Helper functions

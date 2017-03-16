@@ -36,13 +36,20 @@ public class Repo extends Loan {
         collateral.put(asset, collateral.get(asset) - quantity);
     }
 
-    public void marginCall() {
+    public void marginCall() throws FailedMarginCallException {
         double currentValue = valueCollateralHaircutted();
-        if (currentValue < principal) { //TODO: include finite precision? i.e. currentValue < principal + smallNumber
-            ((CanPledgeCollateral) liabilityParty).putMoreCollateral(principal - currentValue, this);
+        CanPledgeCollateral borrower = (CanPledgeCollateral) liabilityParty;
+
+        if (currentValue < principal) { //TODO: finite precision
+
+            if (principal - currentValue < borrower.getMaxUnencumberedHaircuttedCollateral()) {
+                throw new FailedMarginCallException();
+            }
+
+            borrower.putMoreCollateral(principal - currentValue, this);
 
         } else if (currentValue > principal) {
-            ((CanPledgeCollateral) liabilityParty).withdrawCollateral(principal - currentValue, this);
+             borrower.withdrawCollateral(principal - currentValue, this);
         }
     }
 
@@ -105,4 +112,5 @@ public class Repo extends Loan {
     public double getValue() {
         return principal;
     }
+
 }

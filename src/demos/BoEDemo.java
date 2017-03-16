@@ -9,6 +9,7 @@ public class BoEDemo {
 
     private static AssetMarket assetMarket = new AssetMarket();
     private static HashSet<Agent> allAgents = new HashSet<>();
+    private static Recorder recorder = new Recorder(allAgents, assetMarket);
 
     public static void main(String[] args) {
         initialise();
@@ -17,14 +18,19 @@ public class BoEDemo {
     }
 
     private static void runSchedule() {
+
         assetMarket.shockPrice(Asset.AssetType.EXTERNAL, 0.05);
 
-        for (int steps=0 ; steps<5; ++steps) {
+        for (int timeStep=0 ; timeStep< Parameters.N_TIMESTEPS; ++timeStep) {
+
             for (Agent agent : allAgents) {
                 agent.act();
             }
             assetMarket.clearTheMarket();
+            recorder.record();
         }
+
+        recorder.finish();
     }
 
 
@@ -63,6 +69,8 @@ public class BoEDemo {
         initShares(inv1, am1, 200);
 
 
+
+        recorder.init();
     }
 
     private static void initAgent(Agent agent, double cash, double mbs, double equities, double bonds,

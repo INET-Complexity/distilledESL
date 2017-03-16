@@ -19,19 +19,21 @@ public class CashProviderBehaviour extends Behaviour {
      */
     @Override
     protected void chooseActions() {
-        // Get all the pull funding actions available
-        ArrayList<Action> pullFundingActions = getAllActionsOfType(PullFunding.class);
+        if (Parameters.CASH_PROVIDER_RUNS) {
+            // Get all the pull funding actions available
+            ArrayList<Action> pullFundingActions = getAllActionsOfType(PullFunding.class);
 
-        for (Action action : pullFundingActions) {
-            PullFunding pullFundingAction = (PullFunding) action;
+            for (Action action : pullFundingActions) {
+                PullFunding pullFundingAction = (PullFunding) action;
 
-            // Check if the leverage of the bank we are lending money to is below the threshold.
-            if (pullFundingAction.getLoan().getLiabilityParty().getLeverage() < Parameters.LEVERAGE_THRESHOLD_TO_RUN) {
-                // If it is, withdraw a fixed fraction of funding to this bank.
-                pullFundingAction.setAmount(pullFundingAction.getMax() * Parameters.FRACTION_TO_RUN);
-                addAction(pullFundingAction);
+                // Check if the leverage of the bank we are lending money to is below the threshold.
+                if (pullFundingAction.getLoan().getLiabilityParty().getLeverage() < Parameters.LEVERAGE_THRESHOLD_TO_RUN) {
+                    // If it is, withdraw a fixed fraction of funding to this bank.
+                    pullFundingAction.setAmount(pullFundingAction.getMax() * Parameters.FRACTION_TO_RUN);
+                    addAction(pullFundingAction);
+                }
+
             }
-
         }
     }
 }

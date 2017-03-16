@@ -26,10 +26,7 @@ public class Hedgefund extends Agent implements CanPledgeCollateral {
         // First, get a set of all my Assets that can be pledged as collateral
         HashSet<Contract> potentialCollateral = mainLedger.getAssetsOfType(AssetCollateral.class);
 
-        double maxHaircutValue = potentialCollateral.stream()
-                .mapToDouble(contract -> ((CanBeCollateral)contract).getUnencumberedValue())
-                .sum();
-
+        double maxHaircutValue = getMaxUnencumberedHaircuttedCollateral();
 
         for (Contract contract : potentialCollateral) {
             CanBeCollateral asset = (CanBeCollateral) contract;
@@ -38,6 +35,15 @@ public class Hedgefund extends Agent implements CanPledgeCollateral {
             repo.pledgeCollateral(asset, quantityToPledge);
 
         }
+    }
+
+    @Override
+    public double getMaxUnencumberedHaircuttedCollateral() {
+        return mainLedger.getAssetsOfType(AssetCollateral.class).stream()
+                .mapToDouble(asset ->
+                        ((CanBeCollateral) asset).getUnencumberedValue() *
+                                (1.0 - ((CanBeCollateral) asset).getHaircut()))
+                                    .sum();
     }
 
     public double getEffectiveMinLeverage() {
