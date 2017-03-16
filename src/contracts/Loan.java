@@ -23,6 +23,11 @@ public class Loan extends Contract {
     }
 
     @Override
+    public double getLCRweight() {
+        return Parameters.INTERBANK_LCR;
+    }
+
+    @Override
     public String getName(Agent me) {
         if (me==assetParty) return "Loan to "+liabilityParty.getName();
         else return "Loan from "+assetParty.getName();

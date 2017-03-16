@@ -1,6 +1,7 @@
 package contracts;
 
 import agents.Agent;
+import demos.Parameters;
 
 public class RepoMatchedBook extends Repo {
 
@@ -8,6 +9,11 @@ public class RepoMatchedBook extends Repo {
     public RepoMatchedBook(Agent assetParty, Agent liabilityParty, double principal, Repo secondRepo) {
         super(assetParty, liabilityParty, principal);
         this.secondRepo = secondRepo;
+    }
+
+    @Override
+    public double getLCRweight() {
+        return Parameters.MATCH_BOOK_LCR;
     }
 
     @Override

@@ -22,7 +22,7 @@ public class Bank extends Agent implements CanPledgeCollateral {
     public Bank(String name) {
         super(name);
         this.bankLeverageConstraint = new BankLeverageConstraint(this);
-        this.lcr_constraint = new LCR_Constraint(this, 1.0, 1.0, 1.0, 20.0);
+        this.lcr_constraint = new LCR_Constraint(this);
         this.behaviour = new BankBehaviour(this);
     }
 

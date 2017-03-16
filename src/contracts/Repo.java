@@ -2,6 +2,7 @@ package contracts;
 
 import agents.Agent;
 import agents.CanPledgeCollateral;
+import demos.Parameters;
 
 import java.util.*;
 
@@ -18,6 +19,11 @@ public class Repo extends Loan {
     public Repo(Agent assetParty, Agent liabilityParty, double principal) {
         super(assetParty, liabilityParty, principal);
         this.collateral = new HashMap<>();
+    }
+
+    @Override
+    public double getLCRweight() {
+        return Parameters.REPO_LCR;
     }
 
     @Override

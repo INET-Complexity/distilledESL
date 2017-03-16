@@ -113,6 +113,9 @@ public class Parameters {
 
     public static double HF_DEFAULT_LEVERAGE_TARGET = 0.02;
     public static double HF_DEFAULT_LEVERAGE_BUFFER = 0.01;
-    public static double HF_DEFAULT_LEVERAGE_MIN = 0.0;
+
+    public static double BANK_LCR_MIN = 0.10;
+    public static double BANK_LCR_BUFFER = 0.20;
+    public static double BANK_LCR_TARGET = 0.30;
 
 }
