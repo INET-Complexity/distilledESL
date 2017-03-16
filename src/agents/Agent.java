@@ -35,24 +35,26 @@ public abstract class Agent {
         return obligationInbox.stream()
                 .filter(Obligation::hasArrived)
                 .filter(Obligation::isDue)
+                .filter(obligation -> ! obligation.isFulfilled())
                 .mapToDouble(Obligation::getAmount).sum();
     }
 
     public double getPendingObligations() {
         return obligationInbox.stream()
                 .filter(Obligation::hasArrived)
+                .filter(obligation -> ! obligation.isFulfilled())
                 .mapToDouble(Obligation::getAmount).sum();
     }
 
     public void fulfilAllRequests() {
         for (Obligation obligation : obligationInbox) {
-            obligation.fulfil();
+            if (! obligation.isFulfilled()) obligation.fulfil();
         }
     }
 
     public void fulfilMaturedRequests() {
         for (Obligation obligation : obligationInbox) {
-            if (obligation.isDue()) {
+            if (obligation.isDue() && ! obligation.isFulfilled()) {
                 obligation.fulfil();
             }
         }
@@ -92,7 +94,6 @@ public abstract class Agent {
     }
 
     public void devalueAsset(Asset asset, double valueLost) {
-        System.out.println(getName() + " made a loss of " + String.format("%.2f", valueLost) + " from the sale of " + asset.getAssetType());
         mainLedger.devalueAsset(valueLost, asset);
     }
 

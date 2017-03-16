@@ -21,7 +21,6 @@ public class Loan extends Contract {
     Agent assetParty;
     Agent liabilityParty;
     double principal;
-    private boolean cancelled;
 
     public void payLoan(double amount) {
         if (liabilityParty!= null) liabilityParty.payLoan(amount, this);
@@ -72,9 +71,6 @@ public class Loan extends Contract {
         principal = 0.0;
     }
 
-    public void setCancelled(boolean cancelled) {
-        this.cancelled = cancelled;
-    }
 }
 
 

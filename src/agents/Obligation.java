@@ -20,8 +20,14 @@ public class Obligation {
     public void fulfil() {
         if (contract instanceof Loan) {
             ((Loan) contract).payLoan(amount);
+            System.out.println(contract.getLiabilityParty().getName()+" has fulfilled an obligation to pay " +
+                    contract.getAssetParty().getName()+
+                    " an amount "+String.format("%.2f", amount)+".");
         } else if (contract instanceof Shares) {
             ((Shares) contract).redeem((int) amount);
+            System.out.println(contract.getLiabilityParty().getName()+" has fulfilled an obligation to redeem shares and pay " +
+                    contract.getAssetParty().getName()+
+                    " an amount "+String.format("%.2f", amount)+".");
         }
         fulfilled = true;
     }

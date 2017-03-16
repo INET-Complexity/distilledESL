@@ -68,8 +68,24 @@ public class Repo extends Loan {
 
         for (Map.Entry<CanBeCollateral, Double> entry : collateral.entrySet()) {
             CanBeCollateral asset = entry.getKey();
-            double quantityToUnpledge = collateral.get(asset) * (1 - asset.getHaircut()) * excessValue / totalValue;
+            double quantityToUnpledge = entry.getValue() * (1 - asset.getHaircut()) * excessValue / totalValue;
             unpledgeCollateral(asset, quantityToUnpledge);
+        }
+    }
+
+    @Override
+    public void liquidate() {
+        super.liquidate();
+        // When we liquidate a Repo, we must change the ownership of all the collateral and give it to the
+        // asset party.
+
+        for (Map.Entry<CanBeCollateral, Double> entry : collateral.entrySet()) {
+            // 1. Take one type of collateral at a time
+            CanBeCollateral asset = entry.getKey();
+            double amountEncumbered = entry.getValue();
+
+            // 2. Change the ownership of the asset
+            ((Asset) asset).changeOwnership(assetParty, amountEncumbered);
         }
     }
 

@@ -10,12 +10,12 @@ import java.util.List;
 
 public class Asset extends Contract {
 
-    public Asset(Agent assetParty, AssetType assetType, AssetMarket assetMarket, double amount) {
+    public Asset(Agent assetParty, AssetType assetType, AssetMarket assetMarket, double quantity) {
         this.assetParty = assetParty;
         this.assetType = assetType;
         this.assetMarket = assetMarket;
         this.price = assetMarket.getPrice(assetType);
-        this.quantity = 1.0 * amount / this.price;
+        this.quantity = quantity;
     }
 
     public Asset(Agent assetParty, AssetType assetType, AssetMarket assetMarket) {
@@ -59,6 +59,7 @@ public class Asset extends Contract {
         if (newPrice < price) {
             // Value lost is the sum of the value lost from the transaction and the devaluation of the asset that is left.
             double totalValueLost = quantitySold * 0.5 * (price - newPrice) + (quantity - quantitySold) * (price - newPrice);
+            System.out.println(assetParty.getName() + " made a loss of " + String.format("%.2f", totalValueLost) + " from the sale of " + getAssetType());
             assetParty.devalueAsset(this, totalValueLost);
         }
 
@@ -117,6 +118,19 @@ public class Asset extends Contract {
 
     protected double getQuantity() {
         return quantity;
+    }
+
+    public void changeOwnership(Agent newOwner, double quantity) {
+        assert(this.quantity >= quantity);
+
+        // First, reduce the quantity of this asset
+        this.quantity -= quantity;
+
+        // Have the owner lose the value of the asset
+        assetParty.devalueAsset(this, quantity);
+
+        // Create a new Asset of the same type and give it to the new Owner
+        newOwner.add(new Asset(newOwner, assetType, assetMarket, quantity));
     }
 }
 
