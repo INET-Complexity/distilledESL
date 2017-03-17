@@ -78,7 +78,8 @@ public class Asset extends Contract {
     }
 
 
-    public double getValue() {
+    @Override
+    public double getValue(Agent me) {
         return quantity*price;
     }
 

@@ -103,6 +103,14 @@ public class Ledger implements LedgerAPI {
 
     }
 
+    public HashSet<Contract> getAllAssets() {
+        return allAssets;
+    }
+
+    public HashSet<Contract> getAllLiabilities() {
+        return allLiabilities;
+    }
+
     public HashSet<Contract> getAssetsOfType(Class<?> contractType) {
         return allAssets.stream()
                 .filter(contractType::isInstance)

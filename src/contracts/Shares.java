@@ -66,7 +66,8 @@ public class Shares extends Contract {
         return (Agent) issuer;
     }
 
-    public double getValue() {
+    @Override
+    public double getValue(Agent me) {
         return numberOfShares * issuer.getNetAssetValue();
     }
 

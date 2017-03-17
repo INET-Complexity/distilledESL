@@ -13,12 +13,12 @@ public class Parameters {
     public static boolean INVESTOR_REDEMPTION = true;
     public static boolean FIRESALE_CONTAGION = true;
     public static boolean CASH_PROVIDER_RUNS = true;
+    public static boolean NEKO_MODEL = true;
 
     // sell encumbered assets upon default
     // INTERBANK liquidity hoarding threshold
     // margin calls off
     //
-    // NEKO Channel: re-evaluation of interbank assets
 
     public static double INTERBANK_LOSS_GIVEN_DEFAULT = 0.4; // if Interbank contagion is off
 
@@ -29,6 +29,7 @@ public class Parameters {
 
     // Cash Provider
     public static double HAIRCUT_SLOPE = 0.1;
+    public static double HAIRCUT_PRICE_FALL_THRESHOLD = 0.1;
     public static double LEVERAGE_THRESHOLD_TO_RUN = 0.01;
     public static double LCR_THRESHOLD_TO_RUN = 0.01;
     //TODO: REMANE
@@ -60,6 +61,8 @@ public class Parameters {
     // Investor
     public static double REDEMPTIONS_C1 = 20;
     public static double REDEMPTIONS_C2 = 6;
+
+    public static double NEKO_C = 0.6;
 
     public static int TIMESTEPS_TO_PAY = 3;
 

@@ -37,7 +37,7 @@ public class LongTermUnsecured extends Contract {
         return liabilityParty;
     }
 
-    public double getValue() {
+    public double getValue(Agent me) {
         return amount;
     }
 
@@ -46,4 +46,5 @@ public class LongTermUnsecured extends Contract {
 
         return new ArrayList<>();
     }
+
 }

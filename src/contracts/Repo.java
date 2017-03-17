@@ -121,7 +121,7 @@ public class Repo extends Loan {
     }
 
     @Override
-    public double getValue() {
+    public double getValue(Agent me) {
         return principal;
     }
 

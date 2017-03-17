@@ -37,7 +37,8 @@ public class Deposit extends Contract {
         return holder;
     }
 
-    public double getValue() {
+    @Override
+    public double getValue(Agent me) {
         return amount;
     }
 
