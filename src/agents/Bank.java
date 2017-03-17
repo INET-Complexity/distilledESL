@@ -1,13 +1,13 @@
 package agents;
 
-import actions.LCR_Constraint;
-import actions.BankLeverageConstraint;
-import actions.RWA_Constraint;
+import actions.*;
 import behaviours.BankBehaviour;
 import behaviours.Behaviour;
 import contracts.*;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.stream.Collectors;
 
 /**
  * This class represents a simple me with a single Ledger, called 'general Ledger'.
@@ -88,5 +88,25 @@ public class Bank extends Agent implements CanPledgeCollateral {
 
     public double getRWAratio() {
         return rwa_constraint.getRWAratio();
+    }
+
+    @Override
+    public void triggerDefault() {
+        super.triggerDefault();
+
+        HashSet<Contract> loansAndRepos = mainLedger.getLiabilitiesOfType(Loan.class);
+        for (Contract loan : loansAndRepos) {
+            ((Loan) loan).liquidate();
+        }
+
+        ArrayList<Action> pullFundingActions = getAvailableActions(this).stream()
+                .filter(action -> action instanceof PullFunding)
+                .collect(Collectors.toCollection(ArrayList::new));
+
+        for (Action action : pullFundingActions) {
+            action.setAmount(action.getMax());
+            action.perform();
+        }
+
     }
 }

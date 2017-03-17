@@ -37,9 +37,15 @@ public abstract class Behaviour {
         action.perform();
     }
 
-    protected abstract void chooseActions();
+    protected abstract void chooseActions() throws DefaultException;
 
     public void act() {
+        if (!(me.isAlive())) {
+            System.out.println(me.getName() +
+                    " cannot act. I'm crucified, dead and buried, and have descended into hell.");
+            return;
+        }
+
         System.out.println("\n"+me.getName()+" is acting.\n");
 
         // Todo: tick here!
@@ -55,7 +61,11 @@ public abstract class Behaviour {
         liabilitiesToPayOff = 0.0;
         maxLiabilitiesToPayOff = maxLiabilitiesToPayOff();
 
-        chooseActions();
+        try {
+            chooseActions();
+        } catch (DefaultException e) {
+            me.triggerDefault();
+        }
         decidePayOffActions();
         performActions(chosenActions);
 

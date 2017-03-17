@@ -16,6 +16,7 @@ public class Asset extends Contract {
         this.assetMarket = assetMarket;
         this.price = assetMarket.getPrice(assetType);
         this.quantity = quantity;
+        this.putForSale = 0.0;
     }
 
     public Asset(Agent assetParty, AssetType assetType, AssetMarket assetMarket) {
@@ -32,10 +33,11 @@ public class Asset extends Contract {
     private AssetType assetType;
     protected AssetMarket assetMarket;
     private double price;
+    private double putForSale;
 
     @Override
     public List<Action> getAvailableActions(Agent me) {
-        if (!(assetParty==me) || !(quantity >0)
+        if (!(assetParty==me) || !(quantity > putForSale)
                 || (assetType==AssetType.EXTERNAL1)
                 || (assetType==AssetType.EXTERNAL2)
                 || (assetType==AssetType.EXTERNAL3)) return Collections.emptyList();
@@ -46,6 +48,7 @@ public class Asset extends Contract {
     }
 
     public void putForSale(double quantity) {
+        putForSale += quantity;
         assetMarket.putForSale(this, quantity);
     }
 
@@ -72,6 +75,7 @@ public class Asset extends Contract {
 
         // Update the quantity remaining
         this.quantity -= quantitySold;
+        this.putForSale -= quantitySold;
 
         // Update the price
         updatePrice();

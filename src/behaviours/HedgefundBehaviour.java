@@ -4,6 +4,7 @@ import actions.Action;
 import actions.PayLoan;
 import actions.SellAsset;
 import agents.Hedgefund;
+import demos.Parameters;
 
 import java.util.ArrayList;
 
@@ -23,7 +24,7 @@ public class HedgefundBehaviour extends Behaviour {
     }
 
     @Override
-    protected void chooseActions() {
+    protected void chooseActions() throws DefaultException {
 
         // 1) Check matured requests to pull funding. If we can't meet them right now, default.
         double maturedPullFunding = me.getMaturedObligations();
@@ -31,8 +32,9 @@ public class HedgefundBehaviour extends Behaviour {
             if(me.getCash() >= maturedPullFunding) {
                 me.fulfilMaturedRequests();
             } else {
-                //Todo: emergency procedure?
-                triggerDefault();
+                System.out.println(me.getName()+" has failed to fulfill matured obligations:" +
+                        "\n*@*@*@*@*@*@*\nDEFAULT!\n");
+                throw new DefaultException();
             }
         }
 
@@ -50,6 +52,13 @@ public class HedgefundBehaviour extends Behaviour {
         if (pendingToDeLever > 0) {
             double amountToDelever = min(pendingToDeLever, me.getCash());
             if (amountToDelever > 0) payOffLiabilities(amountToDelever);
+        }
+
+        if (me.getLeverage() < me.getEffectiveMinLeverage()) {
+            System.out.println("My leverage is "+me.getLeverage()+
+                    " which is below the effective minimum leverage "+me.getEffectiveMinLeverage());
+            System.out.println("I'm dead.");
+            throw new DefaultException();
         }
 
         double liquidityToRaise = totalPullFunding;
@@ -107,21 +116,6 @@ public class HedgefundBehaviour extends Behaviour {
                     addAction(action);
                 }
             }
-        }
-
-    }
-
-    public void triggerDefault() {
-        ArrayList<Action> availableActions = me.getAvailableActions(me);
-        for (Action action : availableActions ) {
-            // Sell every asset!
-            if (action instanceof SellAsset) {
-                action.setAmount(action.getMax());
-                action.perform();
-            } else if (action instanceof PayLoan) {
-                // Loans must be terminated and changed into assets.
-                ((PayLoan)action).getLoan().liquidate();
-            } // all other actions are ignored
         }
 
     }

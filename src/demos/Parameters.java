@@ -13,9 +13,9 @@ public class Parameters {
     public static boolean INVESTOR_REDEMPTION = true;
     public static boolean FIRESALE_CONTAGION = true;
     public static boolean CASH_PROVIDER_RUNS = true;
-    public static boolean NEKO_MODEL = true;
+    public static boolean NEKO_MODEL = false;
+    public static boolean FIRESALES_UPON_DEFAULT = true;
 
-    // sell encumbered assets upon default
     // INTERBANK liquidity hoarding threshold
     // margin calls off
     //

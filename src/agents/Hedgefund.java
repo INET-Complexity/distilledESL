@@ -84,5 +84,14 @@ public class Hedgefund extends Agent implements CanPledgeCollateral {
         return getAssetValue() * Parameters.HF_CASH_TARGET_AS_FRACTION_OF_ASSETS;
     }
 
+    @Override
+    public void triggerDefault() {
+        super.triggerDefault();
 
+        HashSet<Contract> repos = mainLedger.getLiabilitiesOfType(Repo.class);
+        for (Contract repo : repos) {
+            ((Repo) repo).liquidate();
+        }
+
+    }
 }

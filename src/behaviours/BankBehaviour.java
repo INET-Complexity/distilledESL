@@ -1,13 +1,11 @@
 package behaviours;
 
 import actions.Action;
-import actions.PayLoan;
 import actions.PullFunding;
 import actions.SellAsset;
 import agents.Bank;
 import contracts.FailedMarginCallException;
-
-import java.util.ArrayList;
+import demos.Parameters;
 
 import static java.lang.Math.max;
 import static java.lang.Math.min;
@@ -24,18 +22,16 @@ public class BankBehaviour extends Behaviour {
     }
 
     @Override
-    protected void chooseActions() {
+    protected void chooseActions() throws DefaultException {
 
         // Check inbox for matured PullFunding requests. If we can't meet them right now, default.
         double maturedPullFunding = me.getMaturedObligations();
         if (maturedPullFunding > 0) {
-            System.out.println("We have matured payment contracts.obligations for a total of "+String.format("%.2f", maturedPullFunding));
+            System.out.println("We have matured payment contracts.obligations for a total of " + String.format("%.2f", maturedPullFunding));
             if (me.getCash() >= maturedPullFunding) {
                 me.fulfilMaturedRequests();
             } else {
-                //Todo: emergency procedure?
-                triggerDefault();
-                return;
+                throw new DefaultException();
             }
         }
 
@@ -43,7 +39,7 @@ public class BankBehaviour extends Behaviour {
         // and pay all of them now if possible.
         double totalPullFunding = me.getPendingObligations();
         if (totalPullFunding > 0) {
-            System.out.println("We have not-yet-matured payment contracts.obligations for a total of "+String.format("%.2f", totalPullFunding));
+            System.out.println("We have not-yet-matured payment contracts.obligations for a total of " + String.format("%.2f", totalPullFunding));
             if (me.getCash() >= totalPullFunding) {
                 me.fulfilAllRequests();
                 totalPullFunding = 0.0;
@@ -54,9 +50,14 @@ public class BankBehaviour extends Behaviour {
         try {
             me.runMarginCalls();
         } catch (FailedMarginCallException e) {
-            // If any margin call failed, DEFAULT!
-            triggerDefault(); //TODO; how to abort execution of 'chooseAvailableActions'?
-            return;
+            throw new DefaultException();
+        }
+
+        if (me.getLeverage() < Parameters.BANK_LEVERAGE_MIN) {
+            System.out.println("My leverage is "+me.getLeverage()+
+                    " which is below the minimum "+Parameters.BANK_LEVERAGE_MIN);
+            System.out.println("I'm dead.");
+            throw new DefaultException();
         }
 
         // 3) If we were trying to de-lever further from the previous timestep, we do it now. We break the LCR
@@ -126,9 +127,5 @@ public class BankBehaviour extends Behaviour {
         return max(me.getCash() - me.getLCR_constraint().getCashTarget(), 0.0);
     }
 
-
-    public void triggerDefault() {
-
-    }
 
 }

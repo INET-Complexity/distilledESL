@@ -156,10 +156,6 @@ public abstract class Agent {
         return (1.0 * getEquityValue() / getAssetValue());
     }
 
-    public void liquidateLoan(double initialValue, double valueFraction, Contract loan) {
-        mainLedger.liquidateLoan(initialValue, valueFraction, loan);
-    }
-
     public double getAssetValue() {
         return mainLedger.getAssetValue();
     }
@@ -189,4 +185,9 @@ public abstract class Agent {
     public boolean isAlive() {
         return alive;
     }
+
+    public void triggerDefault() {
+        alive = false;
+    }
+
 }

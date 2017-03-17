@@ -94,7 +94,6 @@ public class Repo extends Loan {
 
     @Override
     public void liquidate() {
-        super.liquidate();
         // When we liquidate a Repo, we must change the ownership of all the collateral and give it to the
         // asset party.
 
@@ -105,7 +104,18 @@ public class Repo extends Loan {
 
             // 2. Change the ownership of the asset
             ((Asset) asset).changeOwnership(assetParty, amountEncumbered);
+
+            // 3. Reduce the value of this repo to zero.
+            assetParty.devalueAsset(this, principal);
+            liabilityParty.devalueLiability(this, principal);
+
+            if (Parameters.FIRESALES_UPON_DEFAULT) {
+                ((Asset) asset).putForSale(((Asset) asset).getQuantity());
+            }
         }
+
+        principal = 0;
+
     }
 
     private HashMap<CanBeCollateral, Double> collateral;
