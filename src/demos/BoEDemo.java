@@ -51,14 +51,14 @@ public class BoEDemo {
         //Todo: depositors should be an agent
 
 
-        initAgent(bank1, 60, 100, 0, 75, 0,
-                0, 51.5, 0);
+        initAgent(bank1, 60, 120, 0, 90, 0,
+                115, 85.8, 0);
 
-        initAgent(bank2, 60, 100, 50, 0, 0,
-                75, 76, 0);
+        initAgent(bank2, 60, 120, 60, 0, 0,
+                145, 105.4, 0);
 
-        initAgent(bank3, 50, 0, 20, 20, 0,
-                150, 93.4, 0);
+        initAgent(bank3, 50, 0, 24, 24, 0,
+                142, 101.24, 0);
 
         initAgent(hf1, 0, 400, 0, 100, 0,
                 0, 0, 0);
@@ -81,9 +81,9 @@ public class BoEDemo {
         initRepo(bank2, hf1, 100.0);
         initRepo(bank3, hf1, 0.0);
 
-        initRepo(cp1, bank1, 325.0);
-        initRepo(cp1, bank2, 250.0);
-        initRepo(cp1, bank3, 40.0);
+        initRepo(cp1, bank1, 210.0);
+        initRepo(cp1, bank2, 180.0);
+        initRepo(cp1, bank3, 84.0);
 
 
 

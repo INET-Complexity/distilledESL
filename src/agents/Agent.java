@@ -188,6 +188,7 @@ public abstract class Agent {
 
     public void triggerDefault() {
         alive = false;
+        System.out.println("Trigger default!");
     }
 
 }

@@ -31,6 +31,7 @@ public class BankBehaviour extends Behaviour {
             if (me.getCash() >= maturedPullFunding) {
                 me.fulfilMaturedRequests();
             } else {
+                System.out.println("A matured obligation was not fulfilled.");
                 throw new DefaultException();
             }
         }
@@ -50,6 +51,7 @@ public class BankBehaviour extends Behaviour {
         try {
             me.runMarginCalls();
         } catch (FailedMarginCallException e) {
+            System.out.println("A margin call failed.");
             throw new DefaultException();
         }
 
