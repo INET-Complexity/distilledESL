@@ -41,7 +41,7 @@ public class Bank extends Agent implements CanPledgeCollateral {
         for (Contract contract : potentialCollateral) {
             CanBeCollateral asset = (CanBeCollateral) contract;
 
-            double quantityToPledge = total * asset.getUnencumberedValue() * (1.0 - asset.getHaircut()) / maxHaircutValue;
+            double quantityToPledge = asset.getUnencumberedValue() * (1.0 - asset.getHaircut()) * total / maxHaircutValue;
             repo.pledgeCollateral(asset, quantityToPledge);
             pledgedSoFar += quantityToPledge;
 
@@ -89,6 +89,7 @@ public class Bank extends Agent implements CanPledgeCollateral {
     public void printBalanceSheet() {
         super.printBalanceSheet();
         System.out.println("Risk Weighted Asset ratio: "+String.format("%.2f", rwa_constraint.getRWAratio()*100.0) + "%");
+        System.out.println("LCR is: "+String.format("%.2f", lcr_constraint.getLCR()*100) + "%");
     }
 
     public double getRWAratio() {

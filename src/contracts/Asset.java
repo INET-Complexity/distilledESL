@@ -3,6 +3,7 @@ package contracts;
 import agents.Agent;
 import actions.Action;
 import actions.SellAsset;
+import demos.Parameters;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -150,6 +151,11 @@ public class Asset extends Contract {
 
     public double getPutForSale() {
         return putForSale;
+    }
+
+    @Override
+    public double getRWAweight() {
+        return Parameters.getRWAWeight(assetType);
     }
 }
 

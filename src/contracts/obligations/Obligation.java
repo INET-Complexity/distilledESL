@@ -5,16 +5,13 @@ import contracts.Contract;
 
 
 public abstract class Obligation {
-    private Contract contract;
     protected double amount;
     private boolean fulfilled = false;
     private int timeLeftToPay;
-    private boolean arrived = false;
     private Agent from;
     private Agent to;
 
-    public Obligation(Contract contract, double amount, int timeLeftToPay) {
-        this.contract = contract;
+    Obligation(Contract contract, double amount, int timeLeftToPay) {
         this.amount = amount;
         this.timeLeftToPay = timeLeftToPay;
         this.from = contract.getAssetParty();
@@ -27,26 +24,17 @@ public abstract class Obligation {
         return amount;
     }
 
-    public boolean isFulfilled() {
+    boolean isFulfilled() {
         return fulfilled;
     }
 
-    public int getTimeLeftToPay() {
-        return timeLeftToPay;
-    }
-
-    public boolean isDue() {
+    boolean isDue() {
         return timeLeftToPay==0;
     }
 
-    public boolean hasArrived() { return arrived;}
 
-    public void tick() {
-        if (!arrived) {
-            arrived = true;
-            System.out.println("Obligation received from "+from.getName()+".\n");
-        }
-        else timeLeftToPay -= 1;
+    void tick() {
+        timeLeftToPay -= 1;
         //Todo: this is in timesteps. Might move to some other unit of time.
     }
 
@@ -58,7 +46,12 @@ public abstract class Obligation {
         return to;
     }
 
-    public void setFulfilled(boolean fulfilled) {
-        this.fulfilled = fulfilled;
+    void setFulfilled() {
+        this.fulfilled = true;
     }
+
+    void setAmount(double amount) {
+        this.amount = amount;
+    }
+
 }

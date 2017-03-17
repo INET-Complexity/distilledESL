@@ -8,7 +8,6 @@ import contracts.Shares;
 import demos.Parameters;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public class InvestorBehaviour extends Behaviour {
     private Investor me;
@@ -42,7 +41,7 @@ public class InvestorBehaviour extends Behaviour {
                     / (Math.E - 1);
 
             // Work out how many shares I must redeem given that fraction
-            int sharesToRedeem = (int) Math.floor(fractionToRedeem * shares.getNumberOfShares());
+            int sharesToRedeem = (int) Math.floor(fractionToRedeem * shares.getnShares());
 
             if (sharesToRedeem > 0) {
                 System.out.println("The NAV of "+shares.getLiabilityParty().getName()+

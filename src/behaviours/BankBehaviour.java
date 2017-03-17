@@ -38,7 +38,7 @@ public class BankBehaviour extends Behaviour {
 
         // Check inbox for other PullFunding requests, find out how much liquidity is needed,
         // and pay all of them now if possible.
-        double totalPullFunding = me.getPendingObligations();
+        double totalPullFunding = me.getAllPendingObligations();
         if (totalPullFunding > 0) {
             System.out.println("We have not-yet-matured payment contracts.obligations for a total of " + String.format("%.2f", totalPullFunding));
             if (me.getCash() >= totalPullFunding) {
@@ -93,7 +93,7 @@ public class BankBehaviour extends Behaviour {
         liquidityToRaise += me.getLCR_constraint().getLiquidityToRaise();
 
         // Discount the liquidity that we are expecting from pull funding requests not yet met by the counter-parties.
-        liquidityToRaise -= me.getPendingObligations();
+        liquidityToRaise -= me.getAllPendingObligations();
 
         // 4) If we decided we need to raise liquidity, we go through our available actions and select a set of actions
         // that will raise the required liquidity.

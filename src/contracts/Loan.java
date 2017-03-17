@@ -94,6 +94,11 @@ public class Loan extends Contract {
     public double getFundingAlreadyPulled() {
         return fundingAlreadyPulled;
     }
+
+    @Override
+    public double getRWAweight() {
+        return Parameters.INTERBANK_RWAWEIGHT;
+    }
 }
 
 

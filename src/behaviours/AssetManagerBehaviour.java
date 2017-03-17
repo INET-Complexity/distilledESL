@@ -31,7 +31,7 @@ public class AssetManagerBehaviour extends Behaviour {
 
         // 2) Check inbox for other Redeem requests, find out how much liquidity is needed,
         // and pay all of them now if possible.
-        double totalRedemptions = me.getPendingObligations();
+        double totalRedemptions = me.getAllPendingObligations();
         if (totalRedemptions > 0) {
             if (me.getCash() >= totalRedemptions) {
                 me.fulfilAllRequests();

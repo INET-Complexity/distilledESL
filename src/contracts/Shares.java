@@ -4,9 +4,6 @@ import actions.Action;
 import actions.RedeemShares;
 import agents.Agent;
 import agents.CanIssueShares;
-import contracts.obligations.Obligation;
-import contracts.obligations.RedeemSharesObligation;
-import demos.Parameters;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -18,16 +15,18 @@ import java.util.List;
 public class Shares extends Contract {
     private Agent owner;
     private CanIssueShares issuer;
-    private int numberOfShares;
+    private int nShares;
     private double previousValueOfShares;
     private double originalNAV;
+    private int nSharesPendingToRedeem;
 
-    public Shares(Agent owner, CanIssueShares issuer, int numberOfShares, double originalNAV) {
+    public Shares(Agent owner, CanIssueShares issuer, int nShares, double originalNAV) {
         this.owner = owner;
         this.issuer = issuer;
-        this.numberOfShares = numberOfShares;
+        this.nShares = nShares;
         this.previousValueOfShares = getValue();
         this.originalNAV = originalNAV;
+        this.nSharesPendingToRedeem = 0;
 
         assert(issuer instanceof Agent);
     }
@@ -42,19 +41,15 @@ public class Shares extends Contract {
     }
 
     public void redeem(int numberToRedeem) {
-        assert(numberToRedeem <= numberOfShares);
-        Obligation paymentObligation =
-                new RedeemSharesObligation(this, numberToRedeem * issuer.getNetAssetValue(),
-                        Parameters.TIMESTEPS_TO_PAY);
-
-        ((Agent) issuer).addToInbox(paymentObligation);
-        owner.addToOutbox(paymentObligation);
+        assert(numberToRedeem <= nShares);
+        double nav = getNAV();
+        ((Agent) issuer).payLiability(numberToRedeem * nav, this);
+        owner.sellAssetForValue(this, numberToRedeem * nav);
+        nShares -= numberToRedeem;
+        nSharesPendingToRedeem -= numberToRedeem;
     }
 
-    public void cashIn(double amount) {
-        ((Agent) issuer).payLiability(amount, this);
-        owner.sellAssetForValue(this, amount);
-    }
+
 
     @Override
     public Agent getAssetParty() {
@@ -68,14 +63,16 @@ public class Shares extends Contract {
 
     @Override
     public double getValue(Agent me) {
-        return numberOfShares * issuer.getNetAssetValue();
+        return nShares * issuer.getNetAssetValue();
     }
 
-    public int getNumberOfShares() {return numberOfShares;}
+    public double getNAV() { return issuer.getNetAssetValue(); }
+
+    public int getnShares() {return nShares;}
 
     @Override
     public List<Action> getAvailableActions(Agent me) {
-        if (!(me==owner) || !(numberOfShares > 0)) return Collections.emptyList();
+        if (!(me==owner) || !(nShares > 0)) return Collections.emptyList();
 
         ArrayList<Action> availableActions = new ArrayList<>();
         availableActions.add(new RedeemShares(this));
@@ -97,6 +94,14 @@ public class Shares extends Contract {
 
     public double getOriginalNAV() {
         return originalNAV;
+    }
+
+    public void addSharesPendingToRedeem(int number) {
+        nSharesPendingToRedeem += number;
+    }
+
+    public int getnSharesPendingToRedeem() {
+        return nSharesPendingToRedeem;
     }
 }
 

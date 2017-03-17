@@ -62,11 +62,15 @@ public class Repo extends Loan {
 
     public void marginCall() throws FailedMarginCallException {
         double currentValue = valueCollateralHaircutted();
+
         CanPledgeCollateral borrower = (CanPledgeCollateral) liabilityParty;
 
         if (currentValue < principal) { //TODO: finite precision
 
-            if (principal - currentValue < borrower.getMaxUnencumberedHaircuttedCollateral()) {
+            if ((principal - currentValue) > borrower.getMaxUnencumberedHaircuttedCollateral()) {
+                System.out.println("The margin call on Repo"+getName(liabilityParty)+" failed." +
+                        " The value of the collateral was "+currentValue+",\n but the principal of the repo is "+principal +
+                        " and I only have a total extra collateral of "+borrower.getMaxUnencumberedHaircuttedCollateral());
                 throw new FailedMarginCallException();
             }
 
@@ -85,9 +89,10 @@ public class Repo extends Loan {
             Double quantity = entry.getValue();
 
             value += asset.getPrice() * quantity * (1.0 - asset.getHaircut());
+
         }
 
-            value += cashCollateral;
+        value += cashCollateral;
 
         return value;
     }
@@ -154,4 +159,8 @@ public class Repo extends Loan {
         return principal;
     }
 
+    @Override
+    public double getRWAweight() {
+        return 0.0;
+    }
 }

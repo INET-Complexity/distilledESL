@@ -1,10 +1,8 @@
 package behaviours;
 
 import actions.Action;
-import actions.PayLoan;
 import actions.SellAsset;
 import agents.Hedgefund;
-import demos.Parameters;
 
 import java.util.ArrayList;
 
@@ -40,7 +38,7 @@ public class HedgefundBehaviour extends Behaviour {
 
         // 2) Check inbox for (non-matured) requests to pull funding, find out how much liquidity is needed,
         // and pay all of them now if possible.
-        double totalPullFunding = me.getPendingObligations();
+        double totalPullFunding = me.getAllPendingObligations();
         if (totalPullFunding > 0) {
             if(me.getCash() >= totalPullFunding) {
                 me.fulfilAllRequests();

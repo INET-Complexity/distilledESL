@@ -131,6 +131,8 @@ public class Recorder {
         banksFile.println(bankLine);
 
 
+        //todo: equity and assets and cash for banks and hF
+        // todo: redemptions from asset manager.
 
 
 

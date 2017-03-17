@@ -3,78 +3,29 @@ package agents;
 import accounting.Ledger;
 import actions.Action;
 import behaviours.Behaviour;
+import contracts.Asset;
 import contracts.Contract;
 import contracts.FailedMarginCallException;
 import contracts.Repo;
+import contracts.obligations.Mailbox;
 import contracts.obligations.Obligation;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.stream.Collectors;
 
 public abstract class Agent {
     Ledger mainLedger;
     private String name;
-    private HashSet<Obligation> obligationInbox;
-    private HashSet<Obligation> obligationOutbox;
     private boolean alive=true;
     private double encumberedCash;
+    private Mailbox mailbox;
 
 
     public Agent(String name) {
         this.name = name;
         mainLedger = new Ledger(this);
-        obligationInbox = new HashSet<>();
-        obligationOutbox = new HashSet<>();
-    }
-
-    public void addToInbox(Obligation obligation) {
-
-        obligationInbox.add(obligation);
-        System.out.println("Obligation sent from "+obligation.getFrom().getName() +
-                " to "+obligation.getTo().getName());
-    }
-
-    public void addToOutbox(Obligation obligation) {
-        obligationOutbox.add(obligation);
-    }
-
-    public double getMaturedObligations() {
-        return obligationInbox.stream()
-                .filter(Obligation::hasArrived)
-                .filter(Obligation::isDue)
-                .filter(obligation -> ! obligation.isFulfilled())
-                .mapToDouble(Obligation::getAmount).sum();
-    }
-
-    public double getPendingObligations() {
-        return obligationInbox.stream()
-                .filter(Obligation::hasArrived)
-                .filter(obligation -> ! obligation.isFulfilled())
-                .mapToDouble(Obligation::getAmount).sum();
-    }
-
-    public void fulfilAllRequests() {
-        for (Obligation obligation : obligationInbox) {
-            if (! obligation.isFulfilled() && obligation.hasArrived()) obligation.fulfil();
-        }
-    }
-
-    public void fulfilMaturedRequests() {
-        for (Obligation obligation : obligationInbox) {
-            if (obligation.isDue() && ! obligation.isFulfilled() && obligation.hasArrived()) {
-                obligation.fulfil();
-            }
-        }
-    }
-
-    public void tick() {
-        // Remove all fulfilled requests
-        obligationInbox.removeIf(Obligation::isFulfilled);
-
-        for (Obligation obligation : obligationInbox) {
-            obligation.tick();
-        }
-
+        this.mailbox = new Mailbox();
     }
 
     public String getName() {
@@ -177,7 +128,7 @@ public abstract class Agent {
     }
 
     public void runMarginCalls() throws FailedMarginCallException {
-        HashSet<Contract> repoContracts = mainLedger.getAssetsOfType(Repo.class);
+        HashSet<Contract> repoContracts = mainLedger.getLiabilitiesOfType(Repo.class);
         for (Contract contract : repoContracts) {
             Repo repo = (Repo) contract;
             repo.marginCall(); // Throws exception if it fails.
@@ -202,6 +153,49 @@ public abstract class Agent {
     public void unencumberCash(double amount) {
         assert(encumberedCash >= amount);
         encumberedCash -= amount;
+    }
+
+    public void receiveShockToAsset(Asset.AssetType assetType, double fractionLost) {
+        HashSet<Contract> assetsShocked = mainLedger.getAssetsOfType(Asset.class).stream()
+                .filter(asset -> ((Asset) asset).getAssetType()==assetType)
+                .collect(Collectors.toCollection(HashSet::new));
+
+        if (!(assetsShocked.isEmpty())) {
+            System.out.println(getName()+" received a shock!! Asset type "+assetType+" lost "
+                    +String.format("%.2f", fractionLost*100.0)+"% of value.");
+            for (Contract asset : assetsShocked) {
+                devalueAsset(asset, asset.getValue() * fractionLost);
+            }
+        }
+    }
+
+    public void tick() {
+        mailbox.tick();
+    }
+
+    public void sendMessage(Agent to, Obligation obligation) {
+        to.receiveMessage(this, obligation);
+        mailbox.addToOutbox(obligation);
+    }
+
+    public void receiveMessage(Agent from, Obligation obligation) {
+        mailbox.addToInbox(obligation);
+    }
+
+    public double getMaturedObligations() {
+        return mailbox.getMaturedObligations();
+    }
+
+    public double getAllPendingObligations() {
+        return mailbox.getAllPendingObligations();
+    }
+
+    public void fulfilAllRequests() {
+        mailbox.fulfilAllRequests();
+    }
+
+    public void fulfilMaturedRequests() {
+        mailbox.fulfilMaturedRequests();
     }
 
 }

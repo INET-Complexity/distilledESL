@@ -27,9 +27,8 @@ public class PullFunding extends Action {
         } else {
             // If there is a counter-party AND we have funding contagion, we must send a Obligation.
             Obligation obligation = new PullFundingObligation(loan, getAmount(), Parameters.TIMESTEPS_TO_PAY);
+            loan.getAssetParty().sendMessage(loan.getLiabilityParty(), obligation);
 
-            loan.getAssetParty().addToOutbox(obligation);
-            loan.getLiabilityParty().addToInbox(obligation);
         }
     }
 

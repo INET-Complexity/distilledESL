@@ -18,6 +18,6 @@ public class PullFundingObligation extends Obligation {
                 loan.getAssetParty().getName()+
                 " an amount "+String.format("%.2f", amount)+".");
 
-        setFulfilled(true);
+        setFulfilled();
     }
 }

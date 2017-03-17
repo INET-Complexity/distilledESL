@@ -24,8 +24,8 @@ public class Parameters {
 
 
 
-    public static double INITIAL_SHOCK = 0.05;
-    public static Asset.AssetType ASSET_TO_SHOCK = Asset.AssetType.EXTERNAL1;
+    public static double INITIAL_SHOCK = 0.10;
+    public static Asset.AssetType ASSET_TO_SHOCK = Asset.AssetType.EXTERNAL2;
 
     // Cash Provider
     public static double HAIRCUT_SLOPE = 0.1;
@@ -93,10 +93,16 @@ public class Parameters {
     public static double getRWAWeight(Asset.AssetType assetType) {
         switch (assetType) {
             case CORPORATE_BONDS:
-                return 1.0;
+                return 1.00;
             case EQUITIES:
                 return 0.75;
             case MBS:
+                return 0.35;
+            case EXTERNAL1:
+                return 0.35;
+            case EXTERNAL2:
+                return 0.35;
+            case EXTERNAL3:
                 return 0.35;
             default:
                 return 0.0;
@@ -113,7 +119,6 @@ public class Parameters {
 
 
     public static double INTERBANK_RWAWEIGHT = 0.40;
-    //todo: compute RWA
 
     public static boolean ASSET_MANAGER_ON = INVESTOR_REDEMPTION;
     public static boolean HEDGEFUNDS_ON = true;

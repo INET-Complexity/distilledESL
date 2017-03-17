@@ -108,14 +108,10 @@ public class AssetMarket {
         return haircuts.containsKey(assetType) ? haircuts.get(assetType) : 0.0;
     }
 
-    private void setPrice(Asset.AssetType assetType, double newPrice) {
+    public void setPrice(Asset.AssetType assetType, double newPrice) {
         prices.put(assetType, newPrice);
     }
-
-    public void shockPrice(Asset.AssetType assetType, double fraction) {
-        setPrice(assetType, getPrice(assetType) * (1.0 - fraction));
-    }
-
+    //todo: should not be public
 
     private class Order {
         private Asset asset;
