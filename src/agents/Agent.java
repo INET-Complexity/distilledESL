@@ -3,10 +3,10 @@ package agents;
 import accounting.Ledger;
 import actions.Action;
 import behaviours.Behaviour;
-import contracts.Asset;
 import contracts.Contract;
 import contracts.FailedMarginCallException;
 import contracts.Repo;
+import contracts.obligations.Obligation;
 
 import java.util.ArrayList;
 import java.util.HashSet;

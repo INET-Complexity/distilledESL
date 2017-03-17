@@ -1,12 +1,12 @@
-package agents;
+package contracts.obligations;
 
+import agents.Agent;
 import contracts.Contract;
-import contracts.Loan;
-import contracts.Shares;
 
-public class Obligation {
+
+public abstract class Obligation {
     private Contract contract;
-    private double amount;
+    protected double amount;
     private boolean fulfilled = false;
     private int timeLeftToPay;
     private boolean arrived = false;
@@ -21,20 +21,7 @@ public class Obligation {
         this.to = contract.getLiabilityParty();
     }
 
-    public void fulfil() {
-        if (contract instanceof Loan) {
-            ((Loan) contract).payLoan(amount);
-            System.out.println(contract.getLiabilityParty().getName()+" has fulfilled an obligation to pay " +
-                    contract.getAssetParty().getName()+
-                    " an amount "+String.format("%.2f", amount)+".");
-        } else if (contract instanceof Shares) {
-            ((Shares) contract).cashIn(amount);
-            System.out.println(contract.getLiabilityParty().getName()+" has fulfilled an obligation to redeem shares and pay " +
-                    contract.getAssetParty().getName()+
-                    " an amount "+String.format("%.2f", amount)+".");
-        }
-        fulfilled = true;
-    }
+    public abstract void fulfil();
 
     public double getAmount() {
         return amount;
@@ -69,5 +56,9 @@ public class Obligation {
 
     public Agent getTo() {
         return to;
+    }
+
+    public void setFulfilled(boolean fulfilled) {
+        this.fulfilled = fulfilled;
     }
 }

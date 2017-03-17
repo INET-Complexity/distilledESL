@@ -29,7 +29,7 @@ public class BankBehaviour extends Behaviour {
         // Check inbox for matured PullFunding requests. If we can't meet them right now, default.
         double maturedPullFunding = me.getMaturedObligations();
         if (maturedPullFunding > 0) {
-            System.out.println("We have matured payment obligations for a total of "+String.format("%.2f", maturedPullFunding));
+            System.out.println("We have matured payment contracts.obligations for a total of "+String.format("%.2f", maturedPullFunding));
             if (me.getCash() >= maturedPullFunding) {
                 me.fulfilMaturedRequests();
             } else {
@@ -43,7 +43,7 @@ public class BankBehaviour extends Behaviour {
         // and pay all of them now if possible.
         double totalPullFunding = me.getPendingObligations();
         if (totalPullFunding > 0) {
-            System.out.println("We have not-yet-matured payment obligations for a total of "+String.format("%.2f", totalPullFunding));
+            System.out.println("We have not-yet-matured payment contracts.obligations for a total of "+String.format("%.2f", totalPullFunding));
             if (me.getCash() >= totalPullFunding) {
                 me.fulfilAllRequests();
                 totalPullFunding = 0.0;

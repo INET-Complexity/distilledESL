@@ -4,7 +4,8 @@ import actions.Action;
 import actions.RedeemShares;
 import agents.Agent;
 import agents.CanIssueShares;
-import agents.Obligation;
+import contracts.obligations.Obligation;
+import contracts.obligations.RedeemSharesObligation;
 import demos.Parameters;
 
 import java.util.ArrayList;
@@ -43,7 +44,7 @@ public class Shares extends Contract {
     public void redeem(int numberToRedeem) {
         assert(numberToRedeem <= numberOfShares);
         Obligation paymentObligation =
-                new Obligation(this, numberToRedeem * issuer.getNetAssetValue(),
+                new RedeemSharesObligation(this, numberToRedeem * issuer.getNetAssetValue(),
                         Parameters.TIMESTEPS_TO_PAY);
 
         ((Agent) issuer).addToInbox(paymentObligation);
