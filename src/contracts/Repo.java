@@ -1,9 +1,8 @@
 package contracts;
 
-import actions.Action;
-import actions.MarginCall;
 import agents.Agent;
 import agents.CanPledgeCollateral;
+import demos.Parameters;
 
 import java.util.*;
 
@@ -22,6 +21,17 @@ public class Repo extends Loan {
         this.collateral = new HashMap<>();
     }
 
+    @Override
+    public double getLCRweight() {
+        return Parameters.REPO_LCR;
+    }
+
+    @Override
+    public String getName(Agent me) {
+        if (me==assetParty) return "Reverse-repo to "+liabilityParty.getName();
+        else return "Repo from "+assetParty.getName();
+    }
+
     public void pledgeCollateral(CanBeCollateral asset, double quantity) {
         asset.encumber(quantity);
 
@@ -38,13 +48,20 @@ public class Repo extends Loan {
         collateral.put(asset, collateral.get(asset) - quantity);
     }
 
-    public void marginCall() {
+    public void marginCall() throws FailedMarginCallException {
         double currentValue = valueCollateralHaircutted();
-        if (currentValue < principal) { //TODO: include finite precision? i.e. currentValue < principal + smallNumber
-            ((CanPledgeCollateral) liabilityParty).putMoreCollateral(principal - currentValue, this);
+        CanPledgeCollateral borrower = (CanPledgeCollateral) liabilityParty;
+
+        if (currentValue < principal) { //TODO: finite precision
+
+            if (principal - currentValue < borrower.getMaxUnencumberedHaircuttedCollateral()) {
+                throw new FailedMarginCallException();
+            }
+
+            borrower.putMoreCollateral(principal - currentValue, this);
 
         } else if (currentValue > principal) {
-            ((CanPledgeCollateral) liabilityParty).withdrawCollateral(principal - currentValue, this);
+             borrower.withdrawCollateral(principal - currentValue, this);
         }
     }
 
@@ -55,7 +72,7 @@ public class Repo extends Loan {
             CanBeCollateral asset = entry.getKey();
             Double quantity = entry.getValue();
 
-            value += asset.getPrice() * quantity * (1.0 - asset.getHairCut());
+            value += asset.getPrice() * quantity * (1.0 - asset.getHaircut());
         }
 
         return value;
@@ -70,8 +87,24 @@ public class Repo extends Loan {
 
         for (Map.Entry<CanBeCollateral, Double> entry : collateral.entrySet()) {
             CanBeCollateral asset = entry.getKey();
-            double quantityToUnpledge = collateral.get(asset) * (1 - asset.getHairCut()) * excessValue / totalValue;
+            double quantityToUnpledge = entry.getValue() * (1 - asset.getHaircut()) * excessValue / totalValue;
             unpledgeCollateral(asset, quantityToUnpledge);
+        }
+    }
+
+    @Override
+    public void liquidate() {
+        super.liquidate();
+        // When we liquidate a Repo, we must change the ownership of all the collateral and give it to the
+        // asset party.
+
+        for (Map.Entry<CanBeCollateral, Double> entry : collateral.entrySet()) {
+            // 1. Take one type of collateral at a time
+            CanBeCollateral asset = entry.getKey();
+            double amountEncumbered = entry.getValue();
+
+            // 2. Change the ownership of the asset
+            ((Asset) asset).changeOwnership(assetParty, amountEncumbered);
         }
     }
 
@@ -92,12 +125,4 @@ public class Repo extends Loan {
         return principal;
     }
 
-    @Override
-    public ArrayList<Action> getAvailableActions(Agent me) {
-        ArrayList<Action> availableActions = super.getAvailableActions(me);
-        if (me == assetParty) {
-            availableActions.add(new MarginCall(this));
-        }
-        return availableActions;
-    }
 }

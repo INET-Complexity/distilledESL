@@ -1,9 +1,6 @@
 package actions;
 
-import agents.Bank;
 import contracts.Loan;
-
-import static java.lang.Math.min;
 
 /**
  * the Payloan action represents the chance to pay back a loan that the agent has on its liability side.
@@ -21,22 +18,7 @@ public class PayLoan extends Action {
 
     @Override
     public void perform() {
-        Bank borrower = (Bank) loan.getLiabilityParty();
-
-        // changes the accounts
-        // TODO: Important! This bit here can cause the borrower to raise liquidity immediately.
-        // Todo: we probably need an exception to guard against defaults.
-        borrower.getMainLedger().payLiability(getAmount(), loan);
-
-
-        if (loan.getAssetParty()!= null) {
-            Bank lender = (Bank) loan.getAssetParty();
-            lender.getMainLedger().pullFunding(getAmount(), loan);
-        }
-
-        // changes the contract
-        loan.reducePrincipal(getAmount());
-
+        loan.payLoan(getAmount());
     }
 
     public double getMax() {
@@ -45,11 +27,15 @@ public class PayLoan extends Action {
 
     @Override
     public void print() {
-        System.out.println("PayLoan action by "+loan.getLiabilityParty().getName()+" -> amount: "+String.format( "%.2f", getAmount()));
+        System.out.println("Pay Loan action by "+loan.getLiabilityParty().getName()+" -> amount: "+String.format( "%.2f", getAmount()));
     }
 
     public String getName() {
-        return "PayLoan";
+        if (loan.getAssetParty()==null) {
+            return "Pay Loan to unspecified lender [max: "+getMax()+"]";
+        } else {
+            return "Pay Loan to "+loan.getAssetParty().getName()+" [max: "+getMax()+"]";
+        }
     }
 
     public Loan getLoan() {

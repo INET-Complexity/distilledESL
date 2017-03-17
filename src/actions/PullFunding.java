@@ -1,8 +1,8 @@
 package actions;
 
-import agents.Agent;
-import agents.Bank;
+import agents.Obligation;
 import contracts.Loan;
+import demos.Parameters;
 
 public class PullFunding extends Action {
 
@@ -12,33 +12,38 @@ public class PullFunding extends Action {
         setAmount(0.0);
     }
 
+    public Loan getLoan() {
+        return loan;
+    }
+
     @Override
     public void perform() {
-        Agent lender = loan.getAssetParty();
-        Agent borrower = loan.getLiabilityParty();
+        loan.increaseFundingPulled(getAmount());
 
-        lender.pullFunding(getAmount(), loan);
-        try {
-            borrower.payLoan(getAmount(), loan);
-        } catch (Exception e) {
-            e.printStackTrace();
+        if (loan.getLiabilityParty()==null || !Parameters.FUNDING_CONTAGION_HEDGEFUND) {
+            // If there's no counter-party OR if there's no funding contagion, the payment can happen instantaneously
+            loan.payLoan(getAmount());
+        } else {
+            // If there is a counter-party AND we have funding contagion, we must send a Obligation.
+            Obligation obligation = new Obligation(loan, getAmount(), Parameters.TIMESTEPS_TO_PAY);
+
+            loan.getAssetParty().addToOutbox(obligation);
+            loan.getLiabilityParty().addToInbox(obligation);
         }
-
     }
 
     @Override
     public double getMax() {
-        //Todo: we need to check that the other party can afford to pay the loan!!
-        return loan.getValue();
+        return (loan.getValue() - loan.getFundingAlreadyPulled());
     }
 
     @Override
     public void print() {
-        System.out.println("PullFunding action by "+loan.getAssetParty().getName()+" -> amount "
+        System.out.println("Pull Funding action by "+loan.getAssetParty().getName()+" -> amount "
             + String.format( "%.2f", getAmount()) +", borrower is "+loan.getLiabilityParty().getName());
     }
 
     public String getName() {
-        return "PullFunding from "+loan.getLiabilityParty().getName();
+        return "Pull Funding from "+loan.getLiabilityParty().getName()+" [max: "+getMax()+"]";
     }
 }

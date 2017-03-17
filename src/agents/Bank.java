@@ -1,16 +1,16 @@
 package agents;
 
-import actions.Action;
 import actions.LCR_Constraint;
 import actions.BankLeverageConstraint;
-import actions.SellAsset;
+import actions.RWA_Constraint;
+import behaviours.BankBehaviour;
+import behaviours.Behaviour;
 import contracts.*;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 
 /**
- * This class represents a simple bank with a single Ledger, called 'general Ledger'.
+ * This class represents a simple me with a single Ledger, called 'general Ledger'.
  *
  * Every Bank has a BankBehaviour.
  */
@@ -18,26 +18,15 @@ public class Bank extends Agent implements CanPledgeCollateral {
 
     private BankLeverageConstraint bankLeverageConstraint;
     private LCR_Constraint lcr_constraint;
+    private BankBehaviour behaviour;
+    private RWA_Constraint rwa_constraint;
 
     public Bank(String name) {
         super(name);
         this.bankLeverageConstraint = new BankLeverageConstraint(this);
-    }
-
-    //Todo: is this the best way to do this? This should really be in Behaviour
-    public void raiseLiquidity(double liquidityNeeded) {
-        ArrayList<Action> availableActions = getAvailableActions(this);
-
-        double initialAssetHoldings = mainLedger.getAssetValueOf(Asset.class);
-
-        for (Action action : availableActions) {
-            if (action instanceof SellAsset) {
-                action.setAmount(action.getMax()*liquidityNeeded/initialAssetHoldings);
-                action.print();
-                action.perform();
-            }
-        }
-
+        this.lcr_constraint = new LCR_Constraint(this);
+        this.behaviour = new BankBehaviour(this);
+        this.rwa_constraint = new RWA_Constraint(this);
     }
 
     @Override
@@ -45,22 +34,25 @@ public class Bank extends Agent implements CanPledgeCollateral {
         // First, get a set of all my Assets that can be pledged as collateral
         HashSet<Contract> potentialCollateral = mainLedger.getAssetsOfType(AssetCollateral.class);
 
-        double maxHaircutValue = 0.0;
-        for (Contract contract : potentialCollateral) {
-            assert(contract instanceof CanBeCollateral);
-            CanBeCollateral asset = (CanBeCollateral) contract;
-            maxHaircutValue += asset.getMaxEncumberableValue() * (1.0 - asset.getHairCut());
-        }
+        double maxHaircutValue = getMaxUnencumberedHaircuttedCollateral();
 
         for (Contract contract : potentialCollateral) {
             CanBeCollateral asset = (CanBeCollateral) contract;
 
-            double quantityToPledge = total * asset.getMaxEncumberableValue() * (1.0 - asset.getHairCut()) / maxHaircutValue;
+            double quantityToPledge = total * asset.getUnencumberedValue() * (1.0 - asset.getHaircut()) / maxHaircutValue;
             repo.pledgeCollateral(asset, quantityToPledge);
 
         }
     }
 
+    @Override
+    public double getMaxUnencumberedHaircuttedCollateral() {
+        return mainLedger.getAssetsOfType(AssetCollateral.class).stream()
+                .mapToDouble(asset ->
+                        ((CanBeCollateral) asset).getUnencumberedValue() *
+                                (1.0 - ((CanBeCollateral) asset).getHaircut()))
+                .sum();
+    }
 
     public void withdrawCollateral(double excessValue, Repo repo) {
         repo.unpledgeProportionally(excessValue);
@@ -81,5 +73,20 @@ public class Bank extends Agent implements CanPledgeCollateral {
 
     public void setLCR_constraint(LCR_Constraint lcr_constraint) {
         this.lcr_constraint = lcr_constraint;
+    }
+
+    @Override
+    public Behaviour getBehaviour() {
+        return behaviour;
+    }
+
+    @Override
+    public void printBalanceSheet() {
+        super.printBalanceSheet();
+        System.out.println("Risk Weighted Asset ratio: "+String.format("%.2f", rwa_constraint.getRWAratio()*100.0) + "%");
+    }
+
+    public double getRWAratio() {
+        return rwa_constraint.getRWAratio();
     }
 }

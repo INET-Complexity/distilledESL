@@ -1,74 +1,148 @@
 package contracts;
 
+import demos.Parameters;
+
+import java.util.*;
+
 public class AssetMarket {
-    private double price1;
-    private double price2;
-    private double price3;
-    private double priceE;
-    private static final double PRICE_IMPACT = 0.0025;
+    private HashMap<Asset.AssetType, Double> prices;
+    private HashMap<Asset.AssetType, Double> priceImpacts;
+    private HashMap<Asset.AssetType, Double> amountsSold;
+    private HashMap<Asset.AssetType, Double> haircuts;
+    private HashMap<Asset.AssetType, Double> totalAmountsSold;
+    private HashSet<Order> orderbook;
 
     public AssetMarket() {
-        price1=1;
-        price2=1;
-        price3=1;
-        priceE=1;
+        prices = new HashMap<>();
+        priceImpacts = new HashMap<>();
+        amountsSold = new HashMap<>();
+        haircuts = new HashMap<>();
+        totalAmountsSold = new HashMap<>();
+        orderbook = new HashSet<>();
+
+        init();
+
     }
 
-    public void computePriceImpact(Asset.AssetType assetType, double amount) {
-        double currentPrice = getPrice(assetType);
-        double newPrice = currentPrice * (1.0 - amount*PRICE_IMPACT);
-        switch (assetType) {
-            case A1:
-                price1 = newPrice;
-                break;
-            case A2:
-                price2 = newPrice;
-                break;
-            case A3:
-                price3 = newPrice;
-                break;
-            case E:
-                priceE = newPrice;
-                break;
+    private void init() {
+        setPrice(Asset.AssetType.CORPORATE_BONDS, 1.0);
+        setPrice(Asset.AssetType.EQUITIES, 1.0);
+        setPrice(Asset.AssetType.EXTERNAL1, 1.0);
+        setPrice(Asset.AssetType.EXTERNAL2, 1.0);
+        setPrice(Asset.AssetType.EXTERNAL3, 1.0);
+        setPrice(Asset.AssetType.MBS, 1.0);
+
+        priceImpacts.put(Asset.AssetType.MBS, Parameters.PRICE_IMPACT_MBS);
+        priceImpacts.put(Asset.AssetType.EQUITIES, Parameters.PRICE_IMPACT_EQUITIES);
+        priceImpacts.put(Asset.AssetType.CORPORATE_BONDS, Parameters.PRICE_IMPACT_CORPORATE_BONDS);
+
+        haircuts.put(Asset.AssetType.MBS, Parameters.getInitialHaircut(Asset.AssetType.MBS));
+        haircuts.put(Asset.AssetType.EQUITIES, Parameters.getInitialHaircut(Asset.AssetType.EQUITIES));
+        haircuts.put(Asset.AssetType.CORPORATE_BONDS, Parameters.getInitialHaircut(Asset.AssetType.CORPORATE_BONDS));
+
+        totalAmountsSold.put(Asset.AssetType.MBS, 0.0);
+        totalAmountsSold.put(Asset.AssetType.EQUITIES, 0.0);
+        totalAmountsSold.put(Asset.AssetType.CORPORATE_BONDS, 0.0);
+
+
+    }
+
+    public void putForSale(Asset asset, double amount) {
+        orderbook.add(new Order(asset, amount));
+        Asset.AssetType type = asset.getAssetType();
+
+        if (!amountsSold.containsKey(type)) {
+            amountsSold.put(type, amount);
+        } else {
+            amountsSold.put(type, amountsSold.get(type) + amount);
         }
+
+    }
+
+
+    public void clearTheMarket() {
+        System.out.println("\nMARKET CLEARING\n");
+        for (Map.Entry<Asset.AssetType, Double> entry : amountsSold.entrySet()) {
+            if (Parameters.FIRESALE_CONTAGION) computePriceImpact(entry.getKey(), entry.getValue());
+            if (Parameters.HAIRCUT_CONTAGION) computeHaircut(entry.getKey(), entry.getValue());
+
+            if (!totalAmountsSold.containsKey(entry.getKey())) {
+                totalAmountsSold.put(entry.getKey(), entry.getValue());
+            } else {
+                totalAmountsSold.put(entry.getKey(), totalAmountsSold.get(entry.getKey()) + entry.getValue());
+            }
+        }
+
+        amountsSold.clear();
+
+        for (Order order : orderbook) {
+            order.settle();
+        }
+
+        orderbook.clear();
+    }
+
+
+    private void computePriceImpact(Asset.AssetType assetType, double amountSold) {
+        double newPrice = prices.get(assetType) * (1.0 - amountSold * priceImpacts.get(assetType));
+        setPrice(assetType, newPrice);
+    }
+
+    private void computeHaircut(Asset.AssetType assetType, double amountSold) {
+        if (!haircuts.containsKey(assetType)) return;
+
+        double h0 = Parameters.getInitialHaircut(assetType);
+        double p0 = 1.0;
+
+        double newHaircut = h0 * Math.max(1.0, Parameters.HAIRCUT_SLOPE * Math.max((p0 - getPrice(assetType)) / p0, 0.0));
+        haircuts.put(assetType, newHaircut);
+
     }
 
     public double getPrice(Asset.AssetType assetType) {
-        double price = 0;
-        switch (assetType) {
-            case A1:
-                price=price1;
-                break;
+        return prices.get(assetType);
+    }
 
-            case A2:
-                price=price2;
-                break;
+    public double getHaircut(Asset.AssetType assetType) {
+        return haircuts.containsKey(assetType) ? haircuts.get(assetType) : 0.0;
+    }
 
-            case A3:
-                price=price3;
-                break;
+    private void setPrice(Asset.AssetType assetType, double newPrice) {
+        prices.put(assetType, newPrice);
+    }
 
-            case E:
-                price=priceE;
-                break;
+    public void shockPrice(Asset.AssetType assetType, double fraction) {
+        setPrice(assetType, getPrice(assetType) * (1.0 - fraction));
+    }
+
+
+    private class Order {
+        private Asset asset;
+        private double quantity;
+
+        private Order(Asset asset, double quantity) {
+            this.asset = asset;
+            this.quantity = quantity;
         }
 
-        return price;
+        private void settle() {
+            asset.clearSale(quantity);
+        }
+
     }
 
-    public void setPrice1(double price1) {
-        this.price1 = price1;
+    public ArrayList<Asset.AssetType> getAssetTypes() {
+        ArrayList<Asset.AssetType> assetTypesArray = new ArrayList<>();
+
+        Set<Asset.AssetType> assetTypes = prices.keySet();
+        for (Asset.AssetType type : assetTypes) {
+            assetTypesArray.add(type);
+        }
+
+        return assetTypesArray;
     }
 
-    public void setPrice2(double price2) {
-        this.price2 = price2;
-    }
-
-    public void setPrice3(double price3) {
-        this.price3 = price3;
-    }
-
-    public void setPriceE(double priceE) {
-        this.priceE = priceE;
+    public double getTotalAmountSold(Asset.AssetType assetType) {
+        return totalAmountsSold.containsKey(assetType) ? totalAmountsSold.get(assetType) : -1;
     }
 }

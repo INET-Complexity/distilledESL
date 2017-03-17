@@ -4,11 +4,12 @@ import agents.Agent;
 
 public class AssetCollateral extends Asset implements CanBeCollateral {
 
+    private double encumberedQuantity;
+
+
     public AssetCollateral(Agent assetParty, AssetType assetType, AssetMarket assetMarket, double amount) {
         super(assetParty, assetType, assetMarket, amount);
     }
-
-    private double encumberedQuantity;
 
     @Override
     public void encumber(double quantity) {
@@ -21,23 +22,14 @@ public class AssetCollateral extends Asset implements CanBeCollateral {
     }
 
     @Override
-    public double getHairCut() {
-        return 0;//TODO where do I get the haircuts from? My agent?
+    public double getHaircut() {
+        return assetMarket.getHaircut(getAssetType());
     }
 
-    public double getMaxEncumberableQuantity() {
+    public double getUnencumberedQuantity() {
         return getQuantity() - encumberedQuantity;
     }
 
-    public double getMaxEncumberableValue() {return getMaxEncumberableQuantity() * getPrice();}
+    public double getUnencumberedValue() {return getUnencumberedQuantity() * getPrice();}
 
-//    @Override
-//    public ArrayList<Action> getAvailableActions(Agent me) {
-//        ArrayList<Action> availableActions = super.getAvailableActions(me);
-//        if (getMaxEncumberableQuantity() > 0) {
-//            availableActions.add(new PledgeAsCollateral(this));
-//        }
-//
-//        return null;
-//    }
 }

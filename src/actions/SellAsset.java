@@ -1,7 +1,7 @@
 package actions;
 
-import agents.Bank;
 import contracts.Asset;
+import contracts.AssetCollateral;
 
 public class SellAsset extends Action {
 
@@ -14,17 +14,20 @@ public class SellAsset extends Action {
 
     @Override
     public void perform() {
-        Bank owner = (Bank) asset.getAssetParty();
-        // changes the contract
-        asset.sellAmount(getAmount());
-        // changes the accounts
-        owner.getMainLedger().sellAsset(getAmount(), asset.getClass());
+        double quantityToSell = getAmount() / asset.getPrice();
+        asset.putForSale(quantityToSell);
     }
 
     @Override
     public double getMax() {
-        return asset.getValue();
+        if (asset instanceof AssetCollateral) {
+            // Only unencumbered assets can be sold!
+            return ((AssetCollateral)asset).getUnencumberedValue();
+        } else {
+            return asset.getValue();
+        }
     }
+    //Todo: should this be here, or should it be with the AssetCollateral?
 
     @Override
     public void print() {
@@ -32,6 +35,6 @@ public class SellAsset extends Action {
     }
 
     public String getName() {
-        return "Sell Asset of type "+ asset.getAssetType();
+        return "Sell Asset of type "+ asset.getAssetType()+" [max: "+getMax()+"]";
     }
 }

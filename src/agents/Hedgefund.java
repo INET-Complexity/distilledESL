@@ -1,72 +1,62 @@
 package agents;
 
-import actions.Action;
-import actions.BankLeverageConstraint;
 import actions.HedgefundLeverageConstraint;
-import actions.SellAsset;
+import behaviours.Behaviour;
+import behaviours.HedgefundBehaviour;
 import contracts.*;
+import demos.Parameters;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 
 public class Hedgefund extends Agent implements CanPledgeCollateral {
 
+    private HedgefundBehaviour behaviour;
     private HedgefundLeverageConstraint hedgefundLeverageConstraint;
+    //Todo just a number for the moment.
 
     public Hedgefund(String name) {
         super(name);
         this.hedgefundLeverageConstraint = new HedgefundLeverageConstraint(this);
+        this.behaviour = new HedgefundBehaviour(this);
     }
 
-    //Todo: is this the best way to do this? This should really be in Behaviour
-    public void raiseLiquidity(double liquidityNeeded) {
-        ArrayList<Action> availableActions = getAvailableActions(this);
-
-        double initialAssetHoldings = mainLedger.getAssetValueOf(Asset.class);
-
-        for (Action action : availableActions) {
-            if (action instanceof SellAsset) {
-                action.setAmount(action.getMax()*liquidityNeeded/initialAssetHoldings);
-                action.print();
-                action.perform();
-            }
-        }
-
-    }
 
     @Override
     public void putMoreCollateral(double total, Repo repo) {
         // First, get a set of all my Assets that can be pledged as collateral
         HashSet<Contract> potentialCollateral = mainLedger.getAssetsOfType(AssetCollateral.class);
 
-        double maxHaircutValue = 0.0;
-        for (Contract contract : potentialCollateral) {
-            assert(contract instanceof CanBeCollateral);
-            CanBeCollateral asset = (CanBeCollateral) contract;
-            maxHaircutValue += asset.getMaxEncumberableValue() * (1.0 - asset.getHairCut());
-        }
+        double maxHaircutValue = getMaxUnencumberedHaircuttedCollateral();
 
         for (Contract contract : potentialCollateral) {
             CanBeCollateral asset = (CanBeCollateral) contract;
 
-            double quantityToPledge = total * asset.getMaxEncumberableValue() * (1.0 - asset.getHairCut()) / maxHaircutValue;
+            double quantityToPledge = total * asset.getUnencumberedValue() * (1.0 - asset.getHaircut()) / maxHaircutValue;
             repo.pledgeCollateral(asset, quantityToPledge);
 
         }
     }
 
-    public double getEffectiveMinLeverage() {
-        double totalRepo = mainLedger.getLiabilityValueOf(Repo.class);
-        double averageHaircut = 0.0;
+    @Override
+    public double getMaxUnencumberedHaircuttedCollateral() {
+        return mainLedger.getAssetsOfType(AssetCollateral.class).stream()
+                .mapToDouble(asset ->
+                        ((CanBeCollateral) asset).getUnencumberedValue() *
+                                (1.0 - ((CanBeCollateral) asset).getHaircut()))
+                                    .sum();
+    }
 
+    public double getEffectiveMinLeverage() {
         HashSet<Contract> collateral = mainLedger.getAssetsOfType(CanBeCollateral.class);
         double totalCollateralValue = collateral.stream().mapToDouble(Contract::getValue).sum();
 
+        double effectiveAverageHaircut = 0.0;
+
         for (Contract asset : collateral) {
-            averageHaircut += ((CanBeCollateral) asset).getHairCut() * asset.getValue() / totalCollateralValue;
+            effectiveAverageHaircut += ((CanBeCollateral) asset).getHaircut() * asset.getValue() / totalCollateralValue;
         }
 
-        return totalRepo / averageHaircut;
+        return effectiveAverageHaircut;
     }
 
     public void withdrawCollateral(double excessValue, Repo repo) {
@@ -80,5 +70,19 @@ public class Hedgefund extends Agent implements CanPledgeCollateral {
     public HedgefundLeverageConstraint getHedgefundLeverageConstraint() {
         return hedgefundLeverageConstraint;
     }
+
+    @Override
+    public Behaviour getBehaviour() {
+        return behaviour;
+    }
+
+    public double getCashBuffer() {
+        return getAssetValue() * Parameters.HF_CASH_BUFFER_AS_FRACTION_OF_ASSETS;
+    }
+
+    public double getCashTarget() {
+        return getAssetValue() * Parameters.HF_CASH_TARGET_AS_FRACTION_OF_ASSETS;
+    }
+
 
 }
