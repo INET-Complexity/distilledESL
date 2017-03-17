@@ -48,7 +48,7 @@ public abstract class Behaviour {
         me.printBalanceSheet();
 
         availableActions = me.getAvailableActions(me);
-        System.out.println("My available actions are: ");
+        System.out.println("\nMy available actions are: ");
         Action.print(availableActions);
 
         chosenActions = new ArrayList<>();

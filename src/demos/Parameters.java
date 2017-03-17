@@ -118,4 +118,10 @@ public class Parameters {
     public static double BANK_LCR_BUFFER = 0.20;
     public static double BANK_LCR_TARGET = 0.30;
 
+    public static double BANK_LEVERAGE_MIN = 0.01;
+    public static double BANK_LEVERAGE_BUFFER = 0.015;
+    public static double BANK_LEVERAGE_TARGET = 0.02;
+
+
+
 }

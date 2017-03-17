@@ -8,7 +8,8 @@ public class AssetMarket {
     private HashMap<Asset.AssetType, Double> prices;
     private HashMap<Asset.AssetType, Double> priceImpacts;
     private HashMap<Asset.AssetType, Double> amountsSold;
-    private HashMap<Asset.AssetType, Double> haircuts; //Todo: at the moment, haircuts are set at the AssetMarket.
+    private HashMap<Asset.AssetType, Double> haircuts;
+    private HashMap<Asset.AssetType, Double> totalAmountsSold;
     private HashSet<Order> orderbook;
 
     public AssetMarket() {
@@ -16,6 +17,7 @@ public class AssetMarket {
         priceImpacts = new HashMap<>();
         amountsSold = new HashMap<>();
         haircuts = new HashMap<>();
+        totalAmountsSold = new HashMap<>();
         orderbook = new HashSet<>();
 
         init();
@@ -38,6 +40,11 @@ public class AssetMarket {
         haircuts.put(Asset.AssetType.EQUITIES, Parameters.getInitialHaircut(Asset.AssetType.EQUITIES));
         haircuts.put(Asset.AssetType.CORPORATE_BONDS, Parameters.getInitialHaircut(Asset.AssetType.CORPORATE_BONDS));
 
+        totalAmountsSold.put(Asset.AssetType.MBS, 0.0);
+        totalAmountsSold.put(Asset.AssetType.EQUITIES, 0.0);
+        totalAmountsSold.put(Asset.AssetType.CORPORATE_BONDS, 0.0);
+
+
     }
 
     public void putForSale(Asset asset, double amount) {
@@ -49,13 +56,21 @@ public class AssetMarket {
         } else {
             amountsSold.put(type, amountsSold.get(type) + amount);
         }
+
     }
+
 
     public void clearTheMarket() {
         System.out.println("\nMARKET CLEARING\n");
         for (Map.Entry<Asset.AssetType, Double> entry : amountsSold.entrySet()) {
             if (Parameters.FIRESALE_CONTAGION) computePriceImpact(entry.getKey(), entry.getValue());
             if (Parameters.HAIRCUT_CONTAGION) computeHaircut(entry.getKey(), entry.getValue());
+
+            if (!totalAmountsSold.containsKey(entry.getKey())) {
+                totalAmountsSold.put(entry.getKey(), entry.getValue());
+            } else {
+                totalAmountsSold.put(entry.getKey(), totalAmountsSold.get(entry.getKey()) + entry.getValue());
+            }
         }
 
         amountsSold.clear();
@@ -125,5 +140,9 @@ public class AssetMarket {
         }
 
         return assetTypesArray;
+    }
+
+    public double getTotalAmountSold(Asset.AssetType assetType) {
+        return totalAmountsSold.containsKey(assetType) ? totalAmountsSold.get(assetType) : -1;
     }
 }

@@ -2,6 +2,7 @@ package agents;
 
 import actions.LCR_Constraint;
 import actions.BankLeverageConstraint;
+import actions.RWA_Constraint;
 import behaviours.BankBehaviour;
 import behaviours.Behaviour;
 import contracts.*;
@@ -18,12 +19,14 @@ public class Bank extends Agent implements CanPledgeCollateral {
     private BankLeverageConstraint bankLeverageConstraint;
     private LCR_Constraint lcr_constraint;
     private BankBehaviour behaviour;
+    private RWA_Constraint rwa_constraint;
 
     public Bank(String name) {
         super(name);
         this.bankLeverageConstraint = new BankLeverageConstraint(this);
         this.lcr_constraint = new LCR_Constraint(this);
         this.behaviour = new BankBehaviour(this);
+        this.rwa_constraint = new RWA_Constraint(this);
     }
 
     @Override
@@ -75,5 +78,15 @@ public class Bank extends Agent implements CanPledgeCollateral {
     @Override
     public Behaviour getBehaviour() {
         return behaviour;
+    }
+
+    @Override
+    public void printBalanceSheet() {
+        super.printBalanceSheet();
+        System.out.println("Risk Weighted Asset ratio: "+String.format("%.2f", rwa_constraint.getRWAratio()*100.0) + "%");
+    }
+
+    public double getRWAratio() {
+        return rwa_constraint.getRWAratio();
     }
 }

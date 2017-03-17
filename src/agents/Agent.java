@@ -16,6 +16,7 @@ public abstract class Agent {
     private String name;
     private HashSet<Obligation> obligationInbox;
     private HashSet<Obligation> obligationOutbox;
+    private boolean alive=true;
 
 
     public Agent(String name) {
@@ -185,5 +186,7 @@ public abstract class Agent {
         }
     }
 
-
+    public boolean isAlive() {
+        return alive;
+    }
 }
