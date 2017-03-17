@@ -39,6 +39,10 @@ public class Parameters {
     public static double HF_CASH_BUFFER_AS_FRACTION_OF_ASSETS = 0.05;
     public static double HF_CASH_TARGET_AS_FRACTION_OF_ASSETS = 0.10;
 
+    // Hedgefund
+    public static double HF_LEVERAGE_BUFFER = 0.03;
+    public static double HF_LEVERAGE_TARGET = 0.06;
+
 
     // Depositor Run
     public static double DEP_LEVERAGE_THRESHOLD_TO_RUN = 0.2;
@@ -114,8 +118,7 @@ public class Parameters {
     public static boolean ASSET_MANAGER_ON = INVESTOR_REDEMPTION;
     public static boolean HEDGEFUNDS_ON = true;
 
-    public static double HF_DEFAULT_LEVERAGE_TARGET = 0.02;
-    public static double HF_DEFAULT_LEVERAGE_BUFFER = 0.01;
+
 
     public static double BANK_LCR_MIN = 0.10;
     public static double BANK_LCR_BUFFER = 0.20;

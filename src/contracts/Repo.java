@@ -16,9 +16,12 @@ import java.util.*;
  */
 public class Repo extends Loan {
 
+    private double cashCollateral;
+
     public Repo(Agent assetParty, Agent liabilityParty, double principal) {
         super(assetParty, liabilityParty, principal);
         this.collateral = new HashMap<>();
+        this.cashCollateral = 0.0;
     }
 
     @Override
@@ -42,10 +45,19 @@ public class Repo extends Loan {
         }
     }
 
+    public void pledgeCashCollateral(double amount) {
+        cashCollateral += amount;
+    }
+
     private void unpledgeCollateral(CanBeCollateral asset, double quantity) {
         asset.unEncumber(quantity);
         assert(collateral.get(asset) >= quantity);
         collateral.put(asset, collateral.get(asset) - quantity);
+    }
+
+    private void unpledgeCashCollateral(double amount) {
+        assert(cashCollateral > amount);
+
     }
 
     public void marginCall() throws FailedMarginCallException {
@@ -75,6 +87,8 @@ public class Repo extends Loan {
             value += asset.getPrice() * quantity * (1.0 - asset.getHaircut());
         }
 
+            value += cashCollateral;
+
         return value;
     }
 
@@ -84,12 +98,17 @@ public class Repo extends Loan {
 
     public void unpledgeProportionally(double excessValue) {
         double totalValue = valueCollateralHaircutted();
+        double unpledgedSoFar = 0.0;
 
         for (Map.Entry<CanBeCollateral, Double> entry : collateral.entrySet()) {
             CanBeCollateral asset = entry.getKey();
             double quantityToUnpledge = entry.getValue() * (1 - asset.getHaircut()) * excessValue / totalValue;
             unpledgeCollateral(asset, quantityToUnpledge);
+            unpledgedSoFar += quantityToUnpledge;
         }
+
+        unpledgeCashCollateral(excessValue - unpledgedSoFar);
+
     }
 
     @Override

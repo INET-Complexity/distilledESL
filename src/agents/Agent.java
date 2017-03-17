@@ -17,6 +17,7 @@ public abstract class Agent {
     private HashSet<Obligation> obligationInbox;
     private HashSet<Obligation> obligationOutbox;
     private boolean alive=true;
+    private double encumberedCash;
 
 
     public Agent(String name) {
@@ -130,7 +131,8 @@ public abstract class Agent {
     }
 
     public double getCash() {
-        return mainLedger.getCash();
+        // Todo: important! We only return the unencumbered cash.
+        return mainLedger.getCash() - encumberedCash;
     }
 
 
@@ -189,6 +191,17 @@ public abstract class Agent {
     public void triggerDefault() {
         alive = false;
         System.out.println("Trigger default!");
+    }
+
+    public void encumberCash(double amount) {
+        assert(getCash()>=amount);
+
+        encumberedCash += amount;
+    }
+
+    public void unencumberCash(double amount) {
+        assert(encumberedCash >= amount);
+        encumberedCash -= amount;
     }
 
 }

@@ -147,5 +147,9 @@ public class Asset extends Contract {
         // Create a new Asset of the same type and give it to the new Owner
         newOwner.add(new Asset(newOwner, assetType, assetMarket, quantity));
     }
+
+    public double getPutForSale() {
+        return putForSale;
+    }
 }
 

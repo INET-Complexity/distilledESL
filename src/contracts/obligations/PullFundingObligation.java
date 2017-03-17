@@ -7,6 +7,7 @@ public class PullFundingObligation extends Obligation {
 
     public PullFundingObligation(Loan loan, double amount, int timeLeftToPay) {
         super(loan, amount, timeLeftToPay);
+        this.loan = loan;
 
     }
 

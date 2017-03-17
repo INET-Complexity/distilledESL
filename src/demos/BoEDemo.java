@@ -29,6 +29,7 @@ public class BoEDemo {
 
             for (Agent agent : allAgents) {
                 agent.act();
+//                agent.printBalanceSheet();
             }
 
             assetMarket.clearTheMarket();
@@ -100,6 +101,7 @@ public class BoEDemo {
         initShares(inv1, am1, 200);
 
 
+        bank3.printBalanceSheet();
 
         recorder.init();
         recorder.record();
