@@ -71,6 +71,7 @@ public class Repo extends Loan {
                 System.out.println("The margin call on Repo"+getName(liabilityParty)+" failed." +
                         " The value of the collateral was "+currentValue+",\n but the principal of the repo is "+principal +
                         " and I only have a total extra collateral of "+borrower.getMaxUnencumberedHaircuttedCollateral());
+
                 throw new FailedMarginCallException();
             }
 
@@ -162,5 +163,16 @@ public class Repo extends Loan {
     @Override
     public double getRWAweight() {
         return 0.0;
+    }
+
+    public void printCollateral() {
+        System.out.println("Collateral of "+getName(liabilityParty));
+        for (Map.Entry<CanBeCollateral, Double> entry : collateral.entrySet()) {
+            CanBeCollateral asset = entry.getKey();
+            Double quantity = entry.getValue();
+
+            System.out.println( ((Contract) asset).getName(liabilityParty)+" for an amount "+quantity +
+            ", price "+asset.getPrice()+" and haircut "+asset.getHaircut());
+        }
     }
 }

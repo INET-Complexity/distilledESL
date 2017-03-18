@@ -87,6 +87,7 @@ public class BankBehaviour extends Behaviour {
 
 
             double deLever = min(balance, min(me.getCash()-me.getLCR_constraint().getCashBuffer(), amountToDelever));
+
             if (deLever > 0) {
                 System.out.println("We will use an amount "+deLever+" to delever.");
                 payOffLiabilities(deLever);

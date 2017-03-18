@@ -158,22 +158,24 @@ public class BoEDemo {
      * @param principal principal
      */
     private static void initRepo(Agent lender, Agent borrower, double principal) {
-        if (Parameters.FUNDING_CONTAGION_HEDGEFUND) {
-            Repo repo = new Repo(lender, borrower, principal);
-            lender.add(repo);
-            borrower.add(repo);
-            try {
-                repo.marginCall();
-            } catch (FailedMarginCallException e) {
-                System.out.println("Strange! A Margin call failed at initialisation.");
-                System.exit(-1);
-            }
+        if (principal > 0) {
+            if (Parameters.FUNDING_CONTAGION_HEDGEFUND) {
+                Repo repo = new Repo(lender, borrower, principal);
+                lender.add(repo);
+                borrower.add(repo);
+                try {
+                    repo.marginCall();
+                } catch (FailedMarginCallException e) {
+                    System.out.println("Strange! A Margin call failed at initialisation.");
+                    System.exit(-1);
+                }
 
-        } else {
-            Repo repo1 = new Repo(lender, null, principal);
-            Repo repo2 = new Repo(null, borrower, principal);
-            lender.add(repo1);
-            borrower.add(repo2);
+            } else {
+                Repo repo1 = new Repo(lender, null, principal);
+                Repo repo2 = new Repo(null, borrower, principal);
+                lender.add(repo1);
+                borrower.add(repo2);
+            }
         }
     }
 

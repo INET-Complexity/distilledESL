@@ -91,23 +91,24 @@ public class Mailbox {
 
 
     public ArrayList<Double> getCashCommitments() {
-        ArrayList<Double> cashCommitments = new ArrayList<>(Collections.nCopies(Parameters.TIMESTEPS_TO_PAY * 2, 0.0));
+        ArrayList<Double> cashCommitments = new ArrayList<>(Collections.nCopies(Parameters.TIMESTEPS_TO_PAY * 3, 0.0));
+
         for (Obligation obligation : inbox) {
             if (!(obligation.isFulfilled())) {
                 int index = obligation.getTimeToPay() - BoEDemo.getTime() - 1;
-                cashCommitments.add(index, cashCommitments.get(index) + obligation.getAmount());
+                cashCommitments.set(index, cashCommitments.get(index) + obligation.getAmount());
             }
         }
         return cashCommitments;
     }
 
     public ArrayList<Double> getCashInflows() {
-        ArrayList<Double> cashInflows = new ArrayList<>(Collections.nCopies(Parameters.TIMESTEPS_TO_PAY * 2, 0.0));
+        ArrayList<Double> cashInflows = new ArrayList<>(Collections.nCopies(Parameters.TIMESTEPS_TO_PAY * 3, 0.0));
 
         for (Obligation obligation : outbox) {
             if (!(obligation.isFulfilled())) {
                 int index = obligation.getTimeToPay() - BoEDemo.getTime() - 1;
-                cashInflows.add(index, cashInflows.get(index) + obligation.getAmount());
+                cashInflows.set(index, cashInflows.get(index) + obligation.getAmount());
             }
         }
         return cashInflows;
