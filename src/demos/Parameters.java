@@ -69,6 +69,7 @@ public class Parameters {
     public static double NEKO_C = 0.6;
 
     public static int TIMESTEPS_TO_PAY = 3;
+    public static int TIMESTEPS_TO_REDEEM_SHARES = 2;
 
     public static int SIMULATION_TIMESTEPS = 4;
 

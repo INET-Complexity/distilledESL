@@ -2,6 +2,7 @@ package actions;
 
 import contracts.Shares;
 import contracts.obligations.RedeemSharesObligation;
+import demos.BoEDemo;
 import demos.Parameters;
 
 public class RedeemShares extends Action {
@@ -15,7 +16,8 @@ public class RedeemShares extends Action {
     @Override
     public void perform() {
         shares.addSharesPendingToRedeem((int) getAmount());
-        RedeemSharesObligation obligation = new RedeemSharesObligation(shares, (int) getAmount(), Parameters.TIMESTEPS_TO_PAY);
+        RedeemSharesObligation obligation = new RedeemSharesObligation(shares, (int) getAmount(),
+                BoEDemo.getTime() + Parameters.TIMESTEPS_TO_REDEEM_SHARES);
         shares.getAssetParty().sendMessage(shares.getLiabilityParty(), obligation);
     }
 

@@ -2,20 +2,25 @@ package contracts.obligations;
 
 import agents.Agent;
 import contracts.Contract;
+import demos.BoEDemo;
 
 
 public abstract class Obligation {
     protected double amount;
     private boolean fulfilled = false;
-    private int timeLeftToPay;
     private Agent from;
     private Agent to;
+    private int timeToOpen;
+    private int timeToPay;
 
-    Obligation(Contract contract, double amount, int timeLeftToPay) {
+    Obligation(Contract contract, double amount, int timeToPay) {
         this.amount = amount;
-        this.timeLeftToPay = timeLeftToPay;
         this.from = contract.getAssetParty();
         this.to = contract.getLiabilityParty();
+        this.timeToPay = timeToPay;
+        this.timeToOpen = BoEDemo.getTime() + 1;
+
+        assert(timeToPay >= timeToOpen);
     }
 
     public abstract void fulfil();
@@ -28,14 +33,12 @@ public abstract class Obligation {
         return fulfilled;
     }
 
-    boolean isDue() {
-        return timeLeftToPay==0;
+    boolean hasArrived() {
+        return BoEDemo.getTime() == timeToOpen;
     }
 
-
-    void tick() {
-        timeLeftToPay -= 1;
-        //Todo: this is in timesteps. Might move to some other unit of time.
+    boolean isDue() {
+        return BoEDemo.getTime() == timeToPay;
     }
 
     public Agent getFrom() {
@@ -53,5 +56,7 @@ public abstract class Obligation {
     void setAmount(double amount) {
         this.amount = amount;
     }
+
+    public int getTimeToPay() {return timeToPay;}
 
 }

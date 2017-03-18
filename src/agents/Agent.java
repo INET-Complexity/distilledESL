@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 public abstract class Agent {
     Ledger mainLedger;
     private String name;
-    private boolean alive=true;
+    private boolean alive = true;
     private double encumberedCash;
     private Mailbox mailbox;
 
@@ -43,7 +43,7 @@ public abstract class Agent {
      * @param loan   the loan we are paying back
      */
     public void payLiability(double amount, Contract loan) {
-        assert(getCash() >= amount);
+        assert (getCash() >= amount);
         mainLedger.payLiability(amount, loan);
     }
 
@@ -122,7 +122,7 @@ public abstract class Agent {
     }
 
     public void printBalanceSheet() {
-        System.out.println("\nBalance Sheet of " +getName()+"\n**************************");
+        System.out.println("\nBalance Sheet of " + getName() + "\n**************************");
         mainLedger.printBalanceSheet(this);
         System.out.println("Leverage ratio: " + String.format("%.2f", 100 * getLeverage()) + "%");
     }
@@ -145,32 +145,32 @@ public abstract class Agent {
     }
 
     public void encumberCash(double amount) {
-        assert(getCash()>=amount);
+        assert (getCash() >= amount);
 
         encumberedCash += amount;
     }
 
     public void unencumberCash(double amount) {
-        assert(encumberedCash >= amount);
+        assert (encumberedCash >= amount);
         encumberedCash -= amount;
     }
 
     public void receiveShockToAsset(Asset.AssetType assetType, double fractionLost) {
         HashSet<Contract> assetsShocked = mainLedger.getAssetsOfType(Asset.class).stream()
-                .filter(asset -> ((Asset) asset).getAssetType()==assetType)
+                .filter(asset -> ((Asset) asset).getAssetType() == assetType)
                 .collect(Collectors.toCollection(HashSet::new));
 
         if (!(assetsShocked.isEmpty())) {
-            System.out.println(getName()+" received a shock!! Asset type "+assetType+" lost "
-                    +String.format("%.2f", fractionLost*100.0)+"% of value.");
+            System.out.println(getName() + " received a shock!! Asset type " + assetType + " lost "
+                    + String.format("%.2f", fractionLost * 100.0) + "% of value.");
             for (Contract asset : assetsShocked) {
                 devalueAsset(asset, asset.getValue() * fractionLost);
             }
         }
     }
 
-    public void tick() {
-        mailbox.tick();
+    public void step() {
+        mailbox.step();
     }
 
     public void sendMessage(Agent to, Obligation obligation) {
@@ -190,6 +190,10 @@ public abstract class Agent {
         return mailbox.getAllPendingObligations();
     }
 
+    public double getPendingPaymentsToMe() {
+        return mailbox.getPendingPaymentsToMe();
+    }
+
     public void fulfilAllRequests() {
         mailbox.fulfilAllRequests();
     }
@@ -197,5 +201,14 @@ public abstract class Agent {
     public void fulfilMaturedRequests() {
         mailbox.fulfilMaturedRequests();
     }
+
+    public ArrayList<Double> getCashCommitments() {
+        return mailbox.getCashCommitments();
+    }
+
+    public ArrayList<Double> getCashInflows() {
+        return mailbox.getCashInflows();
+    }
+
 
 }

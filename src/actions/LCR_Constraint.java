@@ -45,4 +45,8 @@ public class LCR_Constraint {
     public double getCashTarget() {
         return Parameters.BANK_LCR_TARGET * getLCRdenominator();
     }
+
+    public double getCashBuffer() {
+        return Parameters.BANK_LCR_BUFFER * getLCRdenominator();
+    }
 }

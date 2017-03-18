@@ -8,16 +8,15 @@ public class RedeemSharesObligation extends Obligation {
     private Shares shares;
     private final int nSharesToRedeem;
 
-    public RedeemSharesObligation(Shares shares, int numberOfShares, int timeLeftToPay) {
-        super(shares, numberOfShares * shares.getNAV(), timeLeftToPay);
+    public RedeemSharesObligation(Shares shares, int numberOfShares, int timeToPay) {
+        super(shares, numberOfShares * shares.getNAV(), timeToPay);
         this.shares = shares;
         this.nSharesToRedeem = numberOfShares;
     }
 
     @Override
-    void tick() {
-        super.tick();
-        setAmount(nSharesToRedeem * shares.getNAV());
+    public double getAmount() {
+        return (nSharesToRedeem * shares.getNAV());
     }
 
     @Override

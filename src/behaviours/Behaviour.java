@@ -2,39 +2,21 @@ package behaviours;
 
 import actions.Action;
 import actions.PayLoan;
+import actions.PullFunding;
+import actions.SellAsset;
 import agents.Agent;
 
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
+import static jdk.nashorn.internal.objects.NativeMath.min;
+
 public abstract class Behaviour {
     private Agent me;
     private ArrayList<Action> availableActions;
-    private ArrayList<Action> chosenActions;
-    private double liabilitiesToPayOff;
-    private double maxLiabilitiesToPayOff;
 
     Behaviour (Agent me) {
         this.me = me;
-    }
-
-    private void performActions(ArrayList<Action> chosenActions) {
-        if (chosenActions.isEmpty()){
-            System.out.println(me.getName()+" does nothing this round.");
-        }
-
-        for (Action action : chosenActions) {
-            action.print();
-            action.perform();
-        }
-
-        System.out.println(me.getName()+" is done.\n*************");
-    }
-
-    private void performAction(Action action) {
-        if (action==null) return;
-        action.print();
-        action.perform();
     }
 
     protected abstract void chooseActions() throws DefaultException;
@@ -48,27 +30,20 @@ public abstract class Behaviour {
 
         System.out.println("\n"+me.getName()+" is acting.\n");
 
-        // Todo: tick here!
-        me.tick();
-
+        me.step();
         me.printBalanceSheet();
 
         availableActions = me.getAvailableActions(me);
         System.out.println("\nMy available actions are: ");
         Action.print(availableActions);
 
-        chosenActions = new ArrayList<>();
-        liabilitiesToPayOff = 0.0;
-        maxLiabilitiesToPayOff = maxLiabilitiesToPayOff();
-
         try {
             chooseActions();
         } catch (DefaultException e) {
             me.triggerDefault();
         }
-        decidePayOffActions();
-        performActions(chosenActions);
 
+        System.out.println(me.getName()+" done.\n*********");
 
     }
 
@@ -79,47 +54,82 @@ public abstract class Behaviour {
     }
 
     void payOffLiabilities(double amount) {
-        assert(liabilitiesToPayOff+amount <= maxLiabilitiesToPayOff);
-        liabilitiesToPayOff += amount;
-    }
+        System.out.println("Pay off liabilities (delever) proportionally: "+amount);
 
-    private void decidePayOffActions() {
-        if (liabilitiesToPayOff > 0) {
-            ArrayList<Action> payLoanActions = getAllActionsOfType(PayLoan.class);
+        if(amount > maxLiabilitiesToPayOff()) {
+            amount = maxLiabilitiesToPayOff();
+            System.out.println("We do not have enough liabilites to pay off this amount.\n" +
+                    "We can only pay off "+ amount);
+        }
 
-            for (Action action : payLoanActions) {
-                action.setAmount(action.getMax() * liabilitiesToPayOff / maxLiabilitiesToPayOff);
-                addAction(action);
-            }
+        ArrayList<Action> payLoanActions = getAllActionsOfType(PayLoan.class);
+
+        double totalLiabilitiesToPayOff = payLoanActions.stream()
+                .mapToDouble(Action::getMax)
+                .sum();
+
+        for (Action action : payLoanActions) {
+            action.setAmount(action.getMax() * amount / totalLiabilitiesToPayOff);
+            action.perform();
         }
     }
 
-    boolean actionsLeft() {
-        return !availableActions.isEmpty();
-    }
-
-    void addAction(Action action) {
-       chosenActions.add(action);
-       availableActions.remove(action);
-    }
-
-    /**
-     * @param actionType the subclass of Action that we should be looking for
-     * @return the first action in the list 'availableActions' that is of type
-     * actionType.
-     */
-    Action findActionOfType(Class<? extends Action> actionType) {
-        for (Action action : availableActions) {
-            if (actionType.isInstance(action)) {
-                return action;
-            }
-        }
-        return null;
-    }
 
     ArrayList<Action> getAllActionsOfType(Class<? extends Action> actionType) {
         return availableActions.stream()
                 .filter(actionType::isInstance)
                 .collect(Collectors.toCollection(ArrayList::new));
+    }
+
+    public void sellAssetsProportionally(double amount) {
+        System.out.println("Sell assets proportionally: "+amount);
+        ArrayList<Action> sellAssetActions = getAllActionsOfType(SellAsset.class);
+
+        double totalSellableAssets = sellAssetActions.stream()
+                .mapToDouble(Action::getMax)
+                .sum();
+
+        for (Action action : sellAssetActions) {
+            action.setAmount(action.getMax() * amount / totalSellableAssets);
+            action.perform();
+        }
+    }
+
+    public void pullFundingProportionally(double amount) {
+        System.out.println("Pull funding proportionally: "+amount);
+        ArrayList<Action> pullFundingActions = getAllActionsOfType(PullFunding.class);
+
+        double totalFundingThatCanBePulled = pullFundingActions.stream()
+                .mapToDouble(Action::getMax)
+                .sum();
+
+        for (Action action : pullFundingActions) {
+            action.setAmount(action.getMax() * amount / totalFundingThatCanBePulled);
+            action.perform();
+        }
+    }
+
+    public void raiseLiquidityWithPeckingOrder(double amount) {
+        System.out.println("Raising liquidity: "+amount);
+        double totalFundingThatCanBePulled = getAllActionsOfType(PullFunding.class).stream()
+                .mapToDouble(Action::getMax)
+                .sum();
+
+        double amountToPullFunding = min(totalFundingThatCanBePulled, amount);
+        pullFundingProportionally(amountToPullFunding);
+
+        if (totalFundingThatCanBePulled < amount) {
+            amount -= amountToPullFunding;
+            double totalAssetsThatCanBeSold = getAllActionsOfType(SellAsset.class).stream()
+                    .mapToDouble(Action::getMax)
+                    .sum();
+            double assetsToSell = min (amount, totalAssetsThatCanBeSold);
+            sellAssetsProportionally(assetsToSell);
+
+            if (totalAssetsThatCanBeSold < amount) {
+                System.out.println("we could not raise enough liquidity.");
+            }
+        }
+
     }
 }

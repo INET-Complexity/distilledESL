@@ -1,24 +1,29 @@
 package contracts.obligations;
 
-import java.util.Collection;
+import demos.BoEDemo;
+import demos.Parameters;
+
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.stream.Collectors;
 
 public class Mailbox {
-    private HashSet<Obligation> inbox;
+    private HashSet<Obligation> unopenedMessages;
     private HashSet<Obligation> outbox;
-    private HashSet<Obligation> receivedMessages;
+    private HashSet<Obligation> inbox;
 
 
     public Mailbox() {
-        this.inbox = new HashSet<>();
+        this.unopenedMessages = new HashSet<>();
         this.outbox = new HashSet<>();
-        this.receivedMessages = new HashSet<>();
+        this.inbox = new HashSet<>();
     }
 
 
     public void addToInbox(Obligation obligation) {
 
-        inbox.add(obligation);
+        unopenedMessages.add(obligation);
         System.out.println("Obligation sent from "+obligation.getFrom().getName() +
                 " to "+obligation.getTo().getName());
     }
@@ -27,30 +32,41 @@ public class Mailbox {
         outbox.add(obligation);
     }
 
-    private void addAllToReceivedMessages(Collection<Obligation> obligations) {
-        receivedMessages.addAll(obligations);
+    private void addAllToReceivedMessages() {
+        HashSet<Obligation> obligationsThatHaveArrived = unopenedMessages.stream()
+                .filter(Obligation::hasArrived)
+                .collect(Collectors.toCollection(HashSet::new));
 
-        for (Obligation obligation : obligations) {
-            System.out.println("Obligation of type "+obligation.getClass().getName()+" received: from " +
-                    obligation.getFrom() + " for an amount "+obligation.getAmount());
+        for (Obligation obligation : obligationsThatHaveArrived) {
+            System.out.println("Obligation of type "+obligation.getClass().getName()+
+            " has arrived from "+obligation.getFrom().getName());
         }
+
+        inbox.addAll(obligationsThatHaveArrived);
     }
 
     public double getMaturedObligations() {
-        return receivedMessages.stream()
+        return inbox.stream()
                 .filter(Obligation::isDue)
                 .filter(obligation -> ! obligation.isFulfilled())
                 .mapToDouble(Obligation::getAmount).sum();
     }
 
     public double getAllPendingObligations() {
-        return receivedMessages.stream()
+        return inbox.stream()
                 .filter(obligation -> ! obligation.isFulfilled())
                 .mapToDouble(Obligation::getAmount).sum();
     }
 
+    public double getPendingPaymentsToMe() {
+        return outbox.stream()
+                .filter(Obligation::isFulfilled)
+                .mapToDouble(Obligation::getAmount)
+                .sum();
+    }
+
     public void fulfilAllRequests() {
-        for (Obligation obligation : receivedMessages) {
+        for (Obligation obligation : inbox) {
             if (! obligation.isFulfilled() ) obligation.fulfil();
         }
     }
@@ -63,18 +79,38 @@ public class Mailbox {
         }
     }
 
-    public void tick() {
+    public void step() {
         // Remove all fulfilled requests
-        receivedMessages.removeIf(Obligation::isFulfilled);
+        inbox.removeIf(Obligation::isFulfilled);
 
-        // Move all messages in the inbox to the receivedMessages
-        addAllToReceivedMessages(inbox);
-        inbox.clear();
+        // Move all messages in the unopenedMessages to the inbox
+        addAllToReceivedMessages();
+        unopenedMessages.clear();
 
+    }
+
+
+    public ArrayList<Double> getCashCommitments() {
+        ArrayList<Double> cashCommitments = new ArrayList<>(Collections.nCopies(Parameters.TIMESTEPS_TO_PAY * 2, 0.0));
         for (Obligation obligation : inbox) {
-            obligation.tick();
+            if (!(obligation.isFulfilled())) {
+                int index = obligation.getTimeToPay() - BoEDemo.getTime() - 1;
+                cashCommitments.add(index, cashCommitments.get(index) + obligation.getAmount());
+            }
         }
+        return cashCommitments;
+    }
 
+    public ArrayList<Double> getCashInflows() {
+        ArrayList<Double> cashInflows = new ArrayList<>(Collections.nCopies(Parameters.TIMESTEPS_TO_PAY * 2, 0.0));
+
+        for (Obligation obligation : outbox) {
+            if (!(obligation.isFulfilled())) {
+                int index = obligation.getTimeToPay() - BoEDemo.getTime() - 1;
+                cashInflows.add(index, cashInflows.get(index) + obligation.getAmount());
+            }
+        }
+        return cashInflows;
     }
 
 }

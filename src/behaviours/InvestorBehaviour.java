@@ -48,7 +48,7 @@ public class InvestorBehaviour extends Behaviour {
                         " has dropped from its original value of "+originalNAV+" to "+currentNAV +
                 " so I am redeeming "+sharesToRedeem+" shares.");
                 redeemAction.setAmount(sharesToRedeem);
-                addAction(redeemAction);
+                redeemAction.perform();
             }
 
         }

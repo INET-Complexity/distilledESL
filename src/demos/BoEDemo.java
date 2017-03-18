@@ -13,6 +13,8 @@ public class BoEDemo {
     private static Recorder recorder = new Recorder(allAgents, assetMarket);
     public static int timeStep = 0;
 
+    public static int getTime() { return timeStep; }
+
     public static void main(String[] args) {
         initialise();
         runSchedule();

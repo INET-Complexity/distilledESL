@@ -3,6 +3,8 @@ package behaviours;
 import actions.Action;
 import actions.SellAsset;
 import agents.Hedgefund;
+import contracts.FailedMarginCallException;
+import demos.Parameters;
 
 import java.util.ArrayList;
 
@@ -12,111 +14,92 @@ import static java.lang.Math.min;
 public class HedgefundBehaviour extends Behaviour {
 
     private Hedgefund me;
-    private double pendingToDeLever;
 
 
     public HedgefundBehaviour(Hedgefund me) {
         super(me);
         this.me = me;
-        this.pendingToDeLever = 0.0;
     }
 
     @Override
     protected void chooseActions() throws DefaultException {
-
-        // 1) Check matured requests to pull funding. If we can't meet them right now, default.
+        // 1) Pay matured cash commitments or default.
         double maturedPullFunding = me.getMaturedObligations();
         if (maturedPullFunding > 0) {
-            if(me.getCash() >= maturedPullFunding) {
+            System.out.println("We have matured payment contracts.obligations for a total of " + String.format("%.2f", maturedPullFunding));
+            if (me.getCash() >= maturedPullFunding) {
                 me.fulfilMaturedRequests();
             } else {
-                System.out.println(me.getName()+" has failed to fulfill matured obligations:" +
-                        "\n*@*@*@*@*@*@*\nDEFAULT!\n");
+                System.out.println("A matured obligation was not fulfilled.");
                 throw new DefaultException();
             }
         }
 
-        // 2) Check inbox for (non-matured) requests to pull funding, find out how much liquidity is needed,
-        // and pay all of them now if possible.
-        double totalPullFunding = me.getAllPendingObligations();
-        if (totalPullFunding > 0) {
-            if(me.getCash() >= totalPullFunding) {
-                me.fulfilAllRequests();
-                totalPullFunding = 0.0;
-            }
+        // 2) Run margin calls; if any fail, default.
+        try {
+            me.runMarginCalls();
+        } catch (FailedMarginCallException e) {
+            System.out.println("A margin call failed.");
+            throw new DefaultException();
         }
 
-        // 3) If we were trying to de-lever further from the previous timestep, we do it now.
-        if (pendingToDeLever > 0) {
-            double amountToDelever = min(pendingToDeLever, me.getCash());
-            if (amountToDelever > 0) payOffLiabilities(amountToDelever);
-        }
-
+        // 3) If I'm insolvent, default.
         if (me.getLeverage() < me.getEffectiveMinLeverage()) {
             System.out.println("My leverage is "+me.getLeverage()+
-                    " which is below the effective minimum leverage "+me.getEffectiveMinLeverage());
+                    " which is below the effective minimum "+me.getEffectiveMinLeverage());
             System.out.println("I'm dead.");
             throw new DefaultException();
         }
 
-        double liquidityToRaise = totalPullFunding;
+        // Compute amount to DeLever
+        double amountToDelever =
+                (me.getHedgefundLeverageConstraint().isBelowBuffer()) ?
+                        me.getHedgefundLeverageConstraint().getAmountToDelever() :
+                        0.0;
 
-        System.out.println("\nCurrent leverage: " + String.format("%.2f", me.getLeverage()) +
-            ", minimum leverage: " + String.format("%.2f", me.getEffectiveMinLeverage()) +
-            ", leverage buffer: " + String.format("%.2f", me.getHedgefundLeverageConstraint().getLeverageBuffer())) ;
-        // 4) If leverage is below buffer, we must de-lever further, and potentially raise liquidity.
-        if (me.getHedgefundLeverageConstraint().isBelowBuffer()) {
-            double amountToDelever = me.getHedgefundLeverageConstraint().getAmountToDelever();
+        // Compute liquidity to replenish (LCR buffer)
+        double liquidityBufferToReplenish = min(0.0, me.getCashTarget() - me.getCash());
+        double nonUrgentLiquidityNeeds = liquidityBufferToReplenish + amountToDelever;
 
-            System.out.println("\nWe are below our effective minimum leverage. Amount to de-lever: " + amountToDelever);
-            double availableNow = min(me.getCash(), amountToDelever);
+        ArrayList<Double> cashCommitments = me.getCashCommitments();
+        ArrayList<Double> cashInflows = me.getCashInflows();
 
-            System.out.println((availableNow == 0) ?
-                    "We have no cash -> we cannot use cash to de-lever"
-                    : (availableNow < amountToDelever) ?
-                    "We can de-lever an amount " + availableNow + " by using cash."
-                    : "We can de-lever fully using cash -> No contagion!");
 
-            if (availableNow > 0) payOffLiabilities(availableNow);
-            liquidityToRaise += amountToDelever - availableNow;
+        // ST PATRICK'S ALGORITHM
+        // First loop
+        // We look at timesteps between now and the time delay of PullFunding.
+
+        double balance = me.getCash();
+        for (int timeIndex = 0; timeIndex < Parameters.TIMESTEPS_TO_PAY; timeIndex++) {
+            balance += cashInflows.get(timeIndex);
+            balance -= cashCommitments.get(timeIndex);
+        }
+
+        if (balance < 0) {
+            System.out.println("We will not be able to meet our cash commitments in the next " +
+                    Parameters.TIMESTEPS_TO_PAY+ " timesteps, we will be missing an amount "+(-1.0*balance));
+
+            double sellAssetsAmount = -1.0 * balance;
+            sellAssetsProportionally(sellAssetsAmount);
+            balance = 0.0;
         } else {
-            System.out.println("We are above the leverage buffer, no need to act.");
+            System.out.println("We can meet our cash commitments in the next " +
+                    Parameters.TIMESTEPS_TO_PAY+ " timesteps, and we will have a spare balance of "+balance);
+            System.out.println("We will use this cash to de-lever.");
+            double deLever = min(balance, min(me.getCash()-me.getCashBuffer(), amountToDelever));
+            payOffLiabilities(deLever);
+            balance -= deLever;
+
         }
 
-        // 5) We try to raise an extra amount of liquidity, to replenish the liquidity buffer.
-        double replenishBuffer = (me.getCash() < me.getCashBuffer()) ? me.getCashTarget() - me.getCash() : 0.0;
-
-        if (replenishBuffer >0 ) System.out.println("\nCurrent liquidity is " + me.getCash() +
-            ", cash buffer is " + me.getCashBuffer() +
-                ", cash target is "+me.getCashTarget()+", we must raise an amount " + replenishBuffer);
-
-        liquidityToRaise += replenishBuffer;
-
-        // 6) If we decided we need to raise liquidity, we need to select a set of actions that will raise that liquidity.
-        // A hedgefund's actions include just firesales of unencumbered assets, which it performs proportionally.
-        if (liquidityToRaise > 0) {
-
-            System.out.println("\nRaising a total liquidity of "+liquidityToRaise);
-
-            ArrayList<Action> sellAssetActions = getAllActionsOfType(SellAsset.class);
-            double totalSellableAssets = sellAssetActions.stream()
-                    .mapToDouble(Action::getMax)
-                    .sum();
-
-            if (totalSellableAssets < liquidityToRaise) {
-                System.out.println("We cannot raise enough liquidity. We will raise as much as possible.");
-                liquidityToRaise = totalSellableAssets;
-            }
-
-            for (Action action : sellAssetActions) {
-                if (action.getMax()>0) { // Todo: To prevent selling encumbered assets
-                    action.setAmount(liquidityToRaise * action.getMax() / totalSellableAssets);
-                    addAction(action);
-                }
-            }
+        // Second loop
+        for (int timeIndex = Parameters.TIMESTEPS_TO_PAY; timeIndex < cashCommitments.size(); timeIndex++) {
+            balance += cashInflows.get(timeIndex);
+            balance -= cashCommitments.get(timeIndex);
         }
 
+        balance -= nonUrgentLiquidityNeeds;
+        raiseLiquidityWithPeckingOrder(balance);
     }
-
 
 }
