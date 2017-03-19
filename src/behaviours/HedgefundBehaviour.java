@@ -4,6 +4,7 @@ import actions.Action;
 import actions.SellAsset;
 import agents.Hedgefund;
 import contracts.FailedMarginCallException;
+import demos.BoEDemo;
 import demos.Parameters;
 
 import java.util.ArrayList;
@@ -75,7 +76,6 @@ public class HedgefundBehaviour extends Behaviour {
         System.out.println();
 
 
-
         // ST PATRICK'S ALGORITHM
         // First loop
         // We look at timesteps between now and the time delay of PullFunding.
@@ -84,35 +84,33 @@ public class HedgefundBehaviour extends Behaviour {
         for (int timeIndex = 0; timeIndex < Parameters.TIMESTEPS_TO_PAY; timeIndex++) {
             balance += cashInflows.get(timeIndex);
             balance -= cashCommitments.get(timeIndex);
-        }
+            System.out.println("At timestep "+(timeIndex+ BoEDemo.getTime()+1)+", our expected balance " +
+                    "will be "+balance);
 
-        if (balance < 0) {
-            System.out.println("We will not be able to meet our cash commitments in the next " +
-                    Parameters.TIMESTEPS_TO_PAY+ " timesteps, we will be missing an amount "+(-1.0*balance));
-
-            double sellAssetsAmount = -1.0 * balance;
-            double amountSold = sellAssetsProportionally(sellAssetsAmount);
-            balance += amountSold;
-            if (balance < 0) System.out.println("We won't be able to firesale enough assets. We'll wait and see.");
-
-        } else {
-            System.out.println("We can meet our cash commitments in the next " +
-                    Parameters.TIMESTEPS_TO_PAY+ " timesteps, and we will have a spare balance of "+balance);
-
-
-            double deLever = min(balance, min(me.getCash()-me.getCashBuffer(), amountToDelever));
-
-            if (deLever > 0) {
-                System.out.println("Since we would like to delever an amount "+amountToDelever +
-                        "\n\tand we have an amount of cash above the buffer of "+ (me.getCash()-me.getCashBuffer()) +
-                        "\n\tand we expect our cash balance after paying approaching obligations to be "+balance +
-                        "\n\twe can use an amount "+deLever+" to delever.");
-                payOffLiabilities(deLever);
-                amountToDelever -= deLever;
+            if (balance < 0) {
+                System.out.println("We will be short of liquidity at that time.");
+                double sellAssetsAmount = -1.0 * balance;
+                double amountSold = sellAssetsProportionally(sellAssetsAmount);
+                balance += amountSold;
+                if (balance < 0) System.out.println("We won't be able to firesale enough assets. We'll wait and see.");
             }
-            balance -= deLever;
 
         }
+
+        if (balance >= 0) {
+            System.out.println("We can meet our cash commitments in the next " +
+                    Parameters.TIMESTEPS_TO_PAY + " timesteps, and we will have a spare balance of " + balance);
+        }
+
+        double deLever = min(balance, min(me.getCash()-me.getCashBuffer(), amountToDelever));
+
+        if (deLever > 0) {
+            System.out.println("Since we would like to delever an amount "+amountToDelever + "\n\tand we have an amount of cash above the buffer of "+ (me.getCash()-me.getCashBuffer()) + "\n\tand we expect our cash balance after paying approaching obligations to be "+balance + "\n\twe can use an amount "+deLever+" to delever.");
+            payOffLiabilities(deLever);
+            amountToDelever -= deLever;
+        }
+        balance -= deLever;
+
 
         // Second loop
         for (int timeIndex = Parameters.TIMESTEPS_TO_PAY; timeIndex < cashCommitments.size(); timeIndex++) {
@@ -138,7 +136,7 @@ public class HedgefundBehaviour extends Behaviour {
             System.out.println("We can meet our long-term cash commitments and non-urgent liquidity needs in the next " +
                     cashCommitments.size()+ " timesteps, and we will have a spare balance of "+balance);
 
-            double deLever = min(balance, min(me.getCash()-me.getCashBuffer(), amountToDelever));
+            deLever = min(balance, min(me.getCash()-me.getCashBuffer(), amountToDelever));
             if (deLever > 0) {
                 System.out.println("Since we would like to delever an amount "+amountToDelever +
                         "\nand we have an amount of cash above the buffer of "+ (me.getCash()-me.getCashBuffer()) +

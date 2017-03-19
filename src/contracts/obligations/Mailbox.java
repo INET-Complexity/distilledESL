@@ -100,7 +100,7 @@ public class Mailbox {
 
         for (Obligation obligation : outbox) {
             if (!(obligation.isFulfilled())) {
-                int index = obligation.getTimeToPay() - BoEDemo.getTime(); //Todo: important! TimeToPay + 1
+                int index = obligation.getTimeToReceive() - BoEDemo.getTime() - 1;
                 cashInflows.set(index, cashInflows.get(index) + obligation.getAmount());
             }
         }
