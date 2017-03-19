@@ -51,6 +51,7 @@ public class CashProviderBehaviour extends Behaviour {
                         "but it still has "+trialPeriod.get(bank)+" timesteps left in the trial period to do so.");
                     } else {
                         // If it is, withdraw a fixed fraction of funding to this bank.
+                        trialPeriod.put(bank, Parameters.TRIAL_PERIOD);
                         pullFundingAction.setAmount(pullFundingAction.getMax() * Parameters.CP_FRACTION_TO_RUN);
                         pullFundingAction.perform();
                     }

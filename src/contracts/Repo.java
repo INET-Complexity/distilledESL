@@ -62,23 +62,29 @@ public class Repo extends Loan {
 
     public void marginCall() throws FailedMarginCallException {
         double currentValue = valueCollateralHaircutted();
+        double valueNeeded = principal - getFundingAlreadyPulled();
+//        System.out.println("Margin call for Repo "+getName(liabilityParty));
+//        System.out.println("Principal of the Repo is "+principal);
+//        System.out.printf("Amount already pulled is "+getFundingAlreadyPulled());
+//        printCollateral();
 
         CanPledgeCollateral borrower = (CanPledgeCollateral) liabilityParty;
 
-        if (currentValue < principal) { //TODO: finite precision
+        if (currentValue < valueNeeded) {
+            System.out.println("This Repo is short of collateral for an amount "+(valueNeeded - currentValue));
 
-            if ((principal - currentValue) > borrower.getMaxUnencumberedHaircuttedCollateral()) {
+            if ((valueNeeded - currentValue) > borrower.getMaxUnencumberedHaircuttedCollateral()) {
                 System.out.println("The margin call on Repo"+getName(liabilityParty)+" failed." +
                         " The value of the collateral was "+currentValue+",\n but the principal of the repo is "+principal +
-                        " and I only have a total extra collateral of "+borrower.getMaxUnencumberedHaircuttedCollateral());
+                        ", of which "+getFundingAlreadyPulled()+" has already been pulled, and I only have a total extra collateral of "+borrower.getMaxUnencumberedHaircuttedCollateral());
 
                 throw new FailedMarginCallException();
             }
 
-            borrower.putMoreCollateral(principal - currentValue, this);
+            borrower.putMoreCollateral(valueNeeded - currentValue, this);
 
-        } else if (currentValue > principal) {
-             borrower.withdrawCollateral(principal - currentValue, this);
+        } else if (currentValue > valueNeeded) {
+             borrower.withdrawCollateral(currentValue - valueNeeded, this);
         }
     }
 
@@ -104,16 +110,16 @@ public class Repo extends Loan {
 
     public void unpledgeProportionally(double excessValue) {
         double totalValue = valueCollateralHaircutted();
-        double unpledgedSoFar = 0.0;
+        double haircuttedValueUnpledgedSoFar = 0.0;
 
         for (Map.Entry<CanBeCollateral, Double> entry : collateral.entrySet()) {
             CanBeCollateral asset = entry.getKey();
-            double quantityToUnpledge = entry.getValue() * (1 - asset.getHaircut()) * excessValue / totalValue;
+            double quantityToUnpledge = entry.getValue() * excessValue / totalValue;
             unpledgeCollateral(asset, quantityToUnpledge);
-            unpledgedSoFar += quantityToUnpledge;
+            haircuttedValueUnpledgedSoFar += quantityToUnpledge * asset.getPrice() * (1.0 - asset.getHaircut());
         }
 
-        unpledgeCashCollateral(excessValue - unpledgedSoFar);
+        unpledgeCashCollateral(excessValue - haircuttedValueUnpledgedSoFar);
 
     }
 
@@ -151,7 +157,7 @@ public class Repo extends Loan {
     }
 
     public void printCollateral() {
-        System.out.println("Collateral of "+getName(liabilityParty));
+        System.out.println("\nCollateral of "+getName(liabilityParty));
         for (Map.Entry<CanBeCollateral, Double> entry : collateral.entrySet()) {
             CanBeCollateral asset = entry.getKey();
             Double quantity = entry.getValue();
@@ -159,5 +165,11 @@ public class Repo extends Loan {
             System.out.println( ((Contract) asset).getName(liabilityParty)+" for an amount "+quantity +
             ", price "+asset.getPrice()+" and haircut "+asset.getHaircut());
         }
+        System.out.println("Cash collateral is "+cashCollateral);
+        System.out.println("Principal of the Repo is "+principal);
+        System.out.printf("Current value of collateral is "+valueCollateralHaircutted());
     }
+
+
+
 }

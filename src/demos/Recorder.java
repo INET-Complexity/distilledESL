@@ -8,6 +8,7 @@ import contracts.AssetMarket;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.stream.Collectors;
 
@@ -20,8 +21,11 @@ public class Recorder {
 
     private PrintWriter marketFile;
     private PrintWriter banksFile;
+    private PrintWriter lossesFile;
     private ArrayList<Asset.AssetType> assetTypes;
     private ArrayList<Agent> banks;
+    private double totalInitialEquity;
+    private HashMap<Agent, Double> initialEquity;
 
     private int timestep;
     private String marketHeader;
@@ -29,6 +33,7 @@ public class Recorder {
     public Recorder(HashSet<Agent> allAgents, AssetMarket market) {
         this.allAgents = allAgents;
         this.market = market;
+        this.initialEquity = new HashMap<>();
     }
 
     // Things to record:
@@ -42,6 +47,7 @@ public class Recorder {
         try {
             marketFile = new PrintWriter("marketFile.csv");
             banksFile = new PrintWriter("banks.csv");
+            lossesFile = new PrintWriter("losses.csv");
 
             assetTypes = market.getAssetTypes();
             marketHeader = "Timestep";
@@ -83,10 +89,27 @@ public class Recorder {
 
             banksFile.println(bankLine);
 
+            String lossesLine = "Timestep";
+            for (Agent agent : banks) {
+                lossesLine = lossesLine + ", "+agent.getName()+"_loss";
+            }
+            lossesLine = lossesLine + ", totalEquityLoss";
+
+
+            lossesFile.println(lossesLine);
+
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
+
+
+        for (Agent agent : banks) {
+            totalInitialEquity += agent.getEquityValue();
+            initialEquity.put(agent, agent.getEquityValue());
+        }
+        System.out.println("Total initial equity is :"+ totalInitialEquity);
+
     }
 
     public void record() {
@@ -131,6 +154,18 @@ public class Recorder {
         banksFile.println(bankLine);
 
 
+        String lossesLine = Integer.toString(timestep);
+        double totalEquity = 0.0;
+        for (Agent agent : banks) {
+            lossesLine = lossesLine + ", "+ (1.0 - agent.getEquityValue() / initialEquity.get(agent));
+            totalEquity += agent.getEquityValue();
+        }
+        lossesLine = lossesLine + ", "+(1.0 - totalEquity / totalInitialEquity);
+        lossesFile.println(lossesLine);
+
+
+
+
         //todo: equity and assets and cash for banks and hF
         // todo: redemptions from asset manager.
 
@@ -143,6 +178,7 @@ public class Recorder {
 
         marketFile.close();
         banksFile.close();
+        lossesFile.close();
     }
 
 

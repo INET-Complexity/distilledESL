@@ -5,6 +5,7 @@ import actions.PayLoan;
 import actions.PullFunding;
 import actions.SellAsset;
 import agents.Agent;
+import demos.BoEDemo;
 
 import java.util.ArrayList;
 import java.util.stream.Collectors;
@@ -28,7 +29,7 @@ public abstract class Behaviour {
             return;
         }
 
-        System.out.println("\n"+me.getName()+" is acting.\n");
+        System.out.println("\n"+me.getName()+" is acting at time "+ BoEDemo.getTime()+".\n");
 
         me.step();
         me.printBalanceSheet();

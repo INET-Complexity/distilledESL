@@ -31,23 +31,22 @@ public class Bank extends Agent implements CanPledgeCollateral {
 
     @Override
     public void putMoreCollateral(double total, Repo repo) {
-        //TODO: THIS SHOULD BE BEHAVIOUR
         // First, get a set of all my Assets that can be pledged as collateral
         HashSet<Contract> potentialCollateral = mainLedger.getAssetsOfType(AssetCollateral.class);
 
         double maxHaircutValue = getMaxUnencumberedHaircuttedCollateral();
-        double pledgedSoFar = 0.0;
+        double haircuttedValuePledgedSoFar = 0.0;
 
         for (Contract contract : potentialCollateral) {
             CanBeCollateral asset = (CanBeCollateral) contract;
 
-            double quantityToPledge = asset.getUnencumberedValue() * (1.0 - asset.getHaircut()) * total / maxHaircutValue;
+            double quantityToPledge = asset.getUnencumberedQuantity() * total / maxHaircutValue;
             repo.pledgeCollateral(asset, quantityToPledge);
-            pledgedSoFar += quantityToPledge;
+            haircuttedValuePledgedSoFar += quantityToPledge * asset.getPrice() * (1.0 - asset.getHaircut());
 
         }
 
-        repo.pledgeCashCollateral(total - pledgedSoFar);
+        repo.pledgeCashCollateral(total - haircuttedValuePledgedSoFar);
     }
 
     @Override

@@ -11,10 +11,10 @@ public class Parameters {
     public static boolean FUNDING_CONTAGION_HEDGEFUND = true;
     public static boolean FUNDING_CONTAGION_INTERBANK = true;
     public static boolean INVESTOR_REDEMPTION = true;
-    public static boolean FIRESALE_CONTAGION = true;
+    public static boolean FIRESALE_CONTAGION = false;
     public static boolean CASH_PROVIDER_RUNS = true;
     public static boolean NEKO_MODEL = false;
-    public static boolean FIRESALES_UPON_DEFAULT = true;
+    public static boolean FIRESALES_UPON_DEFAULT = false;
 
     // INTERBANK liquidity hoarding threshold
     // margin calls off
@@ -24,22 +24,23 @@ public class Parameters {
 
 
 
-    public static double INITIAL_SHOCK = 0.07;
+    public static double INITIAL_SHOCK = 0.12;
     public static Asset.AssetType ASSET_TO_SHOCK = Asset.AssetType.EXTERNAL2;
 
     // Cash Provider
-    public static double HAIRCUT_SLOPE = 0.1;
-    public static double HAIRCUT_PRICE_FALL_THRESHOLD = 0.1;
-    public static double LEVERAGE_THRESHOLD_TO_RUN = 0.01;
-    public static double LCR_THRESHOLD_TO_RUN = 0.01;
-    //TODO: REMANE
-    public static double CP_FRACTION_TO_RUN = 0.3;
+    public static double HAIRCUT_SLOPE = 0.2;
+    public static double HAIRCUT_PRICE_FALL_THRESHOLD = 0.05;
+
+    public static double LCR_THRESHOLD_TO_RUN = -3.0;
+    public static double LEVERAGE_THRESHOLD_TO_RUN = 0.0125;
+    public static double CP_FRACTION_TO_RUN = 0.5;
+
+    public static int TRIAL_PERIOD = 5;
 
     // Hedgefund parameters
-    public static double HF_CASH_BUFFER_AS_FRACTION_OF_ASSETS = 0.05;
-    public static double HF_CASH_TARGET_AS_FRACTION_OF_ASSETS = 0.10;
+    public static double HF_CASH_BUFFER_AS_FRACTION_OF_ASSETS = 0.04;
+    public static double HF_CASH_TARGET_AS_FRACTION_OF_ASSETS = 0.08;
 
-    // Hedgefund
     public static double HF_LEVERAGE_BUFFER = 0.03;
     public static double HF_LEVERAGE_TARGET = 0.06;
 
@@ -64,7 +65,7 @@ public class Parameters {
 
     // Investor
     public static double REDEMPTIONS_C1 = 20;
-    public static double REDEMPTIONS_C2 = 6;
+    public static double REDEMPTIONS_C2 = 2;
 
     public static double NEKO_C = 0.6;
 
@@ -72,9 +73,6 @@ public class Parameters {
     public static int TIMESTEPS_TO_REDEEM_SHARES = 2;
 
     public static int SIMULATION_TIMESTEPS = 10;
-
-    // Risk-weighted Assets - weights
-    public static double EXTERNAL_ASSETS_WEIGHT = 0.35;
 
 
     // Helper functions
@@ -110,16 +108,16 @@ public class Parameters {
         }
     }
 
-    public static double DEPOSITS_LCR = 0.1;
-    public static double REPO_LCR = 0.5;
-    public static double INTERBANK_LCR = 1.0;
-    public static double LONG_TERM_LCR = 0.05;
-    public static double MATCH_BOOK_LCR = 0.0;
-
-    //todo: put this in for the LCR!
-
-
     public static double INTERBANK_RWAWEIGHT = 0.40;
+
+
+    public static double DEPOSITS_LCR = 0.10;
+    public static double REPO_LCR = 0.50;
+    public static double INTERBANK_LCR = 1.00;
+    public static double LONG_TERM_LCR = 0.05;
+    public static double MATCH_BOOK_LCR = 0.00;
+
+
 
     public static boolean ASSET_MANAGER_ON = INVESTOR_REDEMPTION;
     public static boolean HEDGEFUNDS_ON = true;
@@ -127,8 +125,8 @@ public class Parameters {
 
 
     public static double BANK_LCR_MIN = 0.10;
-    public static double BANK_LCR_BUFFER = 0.20;
-    public static double BANK_LCR_TARGET = 0.30;
+    public static double BANK_LCR_BUFFER = 0.15;
+    public static double BANK_LCR_TARGET = 0.20;
 
     public static double BANK_LEVERAGE_MIN = 0.01;
     public static double BANK_LEVERAGE_BUFFER = 0.015;

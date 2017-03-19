@@ -1,6 +1,8 @@
 package actions;
 
+import contracts.FailedMarginCallException;
 import contracts.Loan;
+import contracts.Repo;
 import contracts.obligations.Obligation;
 import contracts.obligations.PullFundingObligation;
 import demos.Parameters;
@@ -28,6 +30,15 @@ public class PullFunding extends Action {
             // If there is a counter-party AND we have funding contagion, we must send a Obligation.
             Obligation obligation = new PullFundingObligation(loan, getAmount(), Parameters.TIMESTEPS_TO_PAY);
             loan.getAssetParty().sendMessage(loan.getLiabilityParty(), obligation);
+            if (loan instanceof Repo) {
+                try {
+                    System.out.println("I've pulled funding from a repo. My counterparty will perform a margin call to free up assets.");
+                    ((Repo) loan).marginCall();
+                } catch (FailedMarginCallException e) {
+                    System.out.println("Strange! a margin call failed while the funding was being pulled.");
+                    System.exit(-1);
+                }
+            }
 
         }
     }
