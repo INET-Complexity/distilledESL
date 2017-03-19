@@ -81,6 +81,7 @@ public class HedgefundBehaviour extends Behaviour {
         // We look at timesteps between now and the time delay of PullFunding.
 
         double balance = me.getCash();
+        double miniumSpareBalanceInThePeriod = balance;
         for (int timeIndex = 0; timeIndex < Parameters.TIMESTEPS_TO_PAY+1; timeIndex++) {
             balance += cashInflows.get(timeIndex);
             balance -= cashCommitments.get(timeIndex);
@@ -95,18 +96,24 @@ public class HedgefundBehaviour extends Behaviour {
                 if (balance < 0) System.out.println("We won't be able to firesale enough assets. We'll wait and see.");
             }
 
+            miniumSpareBalanceInThePeriod = Math.min(miniumSpareBalanceInThePeriod, balance);
+
         }
 
         if (balance >= 0) {
             System.out.println("We can meet our cash commitments in the next " +
                     Parameters.TIMESTEPS_TO_PAY + " timesteps, and we will have a spare balance of " + balance);
+            System.out.println("Our minimum spare balance in the period will be "+miniumSpareBalanceInThePeriod);
         }
 
-        double deLever = min(balance, min(me.getCash()-me.getCashBuffer(), amountToDelever));
+        double deLever = Math.min(miniumSpareBalanceInThePeriod, min(me.getCash()-me.getCashBuffer(), amountToDelever));
 
         if (deLever > 0) {
-            System.out.println("Since we would like to delever an amount "+amountToDelever + "\n\tand we have an amount of cash above the buffer of "+ (me.getCash()-me.getCashBuffer()) + "\n\tand we expect our cash balance after paying approaching obligations to be "+balance + "\n\twe can use an amount "+deLever+" to delever.");
-            payOffLiabilities(deLever);
+            System.out.println("Since we would like to delever an amount "+amountToDelever +
+                    "\n\tand we have an amount of cash above the buffer of "+ (me.getCash()-me.getCashBuffer()) +
+                    "\n\tand we expect our minimum spare cash balance after paying approaching obligations to be "+miniumSpareBalanceInThePeriod +
+                    "\n\twe can use an amount "+deLever+" to delever.");
+            deLever = payOffLiabilities(deLever);
             amountToDelever -= deLever;
         }
         balance -= deLever;

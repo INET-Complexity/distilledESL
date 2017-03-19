@@ -73,6 +73,8 @@ public class Mailbox {
         inbox.removeIf(Obligation::isFulfilled);
         outbox.removeIf(Obligation::isFulfilled);
 
+        outbox.removeIf(obligation -> (!(obligation.getFrom().isAlive())));
+
         // Move all messages in the unopenedMessages to the inbox
         inbox.addAll(
                 unopenedMessages.stream()

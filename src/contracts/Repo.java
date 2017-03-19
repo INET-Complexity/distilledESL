@@ -139,14 +139,14 @@ public class Repo extends Loan {
             double amountEncumbered = entry.getValue();
 
             // 2. Change the ownership of the asset
-            ((Asset) asset).changeOwnership(assetParty, amountEncumbered);
+            Asset newAsset = ((Asset) asset).changeOwnership(assetParty, amountEncumbered);
 
             // 3. Reduce the value of this repo to zero.
             assetParty.devalueAsset(this, principal);
             liabilityParty.devalueLiability(this, principal);
 
             if (Parameters.FIRESALES_UPON_DEFAULT) {
-                ((Asset) asset).putForSale(((Asset) asset).getQuantity());
+                newAsset.putForSale(newAsset.getQuantity());
             }
         }
 

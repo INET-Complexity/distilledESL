@@ -110,7 +110,7 @@ public class Bank extends Agent implements CanPledgeCollateral {
 
         for (Action action : pullFundingActions) {
             action.setAmount(action.getMax());
-            action.perform();
+            if (action.getAmount() > 0) action.perform();
         }
 
     }

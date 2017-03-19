@@ -118,6 +118,7 @@ public class Recorder {
         }
 
 
+        totalInitialEquity = 0.0;
         for (Agent agent : allAgents) {
             totalInitialEquity += agent.getEquityValue();
             initialEquity.put(agent, agent.getEquityValue());
@@ -173,9 +174,11 @@ public class Recorder {
         double totalEquity = 0.0;
         for (Agent agent : allAgents) {
             lossesLine = lossesLine + ", "+ String.format("%.2f", 100.0*(1.0 - agent.getEquityValue() / initialEquity.get(agent)))+"%";
-            totalEquity += agent.getEquityValue();
+            totalEquity += Math.max(0.0, agent.getEquityValue());
         }
-        lossesLine = lossesLine + ", "+String.format("%.2f", 100.0*(1.0 - totalEquity / totalInitialEquity))+"%";
+
+        double totalEquityLoss = 100.0 * (1.0 - totalEquity / totalInitialEquity);
+        lossesLine = lossesLine + ", "+String.format("%.2f", totalEquityLoss)+"%";
         lossesFile.println(lossesLine);
 
 

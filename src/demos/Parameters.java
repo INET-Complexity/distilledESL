@@ -24,7 +24,7 @@ public class Parameters {
 
 
 
-    public static double INITIAL_SHOCK = 0.10;
+    public static double INITIAL_SHOCK = 0.08;
     public static Asset.AssetType ASSET_TO_SHOCK = Asset.AssetType.EXTERNAL2;
 
     // Cash Provider
@@ -72,7 +72,7 @@ public class Parameters {
     public static int TIMESTEPS_TO_PAY = 3;
     public static int TIMESTEPS_TO_REDEEM_SHARES = 2;
 
-    public static int SIMULATION_TIMESTEPS = 10;
+    public static int SIMULATION_TIMESTEPS = 15;
 
 
     // Helper functions

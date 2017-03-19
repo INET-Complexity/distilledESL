@@ -121,7 +121,7 @@ public abstract class Agent {
     }
 
     public double getEquityValue() {
-        return mainLedger.getEquityValue();
+        return isAlive() ? mainLedger.getEquityValue() : 0.0;
     }
 
     public void printBalanceSheet() {

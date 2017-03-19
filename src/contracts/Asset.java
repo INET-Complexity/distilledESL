@@ -138,7 +138,7 @@ public class Asset extends Contract {
         return quantity;
     }
 
-    public void changeOwnership(Agent newOwner, double quantity) {
+    public Asset changeOwnership(Agent newOwner, double quantity) {
         assert(this.quantity >= quantity);
 
         // First, reduce the quantity of this asset
@@ -147,8 +147,12 @@ public class Asset extends Contract {
         // Have the owner lose the value of the asset
         assetParty.devalueAsset(this, quantity);
 
+        Asset newAsset = new Asset(newOwner, assetType, assetMarket, quantity);
         // Create a new Asset of the same type and give it to the new Owner
-        newOwner.add(new Asset(newOwner, assetType, assetMarket, quantity));
+        newOwner.add(newAsset);
+        //todo: side effects.
+
+        return newAsset;
     }
 
     public double getPutForSale() {

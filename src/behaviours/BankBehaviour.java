@@ -110,7 +110,7 @@ public class BankBehaviour extends Behaviour {
                     "\n\tand we have an amount of cash above the buffer of "+ (me.getCash()-me.getLCR_constraint().getCashBuffer()) +
                     "\n\tand we expect our minimum spare cash balance after paying approaching obligations to be "+miniumSpareBalanceInThePeriod +
                     "\n\twe can use an amount "+deLever+" to delever.");
-            payOffLiabilities(deLever);
+            deLever = payOffLiabilities(deLever);
             amountToDelever -= deLever;
         }
         balance -= deLever;

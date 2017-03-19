@@ -51,7 +51,7 @@ public abstract class Behaviour {
                 .mapToDouble(Action::getMax).sum();
     }
 
-    void payOffLiabilities(double amount) {
+    double payOffLiabilities(double amount) {
         System.out.println("Pay off liabilities (delever) proportionally: "+amount);
 
         if(amount > maxLiabilitiesToPayOff()) {
@@ -59,6 +59,8 @@ public abstract class Behaviour {
             System.out.println("We do not have enough liabilites to pay off this amount.\n" +
                     "We can only pay off "+ amount);
         }
+
+        if (!(amount > 0)) return 0.0;
 
         ArrayList<Action> payLoanActions = getAllActionsOfType(PayLoan.class);
 
@@ -68,8 +70,10 @@ public abstract class Behaviour {
 
         for (Action action : payLoanActions) {
             action.setAmount(action.getMax() * amount / totalLiabilitiesToPayOff);
-            action.perform();
+            if (action.getAmount() > 0) action.perform();
         }
+
+        return amount;
     }
 
 
