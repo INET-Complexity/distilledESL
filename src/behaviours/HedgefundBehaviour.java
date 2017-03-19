@@ -81,7 +81,7 @@ public class HedgefundBehaviour extends Behaviour {
         // We look at timesteps between now and the time delay of PullFunding.
 
         double balance = me.getCash();
-        for (int timeIndex = 0; timeIndex < Parameters.TIMESTEPS_TO_PAY; timeIndex++) {
+        for (int timeIndex = 0; timeIndex < Parameters.TIMESTEPS_TO_PAY+1; timeIndex++) {
             balance += cashInflows.get(timeIndex);
             balance -= cashCommitments.get(timeIndex);
             System.out.println("At timestep "+(timeIndex+ BoEDemo.getTime()+1)+", our expected balance " +
@@ -113,7 +113,7 @@ public class HedgefundBehaviour extends Behaviour {
 
 
         // Second loop
-        for (int timeIndex = Parameters.TIMESTEPS_TO_PAY; timeIndex < cashCommitments.size(); timeIndex++) {
+        for (int timeIndex = Parameters.TIMESTEPS_TO_PAY+1; timeIndex < cashCommitments.size(); timeIndex++) {
             balance += cashInflows.get(timeIndex);
             balance -= cashCommitments.get(timeIndex);
         }

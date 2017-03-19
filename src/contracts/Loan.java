@@ -43,13 +43,15 @@ public class Loan extends Contract {
     private void reducePrincipal(double amount) {
         assert (amount <= principal);
         principal -= amount;
-        fundingAlreadyPulled -= amount;
 
         if (principal < 0.01) {
             System.out.println("This loan has been fully repaid.");
             //Todo: and now what shall we do? Destroy the loan?
         }
+    }
 
+    public void reducePullFundingAmount(double amount) {
+        fundingAlreadyPulled -= amount;
     }
 
     @Override

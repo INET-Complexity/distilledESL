@@ -1,11 +1,13 @@
 package contracts;
 
+import demos.BoEDemo;
 import demos.Parameters;
 
 import java.util.*;
 
 public class AssetMarket {
     private HashMap<Asset.AssetType, Double> prices;
+    private HashMap<Asset.AssetType, Double> oldPrices;
     private HashMap<Asset.AssetType, Double> priceImpacts;
     private HashMap<Asset.AssetType, Double> amountsSold;
     private HashMap<Asset.AssetType, Double> haircuts;
@@ -65,7 +67,17 @@ public class AssetMarket {
     public void clearTheMarket() {
         System.out.println("\nMARKET CLEARING\n");
         for (Map.Entry<Asset.AssetType, Double> entry : amountsSold.entrySet()) {
-            if (Parameters.FIRESALE_CONTAGION) computePriceImpact(entry.getKey(), entry.getValue());
+            if (Parameters.FIRESALE_CONTAGION) {
+                oldPrices = new HashMap<>(prices);
+                computePriceImpact(entry.getKey(), entry.getValue());
+
+                prices.forEach((assetType,newPrice) -> {
+                    if (oldPrices.get(assetType) > newPrice) {
+                        BoEDemo.devalueCommonAsset(assetType, oldPrices.get(assetType) - newPrice);
+                    }
+                });
+            }
+
             if (Parameters.HAIRCUT_CONTAGION) computeHaircut(entry.getKey(), entry.getValue());
 
             if (!totalAmountsSold.containsKey(entry.getKey())) {

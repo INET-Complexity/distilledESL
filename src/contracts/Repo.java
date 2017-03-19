@@ -17,6 +17,7 @@ import java.util.*;
 public class Repo extends Loan {
 
     private double cashCollateral;
+    private HashMap<CanBeCollateral, Double> collateral;
 
     public Repo(Agent assetParty, Agent liabilityParty, double principal) {
         super(assetParty, liabilityParty, principal);
@@ -49,16 +50,18 @@ public class Repo extends Loan {
         cashCollateral += amount;
     }
 
+    private void unpledgeCashCollateral(double amount) {
+        assert(cashCollateral > amount);
+        cashCollateral -= amount;
+
+    }
+
     private void unpledgeCollateral(CanBeCollateral asset, double quantity) {
         asset.unEncumber(quantity);
         assert(collateral.get(asset) >= quantity);
         collateral.put(asset, collateral.get(asset) - quantity);
     }
 
-    private void unpledgeCashCollateral(double amount) {
-        assert(cashCollateral > amount);
-
-    }
 
     public void marginCall() throws FailedMarginCallException {
         double currentValue = valueCollateralHaircutted();
@@ -109,17 +112,19 @@ public class Repo extends Loan {
     }
 
     public void unpledgeProportionally(double excessValue) {
-        double totalValue = valueCollateralHaircutted();
-        double haircuttedValueUnpledgedSoFar = 0.0;
+        double initialCollateralValue = valueCollateralHaircutted();
+//        double haircuttedValueUnpledgedSoFar = 0.0;
 
         for (Map.Entry<CanBeCollateral, Double> entry : collateral.entrySet()) {
             CanBeCollateral asset = entry.getKey();
-            double quantityToUnpledge = entry.getValue() * excessValue / totalValue;
+            double quantityToUnpledge = entry.getValue() * excessValue / initialCollateralValue;
             unpledgeCollateral(asset, quantityToUnpledge);
-            haircuttedValueUnpledgedSoFar += quantityToUnpledge * asset.getPrice() * (1.0 - asset.getHaircut());
+//            haircuttedValueUnpledgedSoFar += quantityToUnpledge * asset.getPrice() * (1.0 - asset.getHaircut());
         }
 
-        unpledgeCashCollateral(excessValue - haircuttedValueUnpledgedSoFar);
+        double currentCollateralValue = valueCollateralHaircutted();
+
+        unpledgeCashCollateral(excessValue - (initialCollateralValue - currentCollateralValue));
 
     }
 
@@ -149,8 +154,6 @@ public class Repo extends Loan {
 
     }
 
-    private HashMap<CanBeCollateral, Double> collateral;
-
     @Override
     public double getRWAweight() {
         return 0.0;
@@ -167,6 +170,8 @@ public class Repo extends Loan {
         }
         System.out.println("Cash collateral is "+cashCollateral);
         System.out.println("Principal of the Repo is "+principal);
+        System.out.println("Amount already pulled is "+getFundingAlreadyPulled());
+        System.out.println("Amount of collateral needed is "+(principal - getFundingAlreadyPulled()));
         System.out.printf("Current value of collateral is "+valueCollateralHaircutted());
     }
 

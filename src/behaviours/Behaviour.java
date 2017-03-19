@@ -10,8 +10,6 @@ import demos.BoEDemo;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
-import static jdk.nashorn.internal.objects.NativeMath.min;
-
 public abstract class Behaviour {
     private Agent me;
     private ArrayList<Action> availableActions;
@@ -156,17 +154,21 @@ public abstract class Behaviour {
             amount = totalAssetsThatCanBeSold + totalFundingThatCanBePulled;
         }
 
-        double amountToPullFunding = min(totalFundingThatCanBePulled, amount);
+        System.out.println("I am raising "+amount+" liquidity, and can pull "+totalFundingThatCanBePulled);
+        double amountToPullFunding = Math.min(totalFundingThatCanBePulled, amount);
+        System.out.println("I'll try to pull "+amountToPullFunding);
         if (amountToPullFunding > 0) {
             fundingPulled = pullFundingProportionally(amountToPullFunding);
+            System.out.println("I succeeded in pulling "+fundingPulled);
             amount -= fundingPulled;
+            System.out.println("I still need to raise "+amount);
         }
 
         if (!(amount >0)) {
             return fundingPulled;
         }
 
-        double assetsToSell = min(amount, totalAssetsThatCanBeSold);
+        double assetsToSell = Math.min(amount, totalAssetsThatCanBeSold);
         if (assetsToSell>0) {
             firesales = sellAssetsProportionally(assetsToSell);
             amount -= firesales;

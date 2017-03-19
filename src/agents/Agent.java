@@ -55,6 +55,13 @@ public abstract class Agent {
         mainLedger.devalueAsset(asset, valueLost);
     }
 
+    public void devalueAssetOfType(Asset.AssetType assetType, double priceLost) {
+        mainLedger.getAssetsOfType(Asset.class).stream()
+                .filter(asset -> ((Asset) asset).getAssetType()==assetType)
+                .forEach(asset ->
+                devalueAsset(asset, ((Asset) asset).getQuantity()*priceLost));
+    }
+
     public void appreciateAsset(Contract asset, double valueLost) {
         mainLedger.appreciateAsset(asset, valueLost);
     }
@@ -99,10 +106,6 @@ public abstract class Agent {
 
     public void act() {
         getBehaviour().act();
-    }
-
-    public void updateAssetPrices() {
-        mainLedger.updateAssetPrices();
     }
 
     public double getLeverage() {

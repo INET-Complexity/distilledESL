@@ -10,7 +10,7 @@ public class BoEDemo {
 
     private static AssetMarket assetMarket = new AssetMarket();
     private static HashSet<Agent> allAgents = new HashSet<>();
-    private static Recorder recorder = new Recorder(allAgents, assetMarket);
+    private static Recorder recorder;
     public static int timeStep = 0;
 
     public static int getTime() { return timeStep; }
@@ -99,6 +99,7 @@ public class BoEDemo {
         initRepo(cp1, bank2, 200);
         initRepo(cp1, bank3, 200);
 
+        recorder = new Recorder(allAgents, assetMarket);
         recorder.init();
         recorder.record();
     }
@@ -192,6 +193,12 @@ public class BoEDemo {
         }
 
         assetMarket.setPrice(assetType, assetMarket.getPrice(assetType) * (1.0 - fraction));
+    }
+
+    public static void devalueCommonAsset(Asset.AssetType assetType, double priceLost) {
+
+        allAgents.forEach(agent ->
+        agent.devalueAssetOfType(assetType, priceLost));
     }
 
 }

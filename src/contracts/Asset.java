@@ -66,10 +66,12 @@ public class Asset extends Contract {
         // Sell the asset at the mid-point price
         assetParty.sellAssetForValue(this, quantitySold * 0.5 * (price + newPrice));
 
-        // Take the loss on devaluation.
+        // Take the loss on the sale.
         if (newPrice < price) {
-            // Value lost is the sum of the value lost from the transaction and the devaluation of the asset that is left.
-            double totalValueLost = quantitySold * 0.5 * (price - newPrice) + (quantity - quantitySold) * (price - newPrice);
+            // Value lost is the value lost from the transaction.
+            double totalValueLost = quantitySold * 0.5 * (price - newPrice);
+
+//            double totalValueLost = quantitySold * 0.5 * (price - newPrice) + (quantity - quantitySold) * (price - newPrice);
             System.out.println(assetParty.getName() + " made a loss of " + String.format("%.2f", totalValueLost) + " from the sale of " + getAssetType());
             assetParty.devalueAsset(this, totalValueLost);
         }
@@ -132,7 +134,7 @@ public class Asset extends Contract {
         return null;
     } //An Asset does not have a liability party
 
-    protected double getQuantity() {
+    public double getQuantity() {
         return quantity;
     }
 
@@ -157,5 +159,7 @@ public class Asset extends Contract {
     public double getRWAweight() {
         return Parameters.getRWAWeight(assetType);
     }
+
+
 }
 
