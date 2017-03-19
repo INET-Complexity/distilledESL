@@ -51,6 +51,8 @@ public class AssetMarket {
         orderbook.add(new Order(asset, amount));
         Asset.AssetType type = asset.getAssetType();
 
+        System.out.println("Putting for sale: "+asset.getAssetType()+", an amount "+amount);
+
         if (!amountsSold.containsKey(type)) {
             amountsSold.put(type, amount);
         } else {

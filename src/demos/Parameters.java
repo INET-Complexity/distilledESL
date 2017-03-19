@@ -71,7 +71,7 @@ public class Parameters {
     public static int TIMESTEPS_TO_PAY = 3;
     public static int TIMESTEPS_TO_REDEEM_SHARES = 2;
 
-    public static int SIMULATION_TIMESTEPS = 4;
+    public static int SIMULATION_TIMESTEPS = 10;
 
     // Risk-weighted Assets - weights
     public static double EXTERNAL_ASSETS_WEIGHT = 0.35;

@@ -124,7 +124,7 @@ public abstract class Agent {
     public void printBalanceSheet() {
         System.out.println("\nBalance Sheet of " + getName() + "\n**************************");
         mainLedger.printBalanceSheet(this);
-        System.out.println("Leverage ratio: " + String.format("%.2f", 100 * getLeverage()) + "%");
+        System.out.println("\nLeverage ratio: " + String.format("%.2f", 100 * getLeverage()) + "%");
     }
 
     public void runMarginCalls() throws FailedMarginCallException {
@@ -173,13 +173,13 @@ public abstract class Agent {
         mailbox.step();
     }
 
-    public void sendMessage(Agent to, Obligation obligation) {
-        to.receiveMessage(this, obligation);
+    public void sendMessage(Agent recipient, Obligation obligation) {
+        recipient.receiveMessage(obligation);
         mailbox.addToOutbox(obligation);
     }
 
-    public void receiveMessage(Agent from, Obligation obligation) {
-        mailbox.addToInbox(obligation);
+    public void receiveMessage(Obligation obligation) {
+        mailbox.receiveMessage(obligation);
     }
 
     public double getMaturedObligations() {
@@ -208,6 +208,10 @@ public abstract class Agent {
 
     public ArrayList<Double> getCashInflows() {
         return mailbox.getCashInflows();
+    }
+
+    public void printMailbox() {
+        mailbox.printMailbox();
     }
 
 

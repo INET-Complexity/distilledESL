@@ -352,7 +352,7 @@ public class Ledger implements LedgerAPI {
         System.out.println("TOTAL LIABILITIES: "+ String.format( "%.2f", getLiabilityValue()));
         System.out.println("\nTOTAL EQUITY: "+String.format("%.2f", getEquityValue()));
 
-        System.out.println("Summary of encumbered collateral:");
+        System.out.println("\nSummary of encumbered collateral:");
         for (Contract contract : getLiabilitiesOfType(Repo.class)) {
             ((Repo) contract).printCollateral();
         }

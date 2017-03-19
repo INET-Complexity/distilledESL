@@ -146,21 +146,6 @@ public class Repo extends Loan {
     private HashMap<CanBeCollateral, Double> collateral;
 
     @Override
-    public Agent getAssetParty() {
-        return assetParty;
-    }
-
-    @Override
-    public Agent getLiabilityParty() {
-        return liabilityParty;
-    }
-
-    @Override
-    public double getValue(Agent me) {
-        return principal;
-    }
-
-    @Override
     public double getRWAweight() {
         return 0.0;
     }

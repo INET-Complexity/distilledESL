@@ -15,8 +15,10 @@ public abstract class Obligation {
 
     Obligation(Contract contract, double amount, int timeLeftToPay) {
         this.amount = amount;
+
         this.from = contract.getLiabilityParty();
         this.to = contract.getAssetParty();
+
         this.timeToPay = BoEDemo.getTime() + timeLeftToPay;
         this.timeToOpen = BoEDemo.getTime() + 1;
 
@@ -58,5 +60,10 @@ public abstract class Obligation {
     }
 
     public int getTimeToPay() {return timeToPay;}
+
+    public void printObligation() {
+        System.out.println("Obligation from "+getFrom().getName()+" to pay "+getTo().getName() +
+        " an amount "+getAmount()+" on timestep "+getTimeToPay());
+    }
 
 }

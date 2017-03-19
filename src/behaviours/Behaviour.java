@@ -32,10 +32,9 @@ public abstract class Behaviour {
 
         me.step();
         me.printBalanceSheet();
+        me.printMailbox();
 
         availableActions = me.getAvailableActions(me);
-        System.out.println("\nMy available actions are: ");
-        Action.print(availableActions);
 
         try {
             chooseActions();
@@ -81,55 +80,103 @@ public abstract class Behaviour {
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
-    public void sellAssetsProportionally(double amount) {
-        System.out.println("Sell assets proportionally: "+amount);
-        ArrayList<Action> sellAssetActions = getAllActionsOfType(SellAsset.class);
+    public double sellAssetsProportionally(double amount) {
+        if (amount > 0) {
+            System.out.println("Sell assets proportionally: " + amount);
+            ArrayList<Action> sellAssetActions = getAllActionsOfType(SellAsset.class);
 
-        double totalSellableAssets = sellAssetActions.stream()
-                .mapToDouble(Action::getMax)
-                .sum();
+            double totalSellableAssets = sellAssetActions.stream()
+                    .mapToDouble(Action::getMax)
+                    .sum();
 
-        for (Action action : sellAssetActions) {
-            action.setAmount(action.getMax() * amount / totalSellableAssets);
-            action.perform();
+            if (!(totalSellableAssets > 0)) {
+                System.out.println("We cannot sell assets.");
+                return 0.0;
+            }
+
+            if (totalSellableAssets < amount) {
+                System.out.println("We do not have enough assets to sell! We can at most sell "+totalSellableAssets);
+                amount = totalSellableAssets;
+            }
+
+            for (Action action : sellAssetActions) {
+                action.setAmount(action.getMax() * amount / totalSellableAssets);
+                action.perform();
+            }
+
+            return amount;
+        } else {
+            return 0.0;
         }
     }
 
-    public void pullFundingProportionally(double amount) {
-        System.out.println("Pull funding proportionally: "+amount);
+    public double pullFundingProportionally(double amount) {
+
         ArrayList<Action> pullFundingActions = getAllActionsOfType(PullFunding.class);
 
         double totalFundingThatCanBePulled = pullFundingActions.stream()
                 .mapToDouble(Action::getMax)
                 .sum();
 
+        if (totalFundingThatCanBePulled < amount) {
+            amount = totalFundingThatCanBePulled;
+        }
+
+        if (!(amount > 0)) return 0.0;
+
+
         for (Action action : pullFundingActions) {
             action.setAmount(action.getMax() * amount / totalFundingThatCanBePulled);
             action.perform();
         }
+
+        return amount;
     }
 
-    public void raiseLiquidityWithPeckingOrder(double amount) {
-        System.out.println("Raising liquidity: "+amount);
+    public double raiseLiquidityWithPeckingOrder(double amount) {
+        if (!(amount>0)) return 0.0;
+        double fundingPulled = 0.0;
+        double firesales = 0.0;
+
         double totalFundingThatCanBePulled = getAllActionsOfType(PullFunding.class).stream()
                 .mapToDouble(Action::getMax)
                 .sum();
 
-        double amountToPullFunding = min(totalFundingThatCanBePulled, amount);
-        if (amountToPullFunding > 0) pullFundingProportionally(amountToPullFunding);
+        double totalAssetsThatCanBeSold = getAllActionsOfType(SellAsset.class).stream()
+                .mapToDouble(Action::getMax)
+                .sum();
 
-        if (totalFundingThatCanBePulled < amount) {
-            amount -= amountToPullFunding;
-            double totalAssetsThatCanBeSold = getAllActionsOfType(SellAsset.class).stream()
-                    .mapToDouble(Action::getMax)
-                    .sum();
-            double assetsToSell = min (amount, totalAssetsThatCanBeSold);
-            if (assetsToSell >0) sellAssetsProportionally(assetsToSell);
-
-            if (totalAssetsThatCanBeSold < amount) {
-                System.out.println("we could not raise enough liquidity.");
-            }
+        if (!((totalAssetsThatCanBeSold + totalFundingThatCanBePulled)>0)) {
+            System.out.println("We can't raise any liquidity.");
+            return 0.0;
+        } else if (amount > (totalFundingThatCanBePulled + totalAssetsThatCanBeSold)) {
+            System.out.println("We can't raise this much liquidity. We will only raise "+
+                    (totalAssetsThatCanBeSold+totalFundingThatCanBePulled));
+            amount = totalAssetsThatCanBeSold + totalFundingThatCanBePulled;
         }
 
+        double amountToPullFunding = min(totalFundingThatCanBePulled, amount);
+        if (amountToPullFunding > 0) {
+            fundingPulled = pullFundingProportionally(amountToPullFunding);
+            amount -= fundingPulled;
+        }
+
+        if (!(amount >0)) {
+            return fundingPulled;
+        }
+
+        double assetsToSell = min(amount, totalAssetsThatCanBeSold);
+        if (assetsToSell>0) {
+            firesales = sellAssetsProportionally(assetsToSell);
+            amount -= firesales;
+        }
+
+        if (amount > 0) {
+            System.out.println("We could not raise enough liquidity.");
+        }
+
+        System.out.println("We managed to put orders to raise "+(firesales+fundingPulled));
+        System.out.println("\tfiresales: "+firesales+"\n\tpull funding: "+fundingPulled);
+        return fundingPulled + firesales;
     }
 }

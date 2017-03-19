@@ -57,12 +57,20 @@ public class BankBehaviour extends Behaviour {
                         me.getBankLeverageConstraint().getAmountToDelever() :
                             0.0;
 
-        // Compute liquidity to replenish (LCR buffer)
-        double liquidityBufferToReplenish = me.getLCR_constraint().getLiquidityToRaise();
-        double nonUrgentLiquidityNeeds = liquidityBufferToReplenish + amountToDelever;
 
         ArrayList<Double> cashCommitments = me.getCashCommitments();
         ArrayList<Double> cashInflows = me.getCashInflows();
+
+        System.out.println("\nLiquidity management for this timestep");
+        System.out.println("Current unencumbered cash -> "+me.getCash());
+        System.out.println("LCR buffer -> "+me.getLCR_constraint().getCashBuffer());
+        System.out.println("Needed to delever -> "+amountToDelever);
+//        System.out.println("Needed to replenish the LCR buffer -> "+liquidityBufferToReplenish);
+        System.out.println("Needed to fulfil obligations -> "+cashCommitments.stream().mapToDouble(Double::doubleValue).sum());
+        System.out.println("Expected cash inflows -> "+cashInflows.stream().mapToDouble(Double::doubleValue).sum());
+        System.out.println();
+
+
 
         // ST PATRICK'S ALGORITHM
         // First loop
@@ -79,8 +87,10 @@ public class BankBehaviour extends Behaviour {
             Parameters.TIMESTEPS_TO_PAY+ " timesteps, we will be missing an amount "+(-1.0*balance));
 
             double sellAssetsAmount = -1.0 * balance;
-            sellAssetsProportionally(sellAssetsAmount);
-            balance = 0.0;
+            double amountSold = sellAssetsProportionally(sellAssetsAmount);
+            balance += amountSold;
+            if (balance < 0) System.out.println("We won't be able to firesale enough assets. We'll wait and see.");
+
         } else {
             System.out.println("We can meet our cash commitments in the next " +
                     Parameters.TIMESTEPS_TO_PAY+ " timesteps, and we will have a spare balance of "+balance);
@@ -89,7 +99,10 @@ public class BankBehaviour extends Behaviour {
             double deLever = min(balance, min(me.getCash()-me.getLCR_constraint().getCashBuffer(), amountToDelever));
 
             if (deLever > 0) {
-                System.out.println("We will use an amount "+deLever+" to delever.");
+                System.out.println("Since we would like to delever an amount "+amountToDelever +
+                "\n\tand we have an amount of cash above the buffer of "+ (me.getCash()-me.getLCR_constraint().getCashBuffer()) +
+                "\n\tand we expect our cash balance after paying approaching obligations to be "+balance +
+                "\n\twe can use an amount "+deLever+" to delever.");
                 payOffLiabilities(deLever);
                 amountToDelever -= deLever;
             }
@@ -103,20 +116,29 @@ public class BankBehaviour extends Behaviour {
             balance -= cashCommitments.get(timeIndex);
         }
 
-        balance -= nonUrgentLiquidityNeeds;
+        System.out.println("\nOur expected balance after delevering and including long term obligations is now "+balance +
+                "\n\twe have "+amountToDelever+" left to delever" +
+                "\n\tand our LCR target is "+me.getLCR_constraint().getCashTarget());
+        balance -= amountToDelever;
+        balance -= me.getLCR_constraint().getCashTarget();
 
         if (balance < 0) {
             double liquidityToRaise = -1.0 * balance;
             System.out.println("In order to meet our long-term cash commitments and non-urgent liquidity needs, " +
                     "we will raise liquidity: "+liquidityToRaise);
             raiseLiquidityWithPeckingOrder(liquidityToRaise);
+
+
         } else {
-            System.out.println("We can meet our long-term cash commitments in the next " +
+            System.out.println("We can meet our long-term cash commitments and non-urgent liquidity needs in the next " +
                 cashCommitments.size()+ " timesteps, and we will have a spare balance of "+balance);
 
             double deLever = min(balance, min(me.getCash()-me.getLCR_constraint().getCashBuffer(), amountToDelever));
             if (deLever > 0) {
-                System.out.println("We will use an amount "+deLever+" to delever.");
+                System.out.println("Since we would like to delever an amount "+amountToDelever +
+                        "\nand we have an amount of cash above the buffer of "+ (me.getCash()-me.getLCR_constraint().getCashBuffer()) +
+                        "\nand we expect our cash balance after paying approaching obligations to be "+balance +
+                        ",\n we can use an amount "+deLever+" to delever.");
                 payOffLiabilities(deLever);
             }
         }

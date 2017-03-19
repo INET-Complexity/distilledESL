@@ -21,34 +21,23 @@ public class Mailbox {
     }
 
 
-    public void addToInbox(Obligation obligation) {
+    public void receiveMessage(Obligation obligation) {
 
         unopenedMessages.add(obligation);
-        System.out.println("Obligation sent from "+obligation.getFrom().getName() +
-                " to "+obligation.getTo().getName());
+
+        System.out.println("Obligation sent. "+obligation.getFrom().getName() +
+                " must pay "+obligation.getAmount()+" to "+obligation.getTo().getName()
+                +" on timestep "+obligation.getTimeToPay());
     }
 
     public void addToOutbox(Obligation obligation) {
         outbox.add(obligation);
     }
 
-    private void addAllToReceivedMessages() {
-        HashSet<Obligation> obligationsThatHaveArrived = unopenedMessages.stream()
-                .filter(Obligation::hasArrived)
-                .collect(Collectors.toCollection(HashSet::new));
-
-        for (Obligation obligation : obligationsThatHaveArrived) {
-            System.out.println("Obligation of type "+obligation.getClass().getName()+
-            " has arrived from "+obligation.getFrom().getName());
-        }
-
-        inbox.addAll(obligationsThatHaveArrived);
-    }
-
     public double getMaturedObligations() {
         return inbox.stream()
                 .filter(Obligation::isDue)
-                .filter(obligation -> ! obligation.isFulfilled())
+                .filter(obligation -> ! (obligation.isFulfilled()))
                 .mapToDouble(Obligation::getAmount).sum();
     }
 
@@ -82,11 +71,15 @@ public class Mailbox {
     public void step() {
         // Remove all fulfilled requests
         inbox.removeIf(Obligation::isFulfilled);
+        outbox.removeIf(Obligation::isFulfilled);
 
         // Move all messages in the unopenedMessages to the inbox
-        addAllToReceivedMessages();
-        unopenedMessages.clear();
+        inbox.addAll(
+                unopenedMessages.stream()
+                        .filter(Obligation::hasArrived)
+                        .collect(Collectors.toCollection(HashSet::new)));
 
+        unopenedMessages.removeIf(Obligation::hasArrived);
     }
 
 
@@ -107,11 +100,6 @@ public class Mailbox {
 
         for (Obligation obligation : outbox) {
             if (!(obligation.isFulfilled())) {
-                System.out.println("Obligation from "+obligation.getFrom().getName()+" to "+obligation.getTo().getName() +
-                "for timestep "+obligation.getTimeToPay());
-                System.out.println("The current timestep is "+BoEDemo.getTime());
-
-
                 int index = obligation.getTimeToPay() - BoEDemo.getTime(); //Todo: important! TimeToPay + 1
                 cashInflows.set(index, cashInflows.get(index) + obligation.getAmount());
             }
@@ -119,4 +107,19 @@ public class Mailbox {
         return cashInflows;
     }
 
+    public void printMailbox() {
+        if (unopenedMessages.isEmpty() && inbox.isEmpty() && outbox.isEmpty()) System.out.println("\nMailbox is empty.");
+        else {
+            System.out.println("\nMailbox contents:");
+            if (!unopenedMessages.isEmpty()) System.out.println("Unopened messages:");
+            unopenedMessages.forEach(Obligation::printObligation);
+
+            if (!inbox.isEmpty()) System.out.println("Inbox:");
+            inbox.forEach(Obligation::printObligation);
+
+            if (!outbox.isEmpty()) System.out.println("Outbox:");
+            outbox.forEach(Obligation::printObligation);
+            System.out.println();
+        }
+    }
 }
