@@ -18,6 +18,10 @@ public class AssetManager extends Agent implements CanIssueShares {
 
     }
 
+    public void updateValueOfAllShares() {
+        mainLedger.getLiabilitiesOfType(Shares.class).forEach(shares -> ((Shares) shares).updateValue());
+    }
+
     public Shares issueShares(Agent owner, int quantity) {
         nShares += quantity;
         if (nShares - quantity > 0) {
@@ -49,5 +53,12 @@ public class AssetManager extends Agent implements CanIssueShares {
     @Override
     public Behaviour getBehaviour() {
         return behaviour;
+    }
+
+    @Override
+    public void step() {
+        super.step();
+        updateValueOfAllShares();
+
     }
 }
