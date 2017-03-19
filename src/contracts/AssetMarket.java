@@ -142,6 +142,6 @@ public class AssetMarket {
     }
 
     public double getTotalAmountSold(Asset.AssetType assetType) {
-        return totalAmountsSold.containsKey(assetType) ? totalAmountsSold.get(assetType) : -1;
+        return totalAmountsSold.containsKey(assetType) ? totalAmountsSold.get(assetType) : 0.0;
     }
 }

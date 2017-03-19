@@ -24,7 +24,7 @@ public class Parameters {
 
 
 
-    public static double INITIAL_SHOCK = 0.10;
+    public static double INITIAL_SHOCK = 0.07;
     public static Asset.AssetType ASSET_TO_SHOCK = Asset.AssetType.EXTERNAL2;
 
     // Cash Provider
