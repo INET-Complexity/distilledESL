@@ -13,11 +13,11 @@ public abstract class Obligation {
     private int timeToOpen;
     private int timeToPay;
 
-    Obligation(Contract contract, double amount, int timeToPay) {
+    Obligation(Contract contract, double amount, int timeLeftToPay) {
         this.amount = amount;
-        this.from = contract.getAssetParty();
-        this.to = contract.getLiabilityParty();
-        this.timeToPay = timeToPay;
+        this.from = contract.getLiabilityParty();
+        this.to = contract.getAssetParty();
+        this.timeToPay = BoEDemo.getTime() + timeLeftToPay;
         this.timeToOpen = BoEDemo.getTime() + 1;
 
         assert(timeToPay >= timeToOpen);

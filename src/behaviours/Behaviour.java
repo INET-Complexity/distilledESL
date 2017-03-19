@@ -116,7 +116,7 @@ public abstract class Behaviour {
                 .sum();
 
         double amountToPullFunding = min(totalFundingThatCanBePulled, amount);
-        pullFundingProportionally(amountToPullFunding);
+        if (amountToPullFunding > 0) pullFundingProportionally(amountToPullFunding);
 
         if (totalFundingThatCanBePulled < amount) {
             amount -= amountToPullFunding;
@@ -124,7 +124,7 @@ public abstract class Behaviour {
                     .mapToDouble(Action::getMax)
                     .sum();
             double assetsToSell = min (amount, totalAssetsThatCanBeSold);
-            sellAssetsProportionally(assetsToSell);
+            if (assetsToSell >0) sellAssetsProportionally(assetsToSell);
 
             if (totalAssetsThatCanBeSold < amount) {
                 System.out.println("we could not raise enough liquidity.");

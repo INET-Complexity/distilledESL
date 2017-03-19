@@ -85,10 +85,14 @@ public class HedgefundBehaviour extends Behaviour {
         } else {
             System.out.println("We can meet our cash commitments in the next " +
                     Parameters.TIMESTEPS_TO_PAY+ " timesteps, and we will have a spare balance of "+balance);
-            System.out.println("We will use this cash to de-lever.");
+
+
             double deLever = min(balance, min(me.getCash()-me.getCashBuffer(), amountToDelever));
-            payOffLiabilities(deLever);
-            balance -= deLever;
+            if (deLever > 0) {
+                System.out.println("We will use some cash to delever;");
+                payOffLiabilities(deLever);
+                balance -= deLever;
+            }
 
         }
 

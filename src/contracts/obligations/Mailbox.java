@@ -107,7 +107,12 @@ public class Mailbox {
 
         for (Obligation obligation : outbox) {
             if (!(obligation.isFulfilled())) {
-                int index = obligation.getTimeToPay() - BoEDemo.getTime() - 1;
+                System.out.println("Obligation from "+obligation.getFrom().getName()+" to "+obligation.getTo().getName() +
+                "for timestep "+obligation.getTimeToPay());
+                System.out.println("The current timestep is "+BoEDemo.getTime());
+
+
+                int index = obligation.getTimeToPay() - BoEDemo.getTime(); //Todo: important! TimeToPay + 1
                 cashInflows.set(index, cashInflows.get(index) + obligation.getAmount());
             }
         }
