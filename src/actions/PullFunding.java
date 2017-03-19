@@ -1,7 +1,8 @@
 package actions;
 
-import agents.Obligation;
 import contracts.Loan;
+import contracts.obligations.Obligation;
+import contracts.obligations.PullFundingObligation;
 import demos.Parameters;
 
 public class PullFunding extends Action {
@@ -25,10 +26,9 @@ public class PullFunding extends Action {
             loan.payLoan(getAmount());
         } else {
             // If there is a counter-party AND we have funding contagion, we must send a Obligation.
-            Obligation obligation = new Obligation(loan, getAmount(), Parameters.TIMESTEPS_TO_PAY);
+            Obligation obligation = new PullFundingObligation(loan, getAmount(), Parameters.TIMESTEPS_TO_PAY);
+            loan.getAssetParty().sendMessage(loan.getLiabilityParty(), obligation);
 
-            loan.getAssetParty().addToOutbox(obligation);
-            loan.getLiabilityParty().addToInbox(obligation);
         }
     }
 

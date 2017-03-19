@@ -31,7 +31,7 @@ public class LCR_Constraint {
     }
 
     private double getLCRdenominator() {
-        return bank.getMainLedger().getLiabilitiesOfType(Contract.class).stream()
+        return bank.getMainLedger().getAllLiabilities().stream()
                 .mapToDouble(contract -> contract.getValue() * contract.getLCRweight()).sum();
     }
     public double getLCR() {
@@ -44,5 +44,9 @@ public class LCR_Constraint {
 
     public double getCashTarget() {
         return Parameters.BANK_LCR_TARGET * getLCRdenominator();
+    }
+
+    public double getCashBuffer() {
+        return Parameters.BANK_LCR_BUFFER * getLCRdenominator();
     }
 }

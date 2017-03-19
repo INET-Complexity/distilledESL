@@ -48,7 +48,8 @@ public class Bond extends Contract {
         return availableActions;
     }
 
-    public double getValue() {
+    @Override
+    public double getValue(Agent me) {
         return principal;
     }
 
@@ -98,4 +99,5 @@ public class Bond extends Contract {
     private MaturityType maturityType;
     private double principal;
     private double rate;
+
 }

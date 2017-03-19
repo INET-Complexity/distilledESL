@@ -4,6 +4,7 @@ import agents.Agent;
 import actions.Action;
 import actions.PullFunding;
 import actions.PayLoan;
+import behaviours.NEKO_Model;
 import demos.Parameters;
 
 import java.util.ArrayList;
@@ -74,12 +75,15 @@ public class Loan extends Contract {
         return liabilityParty;
     }
 
-    public double getValue() {
-        return principal;
+    public double getValue(Agent me) {
+        if (Parameters.NEKO_MODEL && me==assetParty) {
+            return NEKO_Model.getValuation(this);
+        } else return principal;
     }
 
     public void liquidate() {
-        assetParty.liquidateLoan(getValue(), (1.0 - Parameters.INTERBANK_LOSS_GIVEN_DEFAULT), this);
+        assetParty.devalueAsset(this, principal);
+        assetParty.addCash(principal * (1.0 - Parameters.INTERBANK_LOSS_GIVEN_DEFAULT));
         principal = 0.0;
     }
 
@@ -89,6 +93,11 @@ public class Loan extends Contract {
 
     public double getFundingAlreadyPulled() {
         return fundingAlreadyPulled;
+    }
+
+    @Override
+    public double getRWAweight() {
+        return Parameters.INTERBANK_RWAWEIGHT;
     }
 }
 

@@ -52,7 +52,7 @@ public class CashProviderBehaviour extends Behaviour {
                     } else {
                         // If it is, withdraw a fixed fraction of funding to this bank.
                         pullFundingAction.setAmount(pullFundingAction.getMax() * Parameters.CP_FRACTION_TO_RUN);
-                        addAction(pullFundingAction);
+                        pullFundingAction.perform();
                     }
                 }
 

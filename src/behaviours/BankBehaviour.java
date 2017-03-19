@@ -1,11 +1,11 @@
 package behaviours;
 
 import actions.Action;
-import actions.PayLoan;
 import actions.PullFunding;
 import actions.SellAsset;
 import agents.Bank;
 import contracts.FailedMarginCallException;
+import demos.Parameters;
 
 import java.util.ArrayList;
 
@@ -15,119 +15,133 @@ import static java.lang.Math.min;
 public class BankBehaviour extends Behaviour {
 
     private Bank me;
-    private double pendingToDeLever;
 
     public BankBehaviour(Bank me) {
         super(me);
         this.me = me;
-        this.pendingToDeLever = 0.0;
     }
 
     @Override
-    protected void chooseActions() {
-
-        // Check inbox for matured PullFunding requests. If we can't meet them right now, default.
+    protected void chooseActions() throws DefaultException {
+        // 1) Pay matured cash commitments or default.
         double maturedPullFunding = me.getMaturedObligations();
         if (maturedPullFunding > 0) {
-            System.out.println("We have matured payment obligations for a total of "+String.format("%.2f", maturedPullFunding));
+            System.out.println("We have matured payment contracts.obligations for a total of " + String.format("%.2f", maturedPullFunding));
             if (me.getCash() >= maturedPullFunding) {
                 me.fulfilMaturedRequests();
             } else {
-                //Todo: emergency procedure?
-                triggerDefault();
-                return;
+                System.out.println("A matured obligation was not fulfilled.");
+                throw new DefaultException();
             }
         }
 
-        // Check inbox for other PullFunding requests, find out how much liquidity is needed,
-        // and pay all of them now if possible.
-        double totalPullFunding = me.getPendingObligations();
-        if (totalPullFunding > 0) {
-            System.out.println("We have not-yet-matured payment obligations for a total of "+String.format("%.2f", totalPullFunding));
-            if (me.getCash() >= totalPullFunding) {
-                me.fulfilAllRequests();
-                totalPullFunding = 0.0;
-            }
-        }
-
-        // Run margin calls and pledge/unpledge collateral as needed. If any margin call fails, default.
+        // 2) Run margin calls; if any fail, default.
         try {
             me.runMarginCalls();
         } catch (FailedMarginCallException e) {
-            // If any margin call failed, DEFAULT!
-            triggerDefault(); //TODO; how to abort execution of 'chooseAvailableActions'?
-            return;
+            System.out.println("A margin call failed.");
+            throw new DefaultException();
         }
 
-        // 3) If we were trying to de-lever further from the previous timestep, we do it now. We break the LCR
-        // constraint if needed.
-        if (pendingToDeLever > 0) {
-            double amountToDelever = min(pendingToDeLever, me.getCash());
-            if (amountToDelever > 0) payOffLiabilities(amountToDelever);
-            pendingToDeLever = 0.0;
+        // 3) If I'm insolvent, default.
+        if (me.getLeverage() < Parameters.BANK_LEVERAGE_MIN) {
+            System.out.println("My leverage is "+me.getLeverage()+
+                    " which is below the minimum "+Parameters.BANK_LEVERAGE_MIN);
+            System.out.println("I'm dead.");
+            throw new DefaultException();
         }
 
-        double liquidityToRaise = totalPullFunding;
+        // Compute amount to DeLever
+        double amountToDelever =
+                (me.getBankLeverageConstraint().isBelowBuffer()) ?
+                        me.getBankLeverageConstraint().getAmountToDelever() :
+                            0.0;
 
-        // 4) If leverage is below buffer, we must de-lever further, and potentially raise liquidity.
-        if (me.getBankLeverageConstraint().isBelowBuffer()) {
-            double amountToDelever = me.getBankLeverageConstraint().getAmountToDelever();
-            System.out.println("\nWe are below the leverage buffer. Amount to de-lever: " + amountToDelever);
-            double liquidityAboveLCR = getLiquidityAboveLCR();
-            double availableNow = min(liquidityAboveLCR, amountToDelever);
 
-            System.out.println((availableNow == 0) ?
-                    "We are at or below the LCR buffer -> we cannot use cash to de-lever"
-                    : (availableNow < amountToDelever) ?
-                    "We can de-lever an amount " + availableNow + " by using cash."
-                    : "We can de-lever fully using cash -> No contagion!");
+        ArrayList<Double> cashCommitments = me.getCashCommitments();
+        ArrayList<Double> cashInflows = me.getCashInflows();
 
-            if (availableNow > 0) payOffLiabilities(availableNow);
-            liquidityToRaise += amountToDelever - availableNow;
+        System.out.println("\nLiquidity management for this timestep");
+        System.out.println("Current unencumbered cash -> "+me.getCash());
+        System.out.println("LCR buffer -> "+me.getLCR_constraint().getCashBuffer());
+        System.out.println("Needed to delever -> "+amountToDelever);
+//        System.out.println("Needed to replenish the LCR buffer -> "+liquidityBufferToReplenish);
+        System.out.println("Needed to fulfil obligations -> "+cashCommitments.stream().mapToDouble(Double::doubleValue).sum());
+        System.out.println("Expected cash inflows -> "+cashInflows.stream().mapToDouble(Double::doubleValue).sum());
+        System.out.println();
+
+
+
+        // ST PATRICK'S ALGORITHM
+        // First loop
+        // We look at timesteps between now and the time delay of PullFunding.
+
+        double balance = me.getCash();
+        for (int timeIndex = 0; timeIndex < Parameters.TIMESTEPS_TO_PAY; timeIndex++) {
+            balance += cashInflows.get(timeIndex);
+            balance -= cashCommitments.get(timeIndex);
         }
 
-        // 3) If we used up some of our cash buffer, we try to replenish it, so we add to the liquidity to raise.
-        liquidityToRaise += me.getLCR_constraint().getLiquidityToRaise();
+        if (balance < 0) {
+            System.out.println("We will not be able to meet our cash commitments in the next " +
+            Parameters.TIMESTEPS_TO_PAY+ " timesteps, we will be missing an amount "+(-1.0*balance));
 
-        // Discount the liquidity that we are expecting from pull funding requests not yet met by the counter-parties.
-        liquidityToRaise -= me.getPendingObligations();
+            double sellAssetsAmount = -1.0 * balance;
+            double amountSold = sellAssetsProportionally(sellAssetsAmount);
+            balance += amountSold;
+            if (balance < 0) System.out.println("We won't be able to firesale enough assets. We'll wait and see.");
 
-        // 4) If we decided we need to raise liquidity, we go through our available actions and select a set of actions
-        // that will raise the required liquidity.
-        if (liquidityToRaise > 0) {
+        } else {
+            System.out.println("We can meet our cash commitments in the next " +
+                    Parameters.TIMESTEPS_TO_PAY+ " timesteps, and we will have a spare balance of "+balance);
 
-            // Look through the actions and pick according to the pecking order
-            while (liquidityToRaise > 0.0 && actionsLeft()) {
-                Action nextAction = findActionOfType(PullFunding.class);
-                if (nextAction == null) {
-                    nextAction = findActionOfType(SellAsset.class);
-                    if (nextAction == null) {
-                        // We can't find any more suitable actions. Stop looking.
-                        break;
-                    }
-                }
 
-                double liquidityFromThisAction = min(nextAction.getMax(), liquidityToRaise);
-                nextAction.setAmount(liquidityFromThisAction);
-                addAction(nextAction);
-                liquidityToRaise -= liquidityFromThisAction;
+            double deLever = min(balance, min(me.getCash()-me.getLCR_constraint().getCashBuffer(), amountToDelever));
 
+            if (deLever > 0) {
+                System.out.println("Since we would like to delever an amount "+amountToDelever +
+                "\n\tand we have an amount of cash above the buffer of "+ (me.getCash()-me.getLCR_constraint().getCashBuffer()) +
+                "\n\tand we expect our cash balance after paying approaching obligations to be "+balance +
+                "\n\twe can use an amount "+deLever+" to delever.");
+                payOffLiabilities(deLever);
+                amountToDelever -= deLever;
             }
+            balance -= deLever;
 
-            System.out.println((liquidityToRaise > 0) ?
-                    "We could not find a set of actions to raise enough liquidity. We can only expect to raise " + pendingToDeLever
-                    : "We found a set of actions to raise enough liquidity!");
         }
 
-    }
+        // Second loop
+        for (int timeIndex = Parameters.TIMESTEPS_TO_PAY; timeIndex < cashCommitments.size(); timeIndex++) {
+            balance += cashInflows.get(timeIndex);
+            balance -= cashCommitments.get(timeIndex);
+        }
+
+        System.out.println("\nOur expected balance after delevering and including long term obligations is now "+balance +
+                "\n\twe have "+amountToDelever+" left to delever" +
+                "\n\tand our LCR target is "+me.getLCR_constraint().getCashTarget());
+        balance -= amountToDelever;
+        balance -= me.getLCR_constraint().getCashTarget();
+
+        if (balance < 0) {
+            double liquidityToRaise = -1.0 * balance;
+            System.out.println("In order to meet our long-term cash commitments and non-urgent liquidity needs, " +
+                    "we will raise liquidity: "+liquidityToRaise);
+            raiseLiquidityWithPeckingOrder(liquidityToRaise);
 
 
-    private double getLiquidityAboveLCR() {
-        return max(me.getCash() - me.getLCR_constraint().getCashTarget(), 0.0);
-    }
+        } else {
+            System.out.println("We can meet our long-term cash commitments and non-urgent liquidity needs in the next " +
+                cashCommitments.size()+ " timesteps, and we will have a spare balance of "+balance);
 
-
-    public void triggerDefault() {
+            double deLever = min(balance, min(me.getCash()-me.getLCR_constraint().getCashBuffer(), amountToDelever));
+            if (deLever > 0) {
+                System.out.println("Since we would like to delever an amount "+amountToDelever +
+                        "\nand we have an amount of cash above the buffer of "+ (me.getCash()-me.getLCR_constraint().getCashBuffer()) +
+                        "\nand we expect our cash balance after paying approaching obligations to be "+balance +
+                        ",\n we can use an amount "+deLever+" to delever.");
+                payOffLiabilities(deLever);
+            }
+        }
 
     }
 

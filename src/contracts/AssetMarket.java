@@ -51,6 +51,8 @@ public class AssetMarket {
         orderbook.add(new Order(asset, amount));
         Asset.AssetType type = asset.getAssetType();
 
+        System.out.println("Putting for sale: "+asset.getAssetType()+", an amount "+amount);
+
         if (!amountsSold.containsKey(type)) {
             amountsSold.put(type, amount);
         } else {
@@ -94,7 +96,8 @@ public class AssetMarket {
         double h0 = Parameters.getInitialHaircut(assetType);
         double p0 = 1.0;
 
-        double newHaircut = h0 * Math.max(1.0, Parameters.HAIRCUT_SLOPE * Math.max((p0 - getPrice(assetType)) / p0, 0.0));
+        double newHaircut = h0 * Math.max(1.0,
+                1.0 + Parameters.HAIRCUT_SLOPE * ( (p0 - getPrice(assetType)) / p0 - Parameters.HAIRCUT_PRICE_FALL_THRESHOLD) );
         haircuts.put(assetType, newHaircut);
 
     }
@@ -107,14 +110,10 @@ public class AssetMarket {
         return haircuts.containsKey(assetType) ? haircuts.get(assetType) : 0.0;
     }
 
-    private void setPrice(Asset.AssetType assetType, double newPrice) {
+    public void setPrice(Asset.AssetType assetType, double newPrice) {
         prices.put(assetType, newPrice);
     }
-
-    public void shockPrice(Asset.AssetType assetType, double fraction) {
-        setPrice(assetType, getPrice(assetType) * (1.0 - fraction));
-    }
-
+    //todo: should not be public
 
     private class Order {
         private Asset asset;
@@ -143,6 +142,6 @@ public class AssetMarket {
     }
 
     public double getTotalAmountSold(Asset.AssetType assetType) {
-        return totalAmountsSold.containsKey(assetType) ? totalAmountsSold.get(assetType) : -1;
+        return totalAmountsSold.containsKey(assetType) ? totalAmountsSold.get(assetType) : 0.0;
     }
 }

@@ -4,6 +4,7 @@ import agents.Agent;
 import actions.Action;
 import contracts.Asset;
 import contracts.Contract;
+import contracts.Repo;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -101,6 +102,14 @@ public class Ledger implements LedgerAPI {
                 .mapToDouble(Contract::getValue)
                 .sum();
 
+    }
+
+    public HashSet<Contract> getAllAssets() {
+        return allAssets;
+    }
+
+    public HashSet<Contract> getAllLiabilities() {
+        return allLiabilities;
     }
 
     public HashSet<Contract> getAssetsOfType(Class<?> contractType) {
@@ -342,6 +351,11 @@ public class Ledger implements LedgerAPI {
         }
         System.out.println("TOTAL LIABILITIES: "+ String.format( "%.2f", getLiabilityValue()));
         System.out.println("\nTOTAL EQUITY: "+String.format("%.2f", getEquityValue()));
+
+        System.out.println("\nSummary of encumbered collateral:");
+        for (Contract contract : getLiabilitiesOfType(Repo.class)) {
+            ((Repo) contract).printCollateral();
+        }
     }
 
 

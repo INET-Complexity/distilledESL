@@ -16,9 +16,12 @@ import java.util.*;
  */
 public class Repo extends Loan {
 
+    private double cashCollateral;
+
     public Repo(Agent assetParty, Agent liabilityParty, double principal) {
         super(assetParty, liabilityParty, principal);
         this.collateral = new HashMap<>();
+        this.cashCollateral = 0.0;
     }
 
     @Override
@@ -42,19 +45,33 @@ public class Repo extends Loan {
         }
     }
 
+    public void pledgeCashCollateral(double amount) {
+        cashCollateral += amount;
+    }
+
     private void unpledgeCollateral(CanBeCollateral asset, double quantity) {
         asset.unEncumber(quantity);
         assert(collateral.get(asset) >= quantity);
         collateral.put(asset, collateral.get(asset) - quantity);
     }
 
+    private void unpledgeCashCollateral(double amount) {
+        assert(cashCollateral > amount);
+
+    }
+
     public void marginCall() throws FailedMarginCallException {
         double currentValue = valueCollateralHaircutted();
+
         CanPledgeCollateral borrower = (CanPledgeCollateral) liabilityParty;
 
         if (currentValue < principal) { //TODO: finite precision
 
-            if (principal - currentValue < borrower.getMaxUnencumberedHaircuttedCollateral()) {
+            if ((principal - currentValue) > borrower.getMaxUnencumberedHaircuttedCollateral()) {
+                System.out.println("The margin call on Repo"+getName(liabilityParty)+" failed." +
+                        " The value of the collateral was "+currentValue+",\n but the principal of the repo is "+principal +
+                        " and I only have a total extra collateral of "+borrower.getMaxUnencumberedHaircuttedCollateral());
+
                 throw new FailedMarginCallException();
             }
 
@@ -73,7 +90,10 @@ public class Repo extends Loan {
             Double quantity = entry.getValue();
 
             value += asset.getPrice() * quantity * (1.0 - asset.getHaircut());
+
         }
+
+        value += cashCollateral;
 
         return value;
     }
@@ -84,17 +104,21 @@ public class Repo extends Loan {
 
     public void unpledgeProportionally(double excessValue) {
         double totalValue = valueCollateralHaircutted();
+        double unpledgedSoFar = 0.0;
 
         for (Map.Entry<CanBeCollateral, Double> entry : collateral.entrySet()) {
             CanBeCollateral asset = entry.getKey();
             double quantityToUnpledge = entry.getValue() * (1 - asset.getHaircut()) * excessValue / totalValue;
             unpledgeCollateral(asset, quantityToUnpledge);
+            unpledgedSoFar += quantityToUnpledge;
         }
+
+        unpledgeCashCollateral(excessValue - unpledgedSoFar);
+
     }
 
     @Override
     public void liquidate() {
-        super.liquidate();
         // When we liquidate a Repo, we must change the ownership of all the collateral and give it to the
         // asset party.
 
@@ -105,24 +129,35 @@ public class Repo extends Loan {
 
             // 2. Change the ownership of the asset
             ((Asset) asset).changeOwnership(assetParty, amountEncumbered);
+
+            // 3. Reduce the value of this repo to zero.
+            assetParty.devalueAsset(this, principal);
+            liabilityParty.devalueLiability(this, principal);
+
+            if (Parameters.FIRESALES_UPON_DEFAULT) {
+                ((Asset) asset).putForSale(((Asset) asset).getQuantity());
+            }
         }
+
+        principal = 0;
+
     }
 
     private HashMap<CanBeCollateral, Double> collateral;
 
     @Override
-    public Agent getAssetParty() {
-        return assetParty;
+    public double getRWAweight() {
+        return 0.0;
     }
 
-    @Override
-    public Agent getLiabilityParty() {
-        return liabilityParty;
-    }
+    public void printCollateral() {
+        System.out.println("Collateral of "+getName(liabilityParty));
+        for (Map.Entry<CanBeCollateral, Double> entry : collateral.entrySet()) {
+            CanBeCollateral asset = entry.getKey();
+            Double quantity = entry.getValue();
 
-    @Override
-    public double getValue() {
-        return principal;
+            System.out.println( ((Contract) asset).getName(liabilityParty)+" for an amount "+quantity +
+            ", price "+asset.getPrice()+" and haircut "+asset.getHaircut());
+        }
     }
-
 }

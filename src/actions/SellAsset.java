@@ -22,7 +22,7 @@ public class SellAsset extends Action {
     public double getMax() {
         if (asset instanceof AssetCollateral) {
             // Only unencumbered assets can be sold!
-            return ((AssetCollateral)asset).getUnencumberedValue();
+            return ((AssetCollateral)asset).getUnencumberedValue() - asset.getPutForSale();
         } else {
             return asset.getValue();
         }

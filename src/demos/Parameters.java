@@ -13,22 +13,23 @@ public class Parameters {
     public static boolean INVESTOR_REDEMPTION = true;
     public static boolean FIRESALE_CONTAGION = true;
     public static boolean CASH_PROVIDER_RUNS = true;
+    public static boolean NEKO_MODEL = false;
+    public static boolean FIRESALES_UPON_DEFAULT = true;
 
-    // sell encumbered assets upon default
     // INTERBANK liquidity hoarding threshold
     // margin calls off
     //
-    // NEKO Channel: re-evaluation of interbank assets
 
     public static double INTERBANK_LOSS_GIVEN_DEFAULT = 0.4; // if Interbank contagion is off
 
 
 
-    public static double INITIAL_SHOCK = 0.05;
-    public static Asset.AssetType ASSET_TO_SHOCK = Asset.AssetType.EXTERNAL1;
+    public static double INITIAL_SHOCK = 0.07;
+    public static Asset.AssetType ASSET_TO_SHOCK = Asset.AssetType.EXTERNAL2;
 
     // Cash Provider
     public static double HAIRCUT_SLOPE = 0.1;
+    public static double HAIRCUT_PRICE_FALL_THRESHOLD = 0.1;
     public static double LEVERAGE_THRESHOLD_TO_RUN = 0.01;
     public static double LCR_THRESHOLD_TO_RUN = 0.01;
     //TODO: REMANE
@@ -37,6 +38,10 @@ public class Parameters {
     // Hedgefund parameters
     public static double HF_CASH_BUFFER_AS_FRACTION_OF_ASSETS = 0.05;
     public static double HF_CASH_TARGET_AS_FRACTION_OF_ASSETS = 0.10;
+
+    // Hedgefund
+    public static double HF_LEVERAGE_BUFFER = 0.03;
+    public static double HF_LEVERAGE_TARGET = 0.06;
 
 
     // Depositor Run
@@ -61,9 +66,12 @@ public class Parameters {
     public static double REDEMPTIONS_C1 = 20;
     public static double REDEMPTIONS_C2 = 6;
 
-    public static int TIMESTEPS_TO_PAY = 3;
+    public static double NEKO_C = 0.6;
 
-    public static int SIMULATION_TIMESTEPS = 4;
+    public static int TIMESTEPS_TO_PAY = 3;
+    public static int TIMESTEPS_TO_REDEEM_SHARES = 2;
+
+    public static int SIMULATION_TIMESTEPS = 10;
 
     // Risk-weighted Assets - weights
     public static double EXTERNAL_ASSETS_WEIGHT = 0.35;
@@ -86,10 +94,16 @@ public class Parameters {
     public static double getRWAWeight(Asset.AssetType assetType) {
         switch (assetType) {
             case CORPORATE_BONDS:
-                return 1.0;
+                return 1.00;
             case EQUITIES:
                 return 0.75;
             case MBS:
+                return 0.35;
+            case EXTERNAL1:
+                return 0.35;
+            case EXTERNAL2:
+                return 0.35;
+            case EXTERNAL3:
                 return 0.35;
             default:
                 return 0.0;
@@ -106,13 +120,11 @@ public class Parameters {
 
 
     public static double INTERBANK_RWAWEIGHT = 0.40;
-    //todo: compute RWA
 
     public static boolean ASSET_MANAGER_ON = INVESTOR_REDEMPTION;
     public static boolean HEDGEFUNDS_ON = true;
 
-    public static double HF_DEFAULT_LEVERAGE_TARGET = 0.02;
-    public static double HF_DEFAULT_LEVERAGE_BUFFER = 0.01;
+
 
     public static double BANK_LCR_MIN = 0.10;
     public static double BANK_LCR_BUFFER = 0.20;

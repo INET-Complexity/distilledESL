@@ -2,63 +2,47 @@ package behaviours;
 
 import actions.Action;
 import actions.PayLoan;
+import actions.PullFunding;
+import actions.SellAsset;
 import agents.Agent;
 
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
+import static jdk.nashorn.internal.objects.NativeMath.min;
+
 public abstract class Behaviour {
     private Agent me;
     private ArrayList<Action> availableActions;
-    private ArrayList<Action> chosenActions;
-    private double liabilitiesToPayOff;
-    private double maxLiabilitiesToPayOff;
 
     Behaviour (Agent me) {
         this.me = me;
     }
 
-    private void performActions(ArrayList<Action> chosenActions) {
-        if (chosenActions.isEmpty()){
-            System.out.println(me.getName()+" does nothing this round.");
-        }
-
-        for (Action action : chosenActions) {
-            action.print();
-            action.perform();
-        }
-
-        System.out.println(me.getName()+" is done.\n*************");
-    }
-
-    private void performAction(Action action) {
-        if (action==null) return;
-        action.print();
-        action.perform();
-    }
-
-    protected abstract void chooseActions();
+    protected abstract void chooseActions() throws DefaultException;
 
     public void act() {
+        if (!(me.isAlive())) {
+            System.out.println(me.getName() +
+                    " cannot act. I'm crucified, dead and buried, and have descended into hell.");
+            return;
+        }
+
         System.out.println("\n"+me.getName()+" is acting.\n");
 
-        // Todo: tick here!
-        me.tick();
-
+        me.step();
         me.printBalanceSheet();
+        me.printMailbox();
 
         availableActions = me.getAvailableActions(me);
-        System.out.println("\nMy available actions are: ");
-        Action.print(availableActions);
 
-        chosenActions = new ArrayList<>();
-        liabilitiesToPayOff = 0.0;
-        maxLiabilitiesToPayOff = maxLiabilitiesToPayOff();
+        try {
+            chooseActions();
+        } catch (DefaultException e) {
+            me.triggerDefault();
+        }
 
-        chooseActions();
-        decidePayOffActions();
-        performActions(chosenActions);
-
+        System.out.println(me.getName()+" done.\n*********");
 
     }
 
@@ -69,47 +53,130 @@ public abstract class Behaviour {
     }
 
     void payOffLiabilities(double amount) {
-        assert(liabilitiesToPayOff+amount <= maxLiabilitiesToPayOff);
-        liabilitiesToPayOff += amount;
-    }
+        System.out.println("Pay off liabilities (delever) proportionally: "+amount);
 
-    private void decidePayOffActions() {
-        if (liabilitiesToPayOff > 0) {
-            ArrayList<Action> payLoanActions = getAllActionsOfType(PayLoan.class);
+        if(amount > maxLiabilitiesToPayOff()) {
+            amount = maxLiabilitiesToPayOff();
+            System.out.println("We do not have enough liabilites to pay off this amount.\n" +
+                    "We can only pay off "+ amount);
+        }
 
-            for (Action action : payLoanActions) {
-                action.setAmount(action.getMax() * liabilitiesToPayOff / maxLiabilitiesToPayOff);
-                addAction(action);
-            }
+        ArrayList<Action> payLoanActions = getAllActionsOfType(PayLoan.class);
+
+        double totalLiabilitiesToPayOff = payLoanActions.stream()
+                .mapToDouble(Action::getMax)
+                .sum();
+
+        for (Action action : payLoanActions) {
+            action.setAmount(action.getMax() * amount / totalLiabilitiesToPayOff);
+            action.perform();
         }
     }
 
-    boolean actionsLeft() {
-        return !availableActions.isEmpty();
-    }
-
-    void addAction(Action action) {
-       chosenActions.add(action);
-       availableActions.remove(action);
-    }
-
-    /**
-     * @param actionType the subclass of Action that we should be looking for
-     * @return the first action in the list 'availableActions' that is of type
-     * actionType.
-     */
-    Action findActionOfType(Class<? extends Action> actionType) {
-        for (Action action : availableActions) {
-            if (actionType.isInstance(action)) {
-                return action;
-            }
-        }
-        return null;
-    }
 
     ArrayList<Action> getAllActionsOfType(Class<? extends Action> actionType) {
         return availableActions.stream()
                 .filter(actionType::isInstance)
                 .collect(Collectors.toCollection(ArrayList::new));
+    }
+
+    public double sellAssetsProportionally(double amount) {
+        if (amount > 0) {
+            System.out.println("Sell assets proportionally: " + amount);
+            ArrayList<Action> sellAssetActions = getAllActionsOfType(SellAsset.class);
+
+            double totalSellableAssets = sellAssetActions.stream()
+                    .mapToDouble(Action::getMax)
+                    .sum();
+
+            if (!(totalSellableAssets > 0)) {
+                System.out.println("We cannot sell assets.");
+                return 0.0;
+            }
+
+            if (totalSellableAssets < amount) {
+                System.out.println("We do not have enough assets to sell! We can at most sell "+totalSellableAssets);
+                amount = totalSellableAssets;
+            }
+
+            for (Action action : sellAssetActions) {
+                action.setAmount(action.getMax() * amount / totalSellableAssets);
+                action.perform();
+            }
+
+            return amount;
+        } else {
+            return 0.0;
+        }
+    }
+
+    public double pullFundingProportionally(double amount) {
+
+        ArrayList<Action> pullFundingActions = getAllActionsOfType(PullFunding.class);
+
+        double totalFundingThatCanBePulled = pullFundingActions.stream()
+                .mapToDouble(Action::getMax)
+                .sum();
+
+        if (totalFundingThatCanBePulled < amount) {
+            amount = totalFundingThatCanBePulled;
+        }
+
+        if (!(amount > 0)) return 0.0;
+
+
+        for (Action action : pullFundingActions) {
+            action.setAmount(action.getMax() * amount / totalFundingThatCanBePulled);
+            action.perform();
+        }
+
+        return amount;
+    }
+
+    public double raiseLiquidityWithPeckingOrder(double amount) {
+        if (!(amount>0)) return 0.0;
+        double fundingPulled = 0.0;
+        double firesales = 0.0;
+
+        double totalFundingThatCanBePulled = getAllActionsOfType(PullFunding.class).stream()
+                .mapToDouble(Action::getMax)
+                .sum();
+
+        double totalAssetsThatCanBeSold = getAllActionsOfType(SellAsset.class).stream()
+                .mapToDouble(Action::getMax)
+                .sum();
+
+        if (!((totalAssetsThatCanBeSold + totalFundingThatCanBePulled)>0)) {
+            System.out.println("We can't raise any liquidity.");
+            return 0.0;
+        } else if (amount > (totalFundingThatCanBePulled + totalAssetsThatCanBeSold)) {
+            System.out.println("We can't raise this much liquidity. We will only raise "+
+                    (totalAssetsThatCanBeSold+totalFundingThatCanBePulled));
+            amount = totalAssetsThatCanBeSold + totalFundingThatCanBePulled;
+        }
+
+        double amountToPullFunding = min(totalFundingThatCanBePulled, amount);
+        if (amountToPullFunding > 0) {
+            fundingPulled = pullFundingProportionally(amountToPullFunding);
+            amount -= fundingPulled;
+        }
+
+        if (!(amount >0)) {
+            return fundingPulled;
+        }
+
+        double assetsToSell = min(amount, totalAssetsThatCanBeSold);
+        if (assetsToSell>0) {
+            firesales = sellAssetsProportionally(assetsToSell);
+            amount -= firesales;
+        }
+
+        if (amount > 0) {
+            System.out.println("We could not raise enough liquidity.");
+        }
+
+        System.out.println("We managed to put orders to raise "+(firesales+fundingPulled));
+        System.out.println("\tfiresales: "+firesales+"\n\tpull funding: "+fundingPulled);
+        return fundingPulled + firesales;
     }
 }

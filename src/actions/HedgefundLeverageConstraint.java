@@ -20,11 +20,11 @@ public class HedgefundLeverageConstraint {
      }
 
      public double getLeverageBuffer() {
-         return (hf.getEffectiveMinLeverage() + Parameters.HF_DEFAULT_LEVERAGE_BUFFER);
+         return (hf.getEffectiveMinLeverage() + Parameters.HF_LEVERAGE_BUFFER);
      }
 
      private double getLeverageTarget() {
-         return hf.getEffectiveMinLeverage() + Parameters.HF_DEFAULT_LEVERAGE_TARGET;
+         return hf.getEffectiveMinLeverage() + Parameters.HF_LEVERAGE_TARGET;
      }
 
 

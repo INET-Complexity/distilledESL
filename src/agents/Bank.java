@@ -1,13 +1,13 @@
 package agents;
 
-import actions.LCR_Constraint;
-import actions.BankLeverageConstraint;
-import actions.RWA_Constraint;
+import actions.*;
 import behaviours.BankBehaviour;
 import behaviours.Behaviour;
 import contracts.*;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.stream.Collectors;
 
 /**
  * This class represents a simple me with a single Ledger, called 'general Ledger'.
@@ -31,18 +31,23 @@ public class Bank extends Agent implements CanPledgeCollateral {
 
     @Override
     public void putMoreCollateral(double total, Repo repo) {
+        //TODO: THIS SHOULD BE BEHAVIOUR
         // First, get a set of all my Assets that can be pledged as collateral
         HashSet<Contract> potentialCollateral = mainLedger.getAssetsOfType(AssetCollateral.class);
 
         double maxHaircutValue = getMaxUnencumberedHaircuttedCollateral();
+        double pledgedSoFar = 0.0;
 
         for (Contract contract : potentialCollateral) {
             CanBeCollateral asset = (CanBeCollateral) contract;
 
-            double quantityToPledge = total * asset.getUnencumberedValue() * (1.0 - asset.getHaircut()) / maxHaircutValue;
+            double quantityToPledge = asset.getUnencumberedValue() * (1.0 - asset.getHaircut()) * total / maxHaircutValue;
             repo.pledgeCollateral(asset, quantityToPledge);
+            pledgedSoFar += quantityToPledge;
 
         }
+
+        repo.pledgeCashCollateral(total - pledgedSoFar);
     }
 
     @Override
@@ -51,7 +56,7 @@ public class Bank extends Agent implements CanPledgeCollateral {
                 .mapToDouble(asset ->
                         ((CanBeCollateral) asset).getUnencumberedValue() *
                                 (1.0 - ((CanBeCollateral) asset).getHaircut()))
-                .sum();
+                .sum() + getCash();
     }
 
     public void withdrawCollateral(double excessValue, Repo repo) {
@@ -84,9 +89,30 @@ public class Bank extends Agent implements CanPledgeCollateral {
     public void printBalanceSheet() {
         super.printBalanceSheet();
         System.out.println("Risk Weighted Asset ratio: "+String.format("%.2f", rwa_constraint.getRWAratio()*100.0) + "%");
+        System.out.println("LCR is: "+String.format("%.2f", lcr_constraint.getLCR()*100) + "%");
     }
 
     public double getRWAratio() {
         return rwa_constraint.getRWAratio();
+    }
+
+    @Override
+    public void triggerDefault() {
+        super.triggerDefault();
+
+        HashSet<Contract> loansAndRepos = mainLedger.getLiabilitiesOfType(Loan.class);
+        for (Contract loan : loansAndRepos) {
+            ((Loan) loan).liquidate();
+        }
+
+        ArrayList<Action> pullFundingActions = getAvailableActions(this).stream()
+                .filter(action -> action instanceof PullFunding)
+                .collect(Collectors.toCollection(ArrayList::new));
+
+        for (Action action : pullFundingActions) {
+            action.setAmount(action.getMax());
+            action.perform();
+        }
+
     }
 }

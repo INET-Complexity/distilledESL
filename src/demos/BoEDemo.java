@@ -1,6 +1,7 @@
 package demos;
 
 import agents.*;
+import behaviours.DefaultException;
 import contracts.*;
 
 import java.util.HashSet;
@@ -12,6 +13,8 @@ public class BoEDemo {
     private static Recorder recorder = new Recorder(allAgents, assetMarket);
     public static int timeStep = 0;
 
+    public static int getTime() { return timeStep; }
+
     public static void main(String[] args) {
         initialise();
         runSchedule();
@@ -21,7 +24,7 @@ public class BoEDemo {
 
     private static void runSchedule() {
 
-//        assetMarket.shockPrice(Parameters.ASSET_TO_SHOCK, Parameters.INITIAL_SHOCK);
+        initialShock(Parameters.ASSET_TO_SHOCK, Parameters.INITIAL_SHOCK);
 
         while (timeStep< Parameters.SIMULATION_TIMESTEPS) {
             timeStep++;
@@ -51,19 +54,19 @@ public class BoEDemo {
         //Todo: depositors should be an agent
 
 
-        initAgent(bank1, 60, 100, 0, 75, 0,
-                0, 51.5, 0);
+        initAgent(bank1, 53, 0, 260, 0, 0,
+                100, 150, 0); //todo: this should have 0 deposits
 
-        initAgent(bank2, 60, 100, 50, 0, 0,
-                75, 76, 0);
+        initAgent(bank2, 53, 130, 0, 130, 0,
+                145, 200, 0);
 
-        initAgent(bank3, 50, 0, 20, 20, 0,
-                150, 93.4, 0);
+        initAgent(bank3, 70, 60, 100, 100, 0,
+                160, 150, 0);
 
-        initAgent(hf1, 0, 400, 0, 100, 0,
+        initAgent(hf1, 35, 107, 107, 107, 0,
                 0, 0, 0);
 
-        initAgent(am1, 50, 100, 100, 100, 0,
+        initAgent(am1, 20, 130, 130, 130, 0,
                 0, 0, 0);
 
         initAgent(inv1, 0, 0, 0, 0, 0,
@@ -76,30 +79,25 @@ public class BoEDemo {
         addExternalAsset(bank2, Asset.AssetType.EXTERNAL2, 100);
         addExternalAsset(bank3, Asset.AssetType.EXTERNAL3, 200);
 
+        initInterBankLoan(bank1, bank2, 0);
+        initInterBankLoan(bank1, bank3, 40);
+
+        initInterBankLoan(bank2, bank1, 0);
+        initInterBankLoan(bank2, bank3, 40);
+
+        initInterBankLoan(bank3, bank1, 40);
+        initInterBankLoan(bank3, bank2, 40);
+
+
+        initShares(inv1, am1, 410);
 
         initRepo(bank1, hf1, 150.0);
-        initRepo(bank2, hf1, 100.0);
+        initRepo(bank2, hf1, 150.0);
         initRepo(bank3, hf1, 0.0);
 
-        initRepo(cp1, bank1, 325.0);
-        initRepo(cp1, bank2, 250.0);
-        initRepo(cp1, bank3, 40.0);
-
-
-
-        initInterBankLoan(bank1, bank2, 20.0);
-        initInterBankLoan(bank1, bank3, 20.0);
-
-        initInterBankLoan(bank2, bank1, 20.0);
-        initInterBankLoan(bank2, bank3, 20.0);
-
-        initInterBankLoan(bank3, bank1, 20.0);
-        initInterBankLoan(bank3, bank2, 20.0);
-
-
-        initShares(inv1, am1, 200);
-
-
+        initRepo(cp1, bank1, 200);
+        initRepo(cp1, bank2, 200);
+        initRepo(cp1, bank3, 200);
 
         recorder.init();
         recorder.record();
@@ -160,15 +158,24 @@ public class BoEDemo {
      * @param principal principal
      */
     private static void initRepo(Agent lender, Agent borrower, double principal) {
-        if (Parameters.FUNDING_CONTAGION_HEDGEFUND) {
-            Repo repo = new Repo(lender, borrower, principal);
-            lender.add(repo);
-            borrower.add(repo);
-        } else {
-            Repo repo1 = new Repo(lender, null, principal);
-            Repo repo2 = new Repo(null, borrower, principal);
-            lender.add(repo1);
-            borrower.add(repo2);
+        if (principal > 0) {
+            if (Parameters.FUNDING_CONTAGION_HEDGEFUND) {
+                Repo repo = new Repo(lender, borrower, principal);
+                lender.add(repo);
+                borrower.add(repo);
+                try {
+                    repo.marginCall();
+                } catch (FailedMarginCallException e) {
+                    System.out.println("Strange! A Margin call failed at initialisation.");
+                    System.exit(-1);
+                }
+
+            } else {
+                Repo repo1 = new Repo(lender, null, principal);
+                Repo repo2 = new Repo(null, borrower, principal);
+                lender.add(repo1);
+                borrower.add(repo2);
+            }
         }
     }
 
@@ -177,6 +184,14 @@ public class BoEDemo {
         Shares shares = issuer.issueShares(owner, number);
         owner.add(shares);
         ((Agent) issuer).add(shares);
+    }
+
+    private static void initialShock(Asset.AssetType assetType, double fraction) {
+        for (Agent agent : allAgents) {
+            agent.receiveShockToAsset(assetType, fraction);
+        }
+
+        assetMarket.setPrice(assetType, assetMarket.getPrice(assetType) * (1.0 - fraction));
     }
 
 }

@@ -33,7 +33,7 @@ public class Other extends Contract {
         return liabilityParty;
     }
 
-    public double getValue() {
+    public double getValue(Agent me) {
         return amount;
     }
 
@@ -41,4 +41,5 @@ public class Other extends Contract {
     public List<Action> getAvailableActions(Agent me) {
         return Collections.emptyList();
     }
+
 }

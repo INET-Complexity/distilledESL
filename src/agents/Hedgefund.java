@@ -23,19 +23,25 @@ public class Hedgefund extends Agent implements CanPledgeCollateral {
 
     @Override
     public void putMoreCollateral(double total, Repo repo) {
+        //TODO: THIS SHOULD BE BEHAVIOUR
         // First, get a set of all my Assets that can be pledged as collateral
         HashSet<Contract> potentialCollateral = mainLedger.getAssetsOfType(AssetCollateral.class);
 
         double maxHaircutValue = getMaxUnencumberedHaircuttedCollateral();
+        double pledgedSoFar = 0.0;
 
         for (Contract contract : potentialCollateral) {
             CanBeCollateral asset = (CanBeCollateral) contract;
 
-            double quantityToPledge = total * asset.getUnencumberedValue() * (1.0 - asset.getHaircut()) / maxHaircutValue;
+            double quantityToPledge = asset.getUnencumberedValue() * (1.0 - asset.getHaircut()) * total / maxHaircutValue;
             repo.pledgeCollateral(asset, quantityToPledge);
+            pledgedSoFar += quantityToPledge;
 
         }
+
+        repo.pledgeCashCollateral(total - pledgedSoFar);
     }
+
 
     @Override
     public double getMaxUnencumberedHaircuttedCollateral() {
@@ -43,7 +49,7 @@ public class Hedgefund extends Agent implements CanPledgeCollateral {
                 .mapToDouble(asset ->
                         ((CanBeCollateral) asset).getUnencumberedValue() *
                                 (1.0 - ((CanBeCollateral) asset).getHaircut()))
-                                    .sum();
+                .sum() + getCash();
     }
 
     public double getEffectiveMinLeverage() {
@@ -84,5 +90,14 @@ public class Hedgefund extends Agent implements CanPledgeCollateral {
         return getAssetValue() * Parameters.HF_CASH_TARGET_AS_FRACTION_OF_ASSETS;
     }
 
+    @Override
+    public void triggerDefault() {
+        super.triggerDefault();
 
+        HashSet<Contract> repos = mainLedger.getLiabilitiesOfType(Repo.class);
+        for (Contract repo : repos) {
+            ((Repo) repo).liquidate();
+        }
+
+    }
 }

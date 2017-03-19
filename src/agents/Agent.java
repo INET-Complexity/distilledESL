@@ -7,73 +7,25 @@ import contracts.Asset;
 import contracts.Contract;
 import contracts.FailedMarginCallException;
 import contracts.Repo;
+import contracts.obligations.Mailbox;
+import contracts.obligations.Obligation;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.stream.Collectors;
 
 public abstract class Agent {
     Ledger mainLedger;
     private String name;
-    private HashSet<Obligation> obligationInbox;
-    private HashSet<Obligation> obligationOutbox;
-    private boolean alive=true;
+    private boolean alive = true;
+    private double encumberedCash;
+    private Mailbox mailbox;
 
 
     public Agent(String name) {
         this.name = name;
         mainLedger = new Ledger(this);
-        obligationInbox = new HashSet<>();
-        obligationOutbox = new HashSet<>();
-    }
-
-    public void addToInbox(Obligation obligation) {
-
-        obligationInbox.add(obligation);
-        System.out.println("Obligation sent from "+obligation.getFrom().getName() +
-                " to "+obligation.getTo().getName());
-    }
-
-    public void addToOutbox(Obligation obligation) {
-        obligationOutbox.add(obligation);
-    }
-
-    public double getMaturedObligations() {
-        return obligationInbox.stream()
-                .filter(Obligation::hasArrived)
-                .filter(Obligation::isDue)
-                .filter(obligation -> ! obligation.isFulfilled())
-                .mapToDouble(Obligation::getAmount).sum();
-    }
-
-    public double getPendingObligations() {
-        return obligationInbox.stream()
-                .filter(Obligation::hasArrived)
-                .filter(obligation -> ! obligation.isFulfilled())
-                .mapToDouble(Obligation::getAmount).sum();
-    }
-
-    public void fulfilAllRequests() {
-        for (Obligation obligation : obligationInbox) {
-            if (! obligation.isFulfilled() && obligation.hasArrived()) obligation.fulfil();
-        }
-    }
-
-    public void fulfilMaturedRequests() {
-        for (Obligation obligation : obligationInbox) {
-            if (obligation.isDue() && ! obligation.isFulfilled() && obligation.hasArrived()) {
-                obligation.fulfil();
-            }
-        }
-    }
-
-    public void tick() {
-        // Remove all fulfilled requests
-        obligationInbox.removeIf(Obligation::isFulfilled);
-
-        for (Obligation obligation : obligationInbox) {
-            obligation.tick();
-        }
-
+        this.mailbox = new Mailbox();
     }
 
     public String getName() {
@@ -91,7 +43,7 @@ public abstract class Agent {
      * @param loan   the loan we are paying back
      */
     public void payLiability(double amount, Contract loan) {
-        assert(getCash() >= amount);
+        assert (getCash() >= amount);
         mainLedger.payLiability(amount, loan);
     }
 
@@ -130,7 +82,8 @@ public abstract class Agent {
     }
 
     public double getCash() {
-        return mainLedger.getCash();
+        // Todo: important! We only return the unencumbered cash.
+        return mainLedger.getCash() - encumberedCash;
     }
 
 
@@ -156,10 +109,6 @@ public abstract class Agent {
         return (1.0 * getEquityValue() / getAssetValue());
     }
 
-    public void liquidateLoan(double initialValue, double valueFraction, Contract loan) {
-        mainLedger.liquidateLoan(initialValue, valueFraction, loan);
-    }
-
     public double getAssetValue() {
         return mainLedger.getAssetValue();
     }
@@ -173,13 +122,13 @@ public abstract class Agent {
     }
 
     public void printBalanceSheet() {
-        System.out.println("\nBalance Sheet of " +getName()+"\n**************************");
+        System.out.println("\nBalance Sheet of " + getName() + "\n**************************");
         mainLedger.printBalanceSheet(this);
-        System.out.println("Leverage ratio: " + String.format("%.2f", 100 * getLeverage()) + "%");
+        System.out.println("\nLeverage ratio: " + String.format("%.2f", 100 * getLeverage()) + "%");
     }
 
     public void runMarginCalls() throws FailedMarginCallException {
-        HashSet<Contract> repoContracts = mainLedger.getAssetsOfType(Repo.class);
+        HashSet<Contract> repoContracts = mainLedger.getLiabilitiesOfType(Repo.class);
         for (Contract contract : repoContracts) {
             Repo repo = (Repo) contract;
             repo.marginCall(); // Throws exception if it fails.
@@ -189,4 +138,81 @@ public abstract class Agent {
     public boolean isAlive() {
         return alive;
     }
+
+    public void triggerDefault() {
+        alive = false;
+        System.out.println("Trigger default!");
+    }
+
+    public void encumberCash(double amount) {
+        assert (getCash() >= amount);
+
+        encumberedCash += amount;
+    }
+
+    public void unencumberCash(double amount) {
+        assert (encumberedCash >= amount);
+        encumberedCash -= amount;
+    }
+
+    public void receiveShockToAsset(Asset.AssetType assetType, double fractionLost) {
+        HashSet<Contract> assetsShocked = mainLedger.getAssetsOfType(Asset.class).stream()
+                .filter(asset -> ((Asset) asset).getAssetType() == assetType)
+                .collect(Collectors.toCollection(HashSet::new));
+
+        if (!(assetsShocked.isEmpty())) {
+            System.out.println(getName() + " received a shock!! Asset type " + assetType + " lost "
+                    + String.format("%.2f", fractionLost * 100.0) + "% of value.");
+            for (Contract asset : assetsShocked) {
+                devalueAsset(asset, asset.getValue() * fractionLost);
+            }
+        }
+    }
+
+    public void step() {
+        mailbox.step();
+    }
+
+    public void sendMessage(Agent recipient, Obligation obligation) {
+        recipient.receiveMessage(obligation);
+        mailbox.addToOutbox(obligation);
+    }
+
+    public void receiveMessage(Obligation obligation) {
+        mailbox.receiveMessage(obligation);
+    }
+
+    public double getMaturedObligations() {
+        return mailbox.getMaturedObligations();
+    }
+
+    public double getAllPendingObligations() {
+        return mailbox.getAllPendingObligations();
+    }
+
+    public double getPendingPaymentsToMe() {
+        return mailbox.getPendingPaymentsToMe();
+    }
+
+    public void fulfilAllRequests() {
+        mailbox.fulfilAllRequests();
+    }
+
+    public void fulfilMaturedRequests() {
+        mailbox.fulfilMaturedRequests();
+    }
+
+    public ArrayList<Double> getCashCommitments() {
+        return mailbox.getCashCommitments();
+    }
+
+    public ArrayList<Double> getCashInflows() {
+        return mailbox.getCashInflows();
+    }
+
+    public void printMailbox() {
+        mailbox.printMailbox();
+    }
+
+
 }
