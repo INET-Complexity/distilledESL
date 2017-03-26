@@ -37,9 +37,9 @@ public class LongTermUnsecured extends Contract {
         return liabilityParty;
     }
 
-    public double getValue(Agent me) {
-        return amount;
-    }
+
+    @Override
+    public double getValue(Agent me) {return amount;}
 
     @Override
     public List<Action> getAvailableActions(Agent me) {

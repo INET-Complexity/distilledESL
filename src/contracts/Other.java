@@ -33,9 +33,11 @@ public class Other extends Contract {
         return liabilityParty;
     }
 
+    @Override
     public double getValue(Agent me) {
         return amount;
     }
+
 
     @Override
     public List<Action> getAvailableActions(Agent me) {

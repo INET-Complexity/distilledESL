@@ -1,11 +1,8 @@
 package behaviours;
 
-import actions.Action;
-import actions.PullFunding;
-import actions.SellAsset;
 import agents.Bank;
 import contracts.FailedMarginCallException;
-import demos.BoEDemo;
+import demos.Model;
 import demos.Parameters;
 
 import java.util.ArrayList;
@@ -43,6 +40,9 @@ public class BankBehaviour extends Behaviour {
             System.out.println("A margin call failed.");
             throw new DefaultException(me, DefaultException.TypeOfDefault.FAILED_MARGIN_CALL);
         }
+
+        // Revalue all loans using the NEKO model
+        if (Parameters.NEKO_MODEL) me.revalueAllLoans();
 
         // 3) If I'm insolvent, default.
         if (me.getLeverage() < Parameters.BANK_LEVERAGE_MIN) {
@@ -82,7 +82,7 @@ public class BankBehaviour extends Behaviour {
         for (int timeIndex = 0; timeIndex < Parameters.TIMESTEPS_TO_PAY+1; timeIndex++) {
             balance += cashInflows.get(timeIndex);
             balance -= cashCommitments.get(timeIndex);
-            System.out.println("At timestep "+(timeIndex+ BoEDemo.getTime()+1)+", our expected balance " +
+            System.out.println("At timestep "+(timeIndex+ Model.getTime()+1)+", our expected balance " +
                     "will be "+balance);
 
             if (balance < 0) {

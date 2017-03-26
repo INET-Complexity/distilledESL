@@ -1,6 +1,6 @@
 package contracts.obligations;
 
-import demos.BoEDemo;
+import demos.Model;
 import demos.Parameters;
 
 import java.util.ArrayList;
@@ -91,7 +91,7 @@ public class Mailbox {
 
         for (Obligation obligation : inbox) {
             if (!(obligation.isFulfilled())) {
-                int index = obligation.getTimeToPay() - BoEDemo.getTime() - 1;
+                int index = obligation.getTimeToPay() - Model.getTime() - 1;
                 cashCommitments.set(index, cashCommitments.get(index) + obligation.getAmount());
             }
         }
@@ -103,7 +103,7 @@ public class Mailbox {
 
         for (Obligation obligation : outbox) {
             if (!(obligation.isFulfilled())) {
-                int index = obligation.getTimeToReceive() - BoEDemo.getTime() - 1;
+                int index = obligation.getTimeToReceive() - Model.getTime() - 1;
                 cashInflows.set(index, cashInflows.get(index) + obligation.getAmount());
             }
         }

@@ -53,12 +53,12 @@ public class Hedgefund extends Agent implements CanPledgeCollateral {
 
     public double getEffectiveMinLeverage() {
         HashSet<Contract> collateral = mainLedger.getAssetsOfType(CanBeCollateral.class);
-        double totalCollateralValue = collateral.stream().mapToDouble(Contract::getValue).sum();
+        double totalCollateralValue = collateral.stream().mapToDouble(contract -> contract.getValue(null)).sum();
 
         double effectiveAverageHaircut = 0.0;
 
         for (Contract asset : collateral) {
-            effectiveAverageHaircut += ((CanBeCollateral) asset).getHaircut() * asset.getValue() / totalCollateralValue;
+            effectiveAverageHaircut += ((CanBeCollateral) asset).getHaircut() * asset.getValue(null) / totalCollateralValue;
         }
 
         return effectiveAverageHaircut;

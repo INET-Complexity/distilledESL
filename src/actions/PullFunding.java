@@ -23,8 +23,8 @@ public class PullFunding extends Action {
     public void perform() {
         loan.increaseFundingPulled(getAmount());
 
-        if (loan.getLiabilityParty()==null || !Parameters.FUNDING_CONTAGION_HEDGEFUND) {
-            // If there's no counter-party OR if there's no funding contagion, the payment can happen instantaneously
+        if (loan.getLiabilityParty()==null) {
+            // If there's no counter-party the payment can happen instantaneously
             loan.payLoan(getAmount());
         } else {
             // If there is a counter-party AND we have funding contagion, we must send a Obligation.
@@ -45,7 +45,7 @@ public class PullFunding extends Action {
 
     @Override
     public double getMax() {
-        return (loan.getValue() - loan.getFundingAlreadyPulled());
+        return (loan.getValue(null) - loan.getFundingAlreadyPulled());
     }
 
     @Override

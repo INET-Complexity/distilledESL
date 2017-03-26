@@ -8,13 +8,14 @@ import demos.Parameters;
 public class NEKO_Model {
 
     public static double getValuation(Loan loan) {
-        return 1.0 - (Parameters.NEKO_C - 1.0 ) * getProbabilityOfDefault(loan.getLiabilityParty());
+
+        return loan.getPrincipal() * (1.0 - Parameters.NEKO_C * getProbabilityOfDefault(loan.getLiabilityParty()));
     }
 
     private static double getNonInterbankAssets(Agent agent) {
         return agent.getMainLedger().getAllAssets().stream()
                 .filter(contract -> !(contract instanceof Loan))
-                .mapToDouble(Contract::getValue)
+                .mapToDouble(contract -> contract.getValue(null))
                 .sum();
     }
 

@@ -1,10 +1,8 @@
 package behaviours;
 
-import actions.Action;
-import actions.SellAsset;
 import agents.Hedgefund;
 import contracts.FailedMarginCallException;
-import demos.BoEDemo;
+import demos.Model;
 import demos.Parameters;
 
 import java.util.ArrayList;
@@ -85,7 +83,7 @@ public class HedgefundBehaviour extends Behaviour {
         for (int timeIndex = 0; timeIndex < Parameters.TIMESTEPS_TO_PAY+1; timeIndex++) {
             balance += cashInflows.get(timeIndex);
             balance -= cashCommitments.get(timeIndex);
-            System.out.println("At timestep "+(timeIndex+ BoEDemo.getTime()+1)+", our expected balance " +
+            System.out.println("At timestep "+(timeIndex+ Model.getTime()+1)+", our expected balance " +
                     "will be "+balance);
 
             if (balance < 0) {

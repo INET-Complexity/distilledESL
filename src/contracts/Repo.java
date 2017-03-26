@@ -32,7 +32,9 @@ public class Repo extends Loan {
 
     @Override
     public String getName(Agent me) {
-        if (me==assetParty) return "Reverse-repo to "+liabilityParty.getName();
+        if (me==assetParty) return (liabilityParty!=null) ?
+                "Reverse-repo to "+liabilityParty.getName() : "Reverse-repo to uninitialised Agent";
+        //Todo: deal with null parties?
         else return "Repo from "+assetParty.getName();
     }
 
@@ -48,11 +50,13 @@ public class Repo extends Loan {
 
     public void pledgeCashCollateral(double amount) {
         cashCollateral += amount;
+        liabilityParty.encumberCash(amount);
     }
 
     private void unpledgeCashCollateral(double amount) {
         assert(cashCollateral > amount);
         cashCollateral -= amount;
+        liabilityParty.unencumberCash(amount);
 
     }
 

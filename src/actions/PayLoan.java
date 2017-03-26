@@ -31,7 +31,7 @@ public class PayLoan extends Action {
     }
 
     public double getMax() {
-        return loan.getValue();
+        return loan.getValue(null);
     }
 
     @Override

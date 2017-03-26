@@ -5,7 +5,8 @@ import actions.PayLoan;
 import actions.PullFunding;
 import actions.SellAsset;
 import agents.Agent;
-import demos.BoEDemo;
+import demos.Model;
+import demos.Parameters;
 
 import java.util.ArrayList;
 import java.util.stream.Collectors;
@@ -27,7 +28,7 @@ public abstract class Behaviour {
             return;
         }
 
-        System.out.println("\n"+me.getName()+" is acting at time "+ BoEDemo.getTime()+".\n");
+        System.out.println("\n"+me.getName()+" is acting at time "+ Model.getTime()+".\n");
 
         me.step();
         me.printBalanceSheet();
@@ -37,7 +38,8 @@ public abstract class Behaviour {
 
         try {
             chooseActions();
-        } catch (DefaultException e) {
+        } catch (DefaultException exception) {
+            if(Parameters.RECORD_DEFAULT) Model.defaultRecorder.recordDefault(exception);
             me.triggerDefault();
         }
 

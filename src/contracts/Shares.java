@@ -24,7 +24,7 @@ public class Shares extends Contract {
         this.owner = owner;
         this.issuer = issuer;
         this.nShares = nShares;
-        this.previousValueOfShares = getValue();
+        this.previousValueOfShares = getValue(null);
         this.originalNAV = originalNAV;
         this.nSharesPendingToRedeem = 0;
 
@@ -80,8 +80,8 @@ public class Shares extends Contract {
     }
 
     public void updateValue() {
-        double valueChange = getValue() - previousValueOfShares;
-        previousValueOfShares = getValue();
+        double valueChange = getValue(null) - previousValueOfShares;
+        previousValueOfShares = getValue(null);
 
         if (valueChange > 0) {
             owner.appreciateAsset(this, valueChange);

@@ -53,6 +53,7 @@ public class Bond extends Contract {
         return principal;
     }
 
+
     // Setters and Getters
     public Agent getAssetParty() {
         return assetParty;

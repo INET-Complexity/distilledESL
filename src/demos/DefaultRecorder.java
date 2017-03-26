@@ -1,6 +1,5 @@
 package demos;
 
-import agents.Agent;
 import behaviours.DefaultException;
 
 import java.io.FileNotFoundException;
@@ -8,7 +7,7 @@ import java.io.PrintWriter;
 
 public class DefaultRecorder {
 
-    private static PrintWriter defaultsFile;
+    private PrintWriter defaultsFile;
 
     public DefaultRecorder() {
         init();
@@ -17,20 +16,25 @@ public class DefaultRecorder {
     private void init() {
         try {
             defaultsFile = new PrintWriter("defaultsFile.csv");
+
+            defaultsFile.println("Agent, timestep_of_default, equity_at_default, lcr_at_default, leverage_at_default");
         } catch (FileNotFoundException e) {
             //todo: empty catch block
         }
     }
 
 
-    public static void recordDefault(DefaultException defaultException) {
+    public void recordDefault(DefaultException defaultException) {
         defaultsFile.print(defaultException.getAgent().getName());
         defaultsFile.print(", " + defaultException.getTimestep());
+        defaultsFile.print(", " + defaultException.getAgent().getEquityValue());
         defaultsFile.print(", " + defaultException.getAgent().getLCR());
         defaultsFile.print(", " + defaultException.getAgent().getLeverage());
+        defaultsFile.println();
 
+    }
 
-
-
+    public void finish() {
+        defaultsFile.close();
     }
 }

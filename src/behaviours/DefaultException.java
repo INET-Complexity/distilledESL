@@ -1,7 +1,7 @@
 package behaviours;
 
 import agents.Agent;
-import demos.BoEDemo;
+import demos.Model;
 
 public class DefaultException extends Exception {
     private Agent me;
@@ -13,7 +13,7 @@ public class DefaultException extends Exception {
     public DefaultException(Agent me, TypeOfDefault typeOfDefault) {
         this.me = me;
         this.typeOfDefault = typeOfDefault;
-        this.timestep = BoEDemo.getTime();
+        this.timestep = Model.getTime();
         this.equityAtDefault = me.getEquityValue();
         this.lcrAtDefault = me.getLCR();
 

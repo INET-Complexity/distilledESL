@@ -1,6 +1,6 @@
 package contracts;
 
-import demos.BoEDemo;
+import demos.Model;
 import demos.Parameters;
 
 import java.util.*;
@@ -73,7 +73,7 @@ public class AssetMarket {
 
                 prices.forEach((assetType,newPrice) -> {
                     if (oldPrices.get(assetType) > newPrice) {
-                        BoEDemo.devalueCommonAsset(assetType, oldPrices.get(assetType) - newPrice);
+                        Model.devalueCommonAsset(assetType, oldPrices.get(assetType) - newPrice);
                     }
                 });
             }

@@ -76,7 +76,7 @@ public class Bank extends Agent implements CanPledgeCollateral {
 
     @Override
     public double getLCR() {
-        return lcr_constraint.getLCR();
+        return isAlive()? lcr_constraint.getLCR() : getLcrAtDefault();
     }
 
     public void setLCR_constraint(LCR_Constraint lcr_constraint) {
@@ -117,5 +117,9 @@ public class Bank extends Agent implements CanPledgeCollateral {
             if (action.getAmount() > 0) action.perform();
         }
 
+    }
+
+    public void revalueAllLoans() {
+        mainLedger.getAssetsOfType(Loan.class).forEach(loan -> ((Loan) loan).reValueLoan());
     }
 }

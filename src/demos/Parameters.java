@@ -6,15 +6,27 @@ import contracts.Deposit;
 
 public class Parameters {
 
+    public void makeCoherent() {
+        if (!HEDGEFUNDS_ON) {
+            FUNDING_CONTAGION_HEDGEFUND = false;
+        }
+    }
+
     // Contagion Channels
     public static boolean HAIRCUT_CONTAGION = true;
     public static boolean FUNDING_CONTAGION_HEDGEFUND = true;
     public static boolean FUNDING_CONTAGION_INTERBANK = true;
     public static boolean INVESTOR_REDEMPTION = true;
-    public static boolean FIRESALE_CONTAGION = true;
+    public static boolean FIRESALE_CONTAGION = false;
     public static boolean CASH_PROVIDER_RUNS = true;
     public static boolean NEKO_MODEL = false;
     public static boolean FIRESALES_UPON_DEFAULT = true;
+
+
+    // Agents on or off
+    public static boolean ASSET_MANAGER_ON = true;
+    public static boolean HEDGEFUNDS_ON = true;
+
 
     // INTERBANK liquidity hoarding threshold
     // margin calls off
@@ -24,7 +36,7 @@ public class Parameters {
 
 
 
-    public static double INITIAL_SHOCK = 0.15;
+    public static double INITIAL_SHOCK = 0.10;
     public static Asset.AssetType ASSET_TO_SHOCK = Asset.AssetType.EXTERNAL2;
 
     // Cash Provider
@@ -67,7 +79,7 @@ public class Parameters {
     public static double REDEMPTIONS_C1 = 20;
     public static double REDEMPTIONS_C2 = 2;
 
-    public static double NEKO_C = 0.6;
+    public static double NEKO_C = 0.01;//0.6;
 
     public static int TIMESTEPS_TO_PAY = 3;
     public static int TIMESTEPS_TO_REDEEM_SHARES = 2;
@@ -118,12 +130,6 @@ public class Parameters {
     public static double MATCH_BOOK_LCR = 0.00;
 
 
-
-    public static boolean ASSET_MANAGER_ON = INVESTOR_REDEMPTION;
-    public static boolean HEDGEFUNDS_ON = true;
-
-
-
     public static double BANK_LCR_MIN = 0.10;
     public static double BANK_LCR_BUFFER = 0.15;
     public static double BANK_LCR_TARGET = 0.20;
@@ -133,5 +139,7 @@ public class Parameters {
     public static double BANK_LEVERAGE_TARGET = 0.02;
 
 
+    // Recording
+    public static boolean RECORD_DEFAULT = true;
 
 }

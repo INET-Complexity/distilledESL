@@ -16,11 +16,13 @@ public class Loan extends Contract {
     protected Agent liabilityParty;
     protected double principal;
     private double fundingAlreadyPulled = 0;
+    private double previousNekoValuation; //Todo very messy!
 
     public Loan(Agent assetParty, Agent liabilityParty, double principal) {
         this.assetParty = assetParty;
         this.liabilityParty = liabilityParty;
         this.principal = principal;
+        this.previousNekoValuation = getValue(assetParty);
     }
 
     @Override
@@ -77,10 +79,13 @@ public class Loan extends Contract {
         return liabilityParty;
     }
 
+    @Override
     public double getValue(Agent me) {
-        if (Parameters.NEKO_MODEL && me==assetParty) {
-            return NEKO_Model.getValuation(this);
-        } else return principal;
+//        if (me==assetParty && Parameters.NEKO_MODEL) {
+//            return NEKO_Model.getValuation(this);
+//        } else {
+      return principal;
+
     }
 
     public void liquidate() {
@@ -103,6 +108,20 @@ public class Loan extends Contract {
     }
 
 
+    public double getPrincipal() {
+        return principal;
+    }
+
+    public void reValueLoan() {
+
+        double newValue = Parameters.NEKO_MODEL ?
+                NEKO_Model.getValuation(this) : principal;
+
+        if (newValue < previousNekoValuation) {
+            assetParty.devalueAsset(this, previousNekoValuation - newValue);
+            previousNekoValuation = newValue;
+        }
+    }
 }
 
 

@@ -2,7 +2,7 @@ package contracts.obligations;
 
 import agents.Agent;
 import contracts.Contract;
-import demos.BoEDemo;
+import demos.Model;
 
 
 public abstract class Obligation {
@@ -20,8 +20,8 @@ public abstract class Obligation {
         this.from = contract.getLiabilityParty();
         this.to = contract.getAssetParty();
 
-        this.timeToOpen = BoEDemo.getTime() + 1;
-        this.timeToPay = BoEDemo.getTime() + timeLeftToPay;
+        this.timeToOpen = Model.getTime() + 1;
+        this.timeToPay = Model.getTime() + timeLeftToPay;
         this.timeToReceive = timeToPay + 1;
 
         assert(timeToPay >= timeToOpen);
@@ -38,11 +38,11 @@ public abstract class Obligation {
     }
 
     boolean hasArrived() {
-        return BoEDemo.getTime() == timeToOpen;
+        return Model.getTime() == timeToOpen;
     }
 
     boolean isDue() {
-        return BoEDemo.getTime() == timeToPay;
+        return Model.getTime() == timeToPay;
     }
 
     public Agent getFrom() {

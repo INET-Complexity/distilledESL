@@ -21,6 +21,6 @@ public class RWA_Constraint {
 
     public double getRWA() {
         return bank.getMainLedger().getAllAssets().stream()
-                .mapToDouble(contract -> contract.getValue() * contract.getRWAweight()).sum();
+                .mapToDouble(contract -> contract.getValue(null) * contract.getRWAweight()).sum();
     }
 }

@@ -20,7 +20,8 @@ public abstract class Agent {
     private boolean alive = true;
     private double encumberedCash;
     private Mailbox mailbox;
-
+    private double equityAtDefault;
+    private double lcrAtDefault;
 
     public Agent(String name) {
         this.name = name;
@@ -53,6 +54,7 @@ public abstract class Agent {
 
     public void devalueAsset(Contract asset, double valueLost) {
         mainLedger.devalueAsset(asset, valueLost);
+
     }
 
     public void devalueAssetOfType(Asset.AssetType assetType, double priceLost) {
@@ -60,6 +62,12 @@ public abstract class Agent {
                 .filter(asset -> ((Asset) asset).getAssetType()==assetType)
                 .forEach(asset ->
                 devalueAsset(asset, ((Asset) asset).getQuantity()*priceLost));
+
+        //Update their prices too
+        mainLedger.getAssetsOfType(Asset.class).stream()
+                .filter(asset -> ((Asset) asset).getAssetType()==assetType)
+                .forEach(asset -> ((Asset) asset).updatePrice());
+
     }
 
     public void appreciateAsset(Contract asset, double valueLost) {
@@ -121,7 +129,7 @@ public abstract class Agent {
     }
 
     public double getEquityValue() {
-        return isAlive() ? mainLedger.getEquityValue() : 0.0;
+        return isAlive() ? mainLedger.getEquityValue() : equityAtDefault;
     }
 
     public void printBalanceSheet() {
@@ -144,6 +152,8 @@ public abstract class Agent {
 
     public void triggerDefault() {
         alive = false;
+        equityAtDefault = getEquityValue();
+        lcrAtDefault = getLCR();
         System.out.println("Trigger default!");
     }
 
@@ -167,7 +177,8 @@ public abstract class Agent {
             System.out.println(getName() + " received a shock!! Asset type " + assetType + " lost "
                     + String.format("%.2f", fractionLost * 100.0) + "% of value.");
             for (Contract asset : assetsShocked) {
-                devalueAsset(asset, asset.getValue() * fractionLost);
+                devalueAsset(asset, asset.getValue(null) * fractionLost);
+                ((Asset) asset).updatePrice();
             }
         }
     }
@@ -217,7 +228,23 @@ public abstract class Agent {
         mailbox.printMailbox();
     }
 
-    public abstract double getLCR();
+    public double getLCR() {
+        return isAlive()? getCash() : lcrAtDefault;
+    }
 
+    public double getLcrAtDefault() {
+        return lcrAtDefault;
+    }
 
+    public double getEquityLoss() {
+        return ( getEquityValue() - mainLedger.getInitialEquity() ) / mainLedger.getInitialEquity();
+    }
+
+    public void setInitialValues() {
+        mainLedger.setInitialValues();
+    }
+
+    public double getEncumberedCash() {
+        return encumberedCash;
+    }
 }
