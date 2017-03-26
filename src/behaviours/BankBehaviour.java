@@ -27,11 +27,11 @@ public class BankBehaviour extends Behaviour {
         // 1) Pay matured cash commitments or default.
         double maturedPullFunding = me.getMaturedObligations();
         if (maturedPullFunding > 0) {
-            System.out.println("We have matured payment contracts.obligations for a total of " + String.format("%.2f", maturedPullFunding));
+            System.out.println("We have matured payment obligations for a total of " + String.format("%.2f", maturedPullFunding));
             if (me.getCash() >= maturedPullFunding) {
                 me.fulfilMaturedRequests();
             } else {
-                System.out.println("A matured obligation was not fulfilled.");
+                System.out.println("A matured obligation was not fulfilled.\nDEFAULT DUE TO LACK OF LIQUIDITY");
                 throw new DefaultException();
             }
         }
@@ -48,7 +48,7 @@ public class BankBehaviour extends Behaviour {
         if (me.getLeverage() < Parameters.BANK_LEVERAGE_MIN) {
             System.out.println("My leverage is "+me.getLeverage()+
                     " which is below the minimum "+Parameters.BANK_LEVERAGE_MIN);
-            System.out.println("I'm dead.");
+            System.out.println("DEFAULT DUE TO INSOLVENCY.");
             throw new DefaultException();
         }
 

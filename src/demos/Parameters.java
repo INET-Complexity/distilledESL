@@ -24,12 +24,12 @@ public class Parameters {
 
 
 
-    public static double INITIAL_SHOCK = 0.08;
+    public static double INITIAL_SHOCK = 0.02;
     public static Asset.AssetType ASSET_TO_SHOCK = Asset.AssetType.EXTERNAL2;
 
     // Cash Provider
-    public static double HAIRCUT_SLOPE = 0.2;
-    public static double HAIRCUT_PRICE_FALL_THRESHOLD = 0.05;
+    public static double HAIRCUT_SLOPE = 3.0; //0.2;
+    public static double HAIRCUT_PRICE_FALL_THRESHOLD = 0.001; //0.05;
 
     public static double LCR_THRESHOLD_TO_RUN = -3.0;
     public static double LEVERAGE_THRESHOLD_TO_RUN = 0.0075;

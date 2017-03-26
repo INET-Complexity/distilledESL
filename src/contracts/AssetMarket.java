@@ -108,8 +108,11 @@ public class AssetMarket {
         double h0 = Parameters.getInitialHaircut(assetType);
         double p0 = 1.0;
 
-        double newHaircut = h0 * Math.max(1.0,
-                1.0 + Parameters.HAIRCUT_SLOPE * ( (p0 - getPrice(assetType)) / p0 - Parameters.HAIRCUT_PRICE_FALL_THRESHOLD) );
+        double newHaircut = h0 * 1.0 + Parameters.HAIRCUT_SLOPE * ( (p0 - getPrice(assetType)) / p0 - Parameters.HAIRCUT_PRICE_FALL_THRESHOLD);
+
+        if(newHaircut < h0) newHaircut = h0;
+        if(newHaircut > 1) newHaircut = 1.0;
+
         haircuts.put(assetType, newHaircut);
 
     }

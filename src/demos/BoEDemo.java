@@ -5,6 +5,7 @@ import behaviours.DefaultException;
 import contracts.*;
 
 import java.util.HashSet;
+import java.util.Locale;
 
 public class BoEDemo {
 
@@ -16,6 +17,7 @@ public class BoEDemo {
     public static int getTime() { return timeStep; }
 
     public static void main(String[] args) {
+        Locale.setDefault(Locale.UK);
         initialise();
         runSchedule();
         finish();

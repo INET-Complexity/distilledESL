@@ -145,7 +145,7 @@ public class Asset extends Contract {
         this.quantity -= quantity;
 
         // Have the owner lose the value of the asset
-        assetParty.devalueAsset(this, quantity);
+        assetParty.devalueAsset(this, quantity * price);
 
         Asset newAsset = new Asset(newOwner, assetType, assetMarket, quantity);
         // Create a new Asset of the same type and give it to the new Owner

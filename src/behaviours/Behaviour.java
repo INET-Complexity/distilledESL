@@ -83,6 +83,10 @@ public abstract class Behaviour {
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
+    public void performLiquidityManagement(boolean usingPeckingOrder) {
+
+    }
+
     public double sellAssetsProportionally(double amount) {
         if (amount > 0) {
             System.out.println("Sell assets proportionally: " + amount);
@@ -122,10 +126,13 @@ public abstract class Behaviour {
                 .sum();
 
         if (totalFundingThatCanBePulled < amount) {
+            System.out.println("We cannot pull enough funding..." +
+                    " we will pull the greatest possible amount: "+totalFundingThatCanBePulled);
             amount = totalFundingThatCanBePulled;
         }
 
-        if (!(amount > 0)) return 0.0;
+        if (!(amount > 0)) return 0.0; //Either we are calling this function with argument zero,
+        // or we cannot pull any funding.
 
 
         for (Action action : pullFundingActions) {
