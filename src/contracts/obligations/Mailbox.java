@@ -73,6 +73,7 @@ public class Mailbox {
         inbox.removeIf(Obligation::isFulfilled);
         outbox.removeIf(Obligation::isFulfilled);
 
+        // Remove all requests from agents who have defaulted.
         outbox.removeIf(obligation -> (!(obligation.getFrom().isAlive())));
 
         // Move all messages in the unopenedMessages to the inbox

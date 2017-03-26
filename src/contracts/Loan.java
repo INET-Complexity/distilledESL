@@ -101,6 +101,8 @@ public class Loan extends Contract {
     public double getRWAweight() {
         return Parameters.INTERBANK_RWAWEIGHT;
     }
+
+
 }
 
 

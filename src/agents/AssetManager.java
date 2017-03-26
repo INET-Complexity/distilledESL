@@ -66,4 +66,9 @@ public class AssetManager extends Agent implements CanIssueShares {
     public double getEquityValue() {
         return super.getAssetValue();
     }
+
+    @Override
+    public double getLCR() {
+        return getCash();
+    }
 }

@@ -217,5 +217,7 @@ public abstract class Agent {
         mailbox.printMailbox();
     }
 
+    public abstract double getLCR();
+
 
 }

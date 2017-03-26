@@ -99,4 +99,10 @@ public class Hedgefund extends Agent implements CanPledgeCollateral {
         }
 
     }
+
+    @Override
+    public double getLCR() {
+        //the LCR for a hedgefund is just the cash...
+        return getCash();
+    }
 }

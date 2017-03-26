@@ -44,7 +44,7 @@ public class CashProviderBehaviour extends Behaviour {
 
                 // Check if the leverage of the bank we are lending money to is below the threshold.
                 if (bank.getLeverage() < Parameters.LEVERAGE_THRESHOLD_TO_RUN
-                        || bank.getLCR_constraint().getLCR() < Parameters.LCR_THRESHOLD_TO_RUN) {
+                        || bank.getLCR() < Parameters.LCR_THRESHOLD_TO_RUN) {
 
                     if (trialPeriod.containsKey(bank)) {
                         System.out.printf(bank.getName()+" has not gone above its Leverage and/or LCR threshold yet, "+

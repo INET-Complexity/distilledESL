@@ -158,7 +158,7 @@ public class Recorder {
             bankLine = bankLine + ", "+((Bank) agent).getRWAratio();
         }
         for (Agent agent : banks) {
-            bankLine = bankLine + ", "+((Bank)agent).getLCR_constraint().getLCR();
+            bankLine = bankLine + ", "+((Bank)agent).getLCR();
         }
         for (Agent agent : banks) {
             bankLine = bankLine + ", "+agent.getEquityValue();

@@ -12,6 +12,7 @@ public class BoEDemo {
     private static AssetMarket assetMarket = new AssetMarket();
     private static HashSet<Agent> allAgents = new HashSet<>();
     private static Recorder recorder;
+    public static DefaultRecorder defaultRecorder = new DefaultRecorder();
     public static int timeStep = 0;
 
     public static int getTime() { return timeStep; }

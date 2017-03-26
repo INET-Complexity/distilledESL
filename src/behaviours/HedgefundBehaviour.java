@@ -35,7 +35,7 @@ public class HedgefundBehaviour extends Behaviour {
             me.fulfilMaturedRequests();
         } else {
             System.out.println("A matured obligation was not fulfilled.");
-            throw new DefaultException();
+            throw new DefaultException(me, DefaultException.TypeOfDefault.LIQUIDITY);
         }
 
 
@@ -45,7 +45,7 @@ public class HedgefundBehaviour extends Behaviour {
             me.runMarginCalls();
         } catch (FailedMarginCallException e) {
             System.out.println("A margin call failed.");
-            throw new DefaultException();
+            throw new DefaultException(me, DefaultException.TypeOfDefault.FAILED_MARGIN_CALL);
         }
 
         // 3) If I'm insolvent, default.
@@ -53,7 +53,7 @@ public class HedgefundBehaviour extends Behaviour {
             System.out.println("My leverage is "+me.getLeverage()+
                     " which is below the effective minimum "+me.getEffectiveMinLeverage());
             System.out.println("I'm dead.");
-            throw new DefaultException();
+            throw new DefaultException(me, DefaultException.TypeOfDefault.SOLVENCY);
         }
 
         // Compute amount to DeLever

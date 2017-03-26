@@ -66,10 +66,6 @@ public class Repo extends Loan {
     public void marginCall() throws FailedMarginCallException {
         double currentValue = valueCollateralHaircutted();
         double valueNeeded = principal - getFundingAlreadyPulled();
-//        System.out.println("Margin call for Repo "+getName(liabilityParty));
-//        System.out.println("Principal of the Repo is "+principal);
-//        System.out.printf("Amount already pulled is "+getFundingAlreadyPulled());
-//        printCollateral();
 
         CanPledgeCollateral borrower = (CanPledgeCollateral) liabilityParty;
 
@@ -87,7 +83,30 @@ public class Repo extends Loan {
             borrower.putMoreCollateral(valueNeeded - currentValue, this);
 
         } else if (currentValue > valueNeeded) {
-             borrower.withdrawCollateral(currentValue - valueNeeded, this);
+            borrower.withdrawCollateral(currentValue - valueNeeded, this);
+        }
+    }
+
+    public void marginCallBeforeLiquidating() {
+        double currentValue = valueCollateralHaircutted();
+        double valueNeeded = principal;
+
+        CanPledgeCollateral borrower = (CanPledgeCollateral) liabilityParty;
+
+        if (currentValue < valueNeeded) {
+            System.out.println("We are liquidating a repo and we need to encumber more assets for value "+(valueNeeded - currentValue));
+
+            double amountToEncumber = valueNeeded - currentValue;
+            if ((valueNeeded - currentValue) > borrower.getMaxUnencumberedHaircuttedCollateral()) {
+                System.out.println("We do not have enough assets to encumber up to the original value of the repo. We will encumber as much as possible.");
+                amountToEncumber = borrower.getMaxUnencumberedHaircuttedCollateral();
+            }
+
+            borrower.putMoreCollateral(amountToEncumber, this);
+
+        } else if (currentValue > valueNeeded) {
+            System.out.println("Strange. We're liquidating a repo which has too much collateral pledged to it (!)");
+            borrower.withdrawCollateral(currentValue - valueNeeded, this);
         }
     }
 
@@ -130,8 +149,13 @@ public class Repo extends Loan {
 
     @Override
     public void liquidate() {
-        // When we liquidate a Repo, we must change the ownership of all the collateral and give it to the
+        // When we liquidate a Repo, we must:
+        // - re-run the margin call to reintroduce as much collateral as possible into the repo.
+        // - change the ownership of all the collateral and give it to the
         // asset party.
+
+        // re-run the margin call with fundingAlreadyPulled set to zero.
+        marginCallBeforeLiquidating();
 
         for (Map.Entry<CanBeCollateral, Double> entry : collateral.entrySet()) {
             // 1. Take one type of collateral at a time

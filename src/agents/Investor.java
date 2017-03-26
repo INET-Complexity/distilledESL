@@ -15,4 +15,9 @@ public class Investor extends Agent {
     public Behaviour getBehaviour() {
         return behaviour;
     }
+
+    @Override
+    public double getLCR() {
+        return getCash();
+    }
 }

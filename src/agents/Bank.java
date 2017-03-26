@@ -71,8 +71,12 @@ public class Bank extends Agent implements CanPledgeCollateral {
         return bankLeverageConstraint;
     }
 
-    public LCR_Constraint getLCR_constraint() {
-        return lcr_constraint;
+    public double getCashBuffer() {return lcr_constraint.getCashBuffer();}
+    public double getCashTarget() {return lcr_constraint.getCashTarget();}
+
+    @Override
+    public double getLCR() {
+        return lcr_constraint.getLCR();
     }
 
     public void setLCR_constraint(LCR_Constraint lcr_constraint) {
