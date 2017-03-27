@@ -78,7 +78,7 @@ public class Shares extends Contract {
         if (!(me==owner) || !(nShares > 0)) return Collections.emptyList();
 
         ArrayList<Action> availableActions = new ArrayList<>();
-        availableActions.add(new RedeemShares(this));
+        availableActions.add(new RedeemShares(me, this));
         return availableActions;
     }
 

@@ -31,8 +31,8 @@ public abstract class Behaviour {
         System.out.println("\n"+me.getName()+" is acting at time "+ Model.getTime()+".\n");
 
         me.step();
-        me.printBalanceSheet();
-        me.printMailbox();
+        if (Parameters.PRINT_BALANCE_SHEETS) me.printBalanceSheet();
+        if (Parameters.PRINT_MAILBOX) me.printMailbox();
 
         availableActions = me.getAvailableActions(me);
 

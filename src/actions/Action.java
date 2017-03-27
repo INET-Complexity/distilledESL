@@ -1,9 +1,20 @@
 package actions;
 
+import agents.Agent;
+import demos.Model;
+
 import java.util.ArrayList;
 
 public abstract class Action {
-    public abstract void perform();
+    private Agent me;
+
+    public Action(Agent me) {
+        this.me = me;
+    }
+
+    public void perform() {
+        Model.actionsRecorder.recordAction(this);
+    }
 
     private double amount;
 
@@ -27,4 +38,6 @@ public abstract class Action {
     }
 
     public abstract void print();
+
+    public Agent getAgent() {return me;}
 }

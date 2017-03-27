@@ -44,7 +44,7 @@ public class Asset extends Contract {
                 || (assetType==AssetType.EXTERNAL3)) return Collections.emptyList();
 
         ArrayList<Action> availableActions = new ArrayList<>();
-        availableActions.add(new SellAsset(this));
+        availableActions.add(new SellAsset(me, this));
         return availableActions;
     }
 

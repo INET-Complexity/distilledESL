@@ -63,9 +63,9 @@ public class Loan extends Contract {
 
         ArrayList<Action> availableActions = new ArrayList<>();
         if (assetParty == me) {
-            availableActions.add(new PullFunding(this));
+            availableActions.add(new PullFunding(me, this));
         } else if (liabilityParty == me) {
-            availableActions.add(new PayLoan(this));
+            availableActions.add(new PayLoan(me, this));
         }
         return availableActions;
     }

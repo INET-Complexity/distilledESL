@@ -17,6 +17,13 @@ public class Parameters {
     public static boolean NEKO_MODEL = false;
     public static boolean FIRESALES_UPON_DEFAULT = true;
 
+    // Printing out results
+    public static boolean PRINT_BALANCE_SHEETS = false;
+    public static boolean PRINT_LIQUIDITY = false;
+    public static boolean PRINT_MAILBOX = false;
+
+
+
 
     // Agents on or off
     public static boolean ASSET_MANAGER_ON = true;
@@ -31,7 +38,7 @@ public class Parameters {
 
 
 
-    public static double INITIAL_SHOCK = 0.17;
+    public static double INITIAL_SHOCK = 0.16;
     public static Asset.AssetType ASSET_TO_SHOCK = Asset.AssetType.EXTERNAL2;
 
     // Cash Provider
@@ -74,7 +81,7 @@ public class Parameters {
     public static double REDEMPTIONS_C1 = 20;
     public static double REDEMPTIONS_C2 = 2;
 
-    public static double REDEMPTIONS_FRACTION = 0.15;
+    public static double REDEMPTIONS_FRACTION = 0.25;
 
     public static double NEKO_C = 0.01;//0.6;
 

@@ -1,5 +1,6 @@
 package actions;
 
+import agents.Agent;
 import contracts.FailedMarginCallException;
 import contracts.Loan;
 import contracts.Repo;
@@ -10,7 +11,8 @@ import demos.Parameters;
 public class PullFunding extends Action {
 
     private Loan loan;
-    public PullFunding(Loan loan) {
+    public PullFunding(Agent me, Loan loan) {
+        super(me);
         this.loan = loan;
         setAmount(0.0);
     }
@@ -21,6 +23,7 @@ public class PullFunding extends Action {
 
     @Override
     public void perform() {
+        super.perform();
         loan.increaseFundingPulled(getAmount());
 
         if (loan.getLiabilityParty()==null) {
