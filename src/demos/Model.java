@@ -16,6 +16,7 @@ public class Model {
     private static HashMap<String, Agent> allAgents;
     private static Recorder recorder = new Recorder();
     public static DefaultRecorder defaultRecorder = new DefaultRecorder();
+    public static RedemptionsRecorder redemptionsRecorder = new RedemptionsRecorder();
     public static int timeStep = 0;
 
     public static int getTime() { return timeStep; }
@@ -78,6 +79,7 @@ public class Model {
     private static void finish() {
         recorder.finish();
         defaultRecorder.finish();
+        redemptionsRecorder.finish();
     }
 
     private static void initialise() {

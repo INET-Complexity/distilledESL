@@ -27,11 +27,11 @@ public class Parameters {
     // margin calls off
     //
 
-    public static double INTERBANK_LOSS_GIVEN_DEFAULT = 0.3; // if Interbank contagion is off
+    public static double INTERBANK_LOSS_GIVEN_DEFAULT = 0.4; // if Interbank contagion is off
 
 
 
-    public static double INITIAL_SHOCK = 0.178;
+    public static double INITIAL_SHOCK = 0.17;
     public static Asset.AssetType ASSET_TO_SHOCK = Asset.AssetType.EXTERNAL2;
 
     // Cash Provider
@@ -73,6 +73,8 @@ public class Parameters {
     // Investor
     public static double REDEMPTIONS_C1 = 20;
     public static double REDEMPTIONS_C2 = 2;
+
+    public static double REDEMPTIONS_FRACTION = 0.15;
 
     public static double NEKO_C = 0.01;//0.6;
 

@@ -19,12 +19,14 @@ public class Shares extends Contract {
     private double previousValueOfShares;
     private double originalNAV;
     private int nSharesPendingToRedeem;
+    private int originalNumberOfShares;
 
     public Shares(Agent owner, CanIssueShares issuer, int nShares, double originalNAV) {
         this.owner = owner;
         this.issuer = issuer;
         this.nShares = nShares;
-        this.previousValueOfShares = getValue(null);
+        this.originalNumberOfShares = nShares;
+        this.previousValueOfShares = getNewValue();
         this.originalNAV = originalNAV;
         this.nSharesPendingToRedeem = 0;
 
@@ -63,8 +65,9 @@ public class Shares extends Contract {
 
     @Override
     public double getValue(Agent me) {
-        return nShares * issuer.getNetAssetValue();
-    }
+        return previousValueOfShares;}
+
+    private double getNewValue() {return nShares * issuer.getNetAssetValue();}
 
     public double getNAV() { return issuer.getNetAssetValue(); }
 
@@ -80,13 +83,14 @@ public class Shares extends Contract {
     }
 
     public void updateValue() {
-        double valueChange = getValue(null) - previousValueOfShares;
-        previousValueOfShares = getValue(null);
+        double valueChange = getNewValue() - previousValueOfShares;
+        previousValueOfShares = getNewValue();
 
         if (valueChange > 0) {
             owner.appreciateAsset(this, valueChange);
             ((Agent) issuer).appreciateLiability(this, valueChange);
         } else if (valueChange < 0) {
+            System.out.println("value of shares fell.");
             owner.devalueAsset(this, -1.0 * valueChange);
             ((Agent) issuer).devalueLiability(this, -1.0 * valueChange);
         }
@@ -102,6 +106,10 @@ public class Shares extends Contract {
 
     public int getnSharesPendingToRedeem() {
         return nSharesPendingToRedeem;
+    }
+
+    public int getOriginalNumberOfShares() {
+        return originalNumberOfShares;
     }
 }
 

@@ -25,7 +25,7 @@ public class AssetManager extends Agent implements CanIssueShares {
     public Shares issueShares(Agent owner, int quantity) {
         nShares += quantity;
         if (nShares - quantity > 0) {
-            revalueAllExistingShares();
+            updateValueOfAllShares();
         }
         return new Shares(owner, this, quantity, getNetAssetValue());
     }
@@ -39,15 +39,6 @@ public class AssetManager extends Agent implements CanIssueShares {
     @Override
     public int getnShares() {
         return nShares;
-    }
-
-    public void revalueAllExistingShares() {
-        HashSet<Contract> allShares = mainLedger.getLiabilitiesOfType(Shares.class);
-        for (Contract contract : allShares) {
-            Shares shares = (Shares) contract;
-            shares.updateValue();
-        }
-
     }
 
     @Override

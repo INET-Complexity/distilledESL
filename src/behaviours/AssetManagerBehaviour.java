@@ -14,6 +14,8 @@ public class AssetManagerBehaviour extends Behaviour {
 
     @Override
     protected void chooseActions() throws DefaultException {
+        // Plot net asset value?
+        System.out.println("\nMy NAV is "+me.getNetAssetValue());
         // 1) Pay matured cash commitments or default.
         double maturedPullFunding = me.getMaturedObligations();
         if (maturedPullFunding > 0) {

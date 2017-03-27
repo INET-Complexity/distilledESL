@@ -53,6 +53,7 @@ public abstract class Agent {
     }
 
     public void devalueAsset(Contract asset, double valueLost) {
+        System.out.println("Devalue asset "+asset.getName(this)+" for amount "+valueLost);
         mainLedger.devalueAsset(asset, valueLost);
 
     }
