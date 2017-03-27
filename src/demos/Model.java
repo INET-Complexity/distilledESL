@@ -4,22 +4,58 @@ import agents.*;
 import behaviours.DefaultException;
 import contracts.*;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Locale;
 
-public class BoEDemo {
+public class Model {
+
+    public static int simulationNumber = 0;
 
     private static AssetMarket assetMarket = new AssetMarket();
-    private static HashSet<Agent> allAgents = new HashSet<>();
-    private static Recorder recorder = new Recorder(allAgents, assetMarket);
+    private static HashMap<String, Agent> allAgents;
+    private static Recorder recorder = new Recorder();
+    public static DefaultRecorder defaultRecorder = new DefaultRecorder();
     public static int timeStep = 0;
 
     public static int getTime() { return timeStep; }
 
     public static void main(String[] args) {
-        initialise();
-        runSchedule();
+        // Simulation one
+        // First simulation runs with the default parameters
+        runSimulation();
+
+        // From here, you can run more simulations.
+        // simply replace the parameters you wish to change with the new value,
+        // and then call 'runSimulation()'
+
+        // See below for some examples
+
+        // Second simulation runs without the HF
+//        Parameters.ASSET_MANAGER_ON = true;
+//        Parameters.HEDGEFUNDS_ON = false;
+//        runSimulation();
+//
+//        // Third simulation runs without the Asset Manager
+//        Parameters.ASSET_MANAGER_ON = false;
+//        Parameters.HEDGEFUNDS_ON = true;
+//        runSimulation();
+//
+//        // Fourth simulation runs without either HF or Asset Manager
+//        Parameters.ASSET_MANAGER_ON = false;
+//        Parameters.HEDGEFUNDS_ON = false;
+//        runSimulation();
+
+
+        // Important: call finish at the end so that the files get written.
         finish();
 
+    }
+
+    private static void runSimulation() {
+        simulationNumber++;
+        initialise();
+        runSchedule();
     }
 
     private static void runSchedule() {
@@ -30,7 +66,7 @@ public class BoEDemo {
             timeStep++;
             System.out.println("\nTime step: "+timeStep+"\n^^^^^^^^^^^^^");
 
-            for (Agent agent : allAgents) {
+            for (Agent agent : allAgents.values()) {
                 agent.act();
             }
 
@@ -41,15 +77,27 @@ public class BoEDemo {
 
     private static void finish() {
         recorder.finish();
+        defaultRecorder.finish();
     }
 
     private static void initialise() {
+        timeStep = 0;
+        allAgents = new HashMap<>();
+        assetMarket = new AssetMarket();
+
         Bank bank1 = new Bank("Bank 1");
         Bank bank2 = new Bank("Bank 2");
         Bank bank3 = new Bank("Bank 3");
-        Hedgefund hf1 = new Hedgefund("Hedgefund 1");
-        AssetManager am1 = new AssetManager("AssetManager 1");
-        Investor inv1 = new Investor("Investor 1");
+
+        Hedgefund hf1 = Parameters.HEDGEFUNDS_ON ?
+                new Hedgefund("Hedgefund 1") : null;
+
+        AssetManager am1 = Parameters.ASSET_MANAGER_ON ?
+                new AssetManager("AssetManager 1") : null;
+
+        Investor inv1 = Parameters.ASSET_MANAGER_ON ?
+                new Investor("Investor 1") : null;
+
         CashProvider cp1 = new CashProvider("Cash Provider 1");
         //Todo: depositors should be an agent
 
@@ -64,7 +112,7 @@ public class BoEDemo {
                 160, 150, 0);
 
         initAgent(hf1, 35, 107, 107, 107, 0,
-                0, 0, 0);
+                    0, 0, 0);
 
         initAgent(am1, 20, 130, 130, 130, 0,
                 0, 0, 0);
@@ -88,7 +136,6 @@ public class BoEDemo {
         initInterBankLoan(bank3, bank1, 40);
         initInterBankLoan(bank3, bank2, 40);
 
-
         initShares(inv1, am1, 410);
 
         initRepo(bank1, hf1, 150.0);
@@ -99,12 +146,16 @@ public class BoEDemo {
         initRepo(cp1, bank2, 200);
         initRepo(cp1, bank3, 200);
 
-        recorder.init();
+        allAgents.forEach((name, agent) -> agent.setInitialValues());
+
+        recorder.startSimulation(allAgents, assetMarket);
         recorder.record();
     }
 
     private static void initAgent(Agent agent, double cash, double mbs, double equities, double bonds,
                                   double otherAsset, double deposits, double longTerm, double otherLiability) {
+
+        if (agent == null) return;
 
         agent.addCash(cash);
         // Asset side
@@ -119,10 +170,11 @@ public class BoEDemo {
         if (otherLiability > 0) agent.add(new Other(null, agent, otherLiability));
 
 
-        allAgents.add(agent);
+        allAgents.put(agent.getName(), agent);
     }
 
     private static void addExternalAsset(Agent agent, Asset.AssetType assetType, double quantity) {
+        if (agent == null) return;
         if (quantity > 0) agent.add(new Asset(agent, assetType, assetMarket, quantity));
     }
 
@@ -159,7 +211,7 @@ public class BoEDemo {
      */
     private static void initRepo(Agent lender, Agent borrower, double principal) {
         if (principal > 0) {
-            if (Parameters.FUNDING_CONTAGION_HEDGEFUND) {
+            if (lender != null && borrower != null && Parameters.FUNDING_CONTAGION_HEDGEFUND) {
                 Repo repo = new Repo(lender, borrower, principal);
                 lender.add(repo);
                 borrower.add(repo);
@@ -169,29 +221,40 @@ public class BoEDemo {
                     System.out.println("Strange! A Margin call failed at initialisation.");
                     System.exit(-1);
                 }
-
             } else {
                 Repo repo1 = new Repo(lender, null, principal);
                 Repo repo2 = new Repo(null, borrower, principal);
-                lender.add(repo1);
-                borrower.add(repo2);
+
+                if (lender != null) lender.add(repo1);
+
+                if (borrower != null) borrower.add(repo2);
             }
         }
     }
 
 
+
     private static void initShares(Agent owner, CanIssueShares issuer, int number) {
+        if (owner == null || issuer == null) return;
         Shares shares = issuer.issueShares(owner, number);
         owner.add(shares);
         ((Agent) issuer).add(shares);
     }
 
     private static void initialShock(Asset.AssetType assetType, double fraction) {
-        for (Agent agent : allAgents) {
+        assetMarket.setPrice(assetType, assetMarket.getPrice(assetType) * (1.0 - fraction));
+
+        for (Agent agent : allAgents.values()) {
             agent.receiveShockToAsset(assetType, fraction);
         }
 
-        assetMarket.setPrice(assetType, assetMarket.getPrice(assetType) * (1.0 - fraction));
     }
+
+    public static void devalueCommonAsset(Asset.AssetType assetType, double priceLost) {
+        allAgents.forEach((name, agent) ->
+        agent.devalueAssetOfType(assetType, priceLost));
+
+    }
+
 
 }

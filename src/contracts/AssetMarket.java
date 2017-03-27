@@ -1,11 +1,13 @@
 package contracts;
 
+import demos.Model;
 import demos.Parameters;
 
 import java.util.*;
 
 public class AssetMarket {
     private HashMap<Asset.AssetType, Double> prices;
+    private HashMap<Asset.AssetType, Double> oldPrices;
     private HashMap<Asset.AssetType, Double> priceImpacts;
     private HashMap<Asset.AssetType, Double> amountsSold;
     private HashMap<Asset.AssetType, Double> haircuts;
@@ -65,7 +67,17 @@ public class AssetMarket {
     public void clearTheMarket() {
         System.out.println("\nMARKET CLEARING\n");
         for (Map.Entry<Asset.AssetType, Double> entry : amountsSold.entrySet()) {
-            if (Parameters.FIRESALE_CONTAGION) computePriceImpact(entry.getKey(), entry.getValue());
+            if (Parameters.FIRESALE_CONTAGION) {
+                oldPrices = new HashMap<>(prices);
+                computePriceImpact(entry.getKey(), entry.getValue());
+
+                prices.forEach((assetType,newPrice) -> {
+                    if (oldPrices.get(assetType) > newPrice) {
+                        Model.devalueCommonAsset(assetType, oldPrices.get(assetType) - newPrice);
+                    }
+                });
+            }
+
             if (Parameters.HAIRCUT_CONTAGION) computeHaircut(entry.getKey(), entry.getValue());
 
             if (!totalAmountsSold.containsKey(entry.getKey())) {
@@ -96,8 +108,11 @@ public class AssetMarket {
         double h0 = Parameters.getInitialHaircut(assetType);
         double p0 = 1.0;
 
-        double newHaircut = h0 * Math.max(1.0,
-                1.0 + Parameters.HAIRCUT_SLOPE * ( (p0 - getPrice(assetType)) / p0 - Parameters.HAIRCUT_PRICE_FALL_THRESHOLD) );
+        double newHaircut = h0 * 1.0 + Parameters.HAIRCUT_SLOPE * ( (p0 - getPrice(assetType)) / p0 - Parameters.HAIRCUT_PRICE_FALL_THRESHOLD);
+
+        if(newHaircut < h0) newHaircut = h0;
+        if(newHaircut > 1) newHaircut = 1.0;
+
         haircuts.put(assetType, newHaircut);
 
     }

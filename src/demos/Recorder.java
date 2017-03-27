@@ -2,98 +2,130 @@ package demos;
 
 import agents.Agent;
 import agents.Bank;
+import agents.CashProvider;
+import agents.Investor;
 import contracts.Asset;
 import contracts.AssetMarket;
 
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 /**
  * This class records all statistics.
  */
 public class Recorder {
-    private HashSet<Agent> allAgents;
     private AssetMarket market;
 
     private PrintWriter marketFile;
     private PrintWriter banksFile;
+    private PrintWriter lossesFile;
     private ArrayList<Asset.AssetType> assetTypes;
-    private ArrayList<Agent> banks;
+    private Agent[] banks;
 
-    private int timestep;
+    private Agent[] allAgents;
+
+
+    private double totalInitialEquity;
+
     private String marketHeader;
 
-    public Recorder(HashSet<Agent> allAgents, AssetMarket market) {
-        this.allAgents = allAgents;
-        this.market = market;
-    }
-
-    // Things to record:
-    // Market file:
-    // Timestep, price asset 1, price asset 2, ... haircut asset 1, haircut asset 2, ...
-
-
-    public void init() {
-        timestep = 0;
+    public Recorder() {
+        Locale.setDefault(Locale.UK);
 
         try {
             marketFile = new PrintWriter("marketFile.csv");
             banksFile = new PrintWriter("banks.csv");
-
-            assetTypes = market.getAssetTypes();
-            marketHeader = "Timestep";
-
-            for (Asset.AssetType assetType : assetTypes) {
-                marketHeader = marketHeader + ", price_" + assetType;
-            }
-
-            for (Asset.AssetType assetType : assetTypes) {
-                marketHeader = marketHeader + ", haircut_" + assetType;
-            }
-
-            for (Asset.AssetType assetType : assetTypes) {
-                marketHeader = marketHeader + ", totalAmountSold_" + assetType;
-            }
-
-            marketFile.println(marketHeader);
-
-            banks = allAgents.stream()
-                    .filter(agent -> agent instanceof Bank)
-                    .collect(Collectors.toCollection(ArrayList::new));
-
-            String bankLine = "Timestep";
-            for (Agent agent : banks) {
-                bankLine = bankLine + ", "+agent.getName()+"_leverage";
-            }
-            for (Agent agent : banks) {
-                bankLine = bankLine + ", "+agent.getName()+"_RWA_ratio";
-            }
-            for (Agent agent : banks) {
-                bankLine = bankLine + ", "+agent.getName()+"_LCR";
-            }
-            for (Agent agent : banks) {
-                bankLine = bankLine + ", "+agent.getName()+"_equity";
-            }
-            for (Agent agent : banks) {
-                bankLine = bankLine + ", "+agent.getName()+"_alive";
-            }
-
-            banksFile.println(bankLine);
-
+            lossesFile = new PrintWriter("losses.csv");
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
+
+    }
+
+    public void startSimulation(HashMap<String, Agent> modelAgents, AssetMarket market) {
+        allAgents = new Agent[5];
+
+        String[] names = new String[] {"Bank 1", "Bank 2", "Bank 3", "Hedgefund 1", "AssetManager 1"};
+        for (int i = 0; i < names.length; i++) {
+            allAgents[i] = modelAgents.containsKey(names[i]) ? modelAgents.get(names[i]) : null;
+        }
+
+        banks = new Agent[3];
+
+        System.arraycopy(allAgents, 0, banks, 0, 3);
+
+        this.market = market;
+
+        assetTypes = market.getAssetTypes();
+        marketHeader = "Simulation number, Timestep";
+
+        for (Asset.AssetType assetType : assetTypes) {
+            marketHeader = marketHeader + ", price_" + assetType;
+        }
+
+        for (Asset.AssetType assetType : assetTypes) {
+            marketHeader = marketHeader + ", haircut_" + assetType;
+        }
+
+        for (Asset.AssetType assetType : assetTypes) {
+            marketHeader = marketHeader + ", totalAmountSold_" + assetType;
+        }
+
+        marketFile.println(marketHeader);
+
+
+        String bankLine = "Simulation number, Timestep";
+        for (Agent agent : banks) {
+            bankLine = bankLine + ", "+agent.getName()+"_leverage";
+        }
+        for (Agent agent : banks) {
+            bankLine = bankLine + ", "+agent.getName()+"_RWA_ratio";
+        }
+        for (Agent agent : banks) {
+            bankLine = bankLine + ", "+agent.getName()+"_LCR";
+        }
+        for (Agent agent : banks) {
+            bankLine = bankLine + ", "+agent.getName()+"_equity";
+        }
+        for (Agent agent : banks) {
+            bankLine = bankLine + ", "+agent.getName()+"_alive";
+        }
+
+        banksFile.println(bankLine);
+
+        String lossesLine = "Simulation number, Timestep";
+        for (Agent agent : allAgents) {
+            lossesLine = lossesLine + ", " +
+                    ((agent != null) ? agent.getName()+"_loss" : "MISSING");
+        }
+
+        lossesLine = lossesLine + ", totalEquityLoss";
+
+        lossesFile.println(lossesLine);
+
+        totalInitialEquity = 0.0;
+        for (Agent agent : allAgents) {
+            if (agent != null) {
+                totalInitialEquity += agent.getEquityValue();
+            }
+        }
+
+        System.out.println("Total initial equity is :"+ totalInitialEquity);
+
     }
 
     public void record() {
-        timestep++;
 
         // Write all market prices and haircuts
-        String line = Integer.toString(timestep);
+        String line = Integer.toString(Model.simulationNumber);
+
+        line = line + ", " + Integer.toString(Model.getTime());
 
         for (Asset.AssetType assetType : assetTypes) {
             line = line + ", " + Double.toString(market.getPrice(assetType));
@@ -111,7 +143,9 @@ public class Recorder {
         marketFile.println(line);
 
 
-        String bankLine = Integer.toString(timestep);
+        String bankLine = Integer.toString(Model.simulationNumber);
+        bankLine = bankLine +", "+ Integer.toString(Model.getTime());
+
         for (Agent agent : banks) {
             bankLine = bankLine + ", "+agent.getLeverage();
         }
@@ -119,7 +153,7 @@ public class Recorder {
             bankLine = bankLine + ", "+((Bank) agent).getRWAratio();
         }
         for (Agent agent : banks) {
-            bankLine = bankLine + ", "+((Bank)agent).getLCR_constraint().getLCR();
+            bankLine = bankLine + ", "+agent.getLCR();
         }
         for (Agent agent : banks) {
             bankLine = bankLine + ", "+agent.getEquityValue();
@@ -131,10 +165,31 @@ public class Recorder {
         banksFile.println(bankLine);
 
 
+        String lossesLine = Integer.toString(Model.simulationNumber);
+        lossesLine = lossesLine +", "+ Integer.toString(Model.getTime());
+
+        double totalEquity = 0.0;
+        for (Agent agent : allAgents) {
+            if (agent != null) {
+                lossesLine = lossesLine + ", " + String.format("%.2f", (100.0*agent.getEquityLoss())) + "%";
+                totalEquity += Math.max(0.0, agent.getEquityValue());
+            } else {
+                lossesLine = lossesLine + ", " + "MISSING";
+            }
+        }
+
+        double totalEquityLoss = (totalEquity - totalInitialEquity) / totalInitialEquity;
+        lossesLine = lossesLine + ", "+String.format("%.2f", totalEquityLoss)+"%";
+        lossesFile.println(lossesLine);
+
+
         //todo: equity and assets and cash for banks and hF
         // todo: redemptions from asset manager.
 
 
+        marketFile.flush();
+        banksFile.flush();
+        lossesFile.flush();
 
     }
 
@@ -143,10 +198,8 @@ public class Recorder {
 
         marketFile.close();
         banksFile.close();
+        lossesFile.close();
     }
-
-
-
 
 
 }

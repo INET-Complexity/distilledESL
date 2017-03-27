@@ -1,6 +1,6 @@
 package contracts.obligations;
 
-import demos.BoEDemo;
+import demos.Model;
 import demos.Parameters;
 
 import java.util.ArrayList;
@@ -73,6 +73,9 @@ public class Mailbox {
         inbox.removeIf(Obligation::isFulfilled);
         outbox.removeIf(Obligation::isFulfilled);
 
+        // Remove all requests from agents who have defaulted.
+        outbox.removeIf(obligation -> (!(obligation.getFrom().isAlive())));
+
         // Move all messages in the unopenedMessages to the inbox
         inbox.addAll(
                 unopenedMessages.stream()
@@ -88,7 +91,7 @@ public class Mailbox {
 
         for (Obligation obligation : inbox) {
             if (!(obligation.isFulfilled())) {
-                int index = obligation.getTimeToPay() - BoEDemo.getTime() - 1;
+                int index = obligation.getTimeToPay() - Model.getTime() - 1;
                 cashCommitments.set(index, cashCommitments.get(index) + obligation.getAmount());
             }
         }
@@ -100,7 +103,7 @@ public class Mailbox {
 
         for (Obligation obligation : outbox) {
             if (!(obligation.isFulfilled())) {
-                int index = obligation.getTimeToPay() - BoEDemo.getTime(); //Todo: important! TimeToPay + 1
+                int index = obligation.getTimeToReceive() - Model.getTime() - 1;
                 cashInflows.set(index, cashInflows.get(index) + obligation.getAmount());
             }
         }

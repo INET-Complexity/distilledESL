@@ -2,7 +2,7 @@ package actions;
 
 import contracts.Shares;
 import contracts.obligations.RedeemSharesObligation;
-import demos.BoEDemo;
+import demos.Model;
 import demos.Parameters;
 
 public class RedeemShares extends Action {
@@ -17,7 +17,7 @@ public class RedeemShares extends Action {
     public void perform() {
         shares.addSharesPendingToRedeem((int) getAmount());
         RedeemSharesObligation obligation = new RedeemSharesObligation(shares, (int) getAmount(),
-                BoEDemo.getTime() + Parameters.TIMESTEPS_TO_REDEEM_SHARES);
+                Model.getTime() + Parameters.TIMESTEPS_TO_REDEEM_SHARES);
         shares.getAssetParty().sendMessage(shares.getLiabilityParty(), obligation);
     }
 

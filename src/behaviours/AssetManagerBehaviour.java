@@ -22,7 +22,7 @@ public class AssetManagerBehaviour extends Behaviour {
                 me.fulfilMaturedRequests();
             } else {
                 System.out.println("A matured obligation was not fulfilled.");
-                throw new DefaultException();
+                throw new DefaultException(me, DefaultException.TypeOfDefault.LIQUIDITY);
             }
         }
 

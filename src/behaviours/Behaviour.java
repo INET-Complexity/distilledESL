@@ -5,11 +5,11 @@ import actions.PayLoan;
 import actions.PullFunding;
 import actions.SellAsset;
 import agents.Agent;
+import demos.Model;
+import demos.Parameters;
 
 import java.util.ArrayList;
 import java.util.stream.Collectors;
-
-import static jdk.nashorn.internal.objects.NativeMath.min;
 
 public abstract class Behaviour {
     private Agent me;
@@ -28,7 +28,7 @@ public abstract class Behaviour {
             return;
         }
 
-        System.out.println("\n"+me.getName()+" is acting.\n");
+        System.out.println("\n"+me.getName()+" is acting at time "+ Model.getTime()+".\n");
 
         me.step();
         me.printBalanceSheet();
@@ -38,7 +38,8 @@ public abstract class Behaviour {
 
         try {
             chooseActions();
-        } catch (DefaultException e) {
+        } catch (DefaultException exception) {
+            if(Parameters.RECORD_DEFAULT) Model.defaultRecorder.recordDefault(exception);
             me.triggerDefault();
         }
 
@@ -52,7 +53,7 @@ public abstract class Behaviour {
                 .mapToDouble(Action::getMax).sum();
     }
 
-    void payOffLiabilities(double amount) {
+    double payOffLiabilities(double amount) {
         System.out.println("Pay off liabilities (delever) proportionally: "+amount);
 
         if(amount > maxLiabilitiesToPayOff()) {
@@ -60,6 +61,8 @@ public abstract class Behaviour {
             System.out.println("We do not have enough liabilites to pay off this amount.\n" +
                     "We can only pay off "+ amount);
         }
+
+        if (!(amount > 0)) return 0.0;
 
         ArrayList<Action> payLoanActions = getAllActionsOfType(PayLoan.class);
 
@@ -69,8 +72,10 @@ public abstract class Behaviour {
 
         for (Action action : payLoanActions) {
             action.setAmount(action.getMax() * amount / totalLiabilitiesToPayOff);
-            action.perform();
+            if (action.getAmount() > 0) action.perform();
         }
+
+        return amount;
     }
 
 
@@ -78,6 +83,10 @@ public abstract class Behaviour {
         return availableActions.stream()
                 .filter(actionType::isInstance)
                 .collect(Collectors.toCollection(ArrayList::new));
+    }
+
+    public void performLiquidityManagement(boolean usingPeckingOrder) {
+
     }
 
     public double sellAssetsProportionally(double amount) {
@@ -119,10 +128,13 @@ public abstract class Behaviour {
                 .sum();
 
         if (totalFundingThatCanBePulled < amount) {
+            System.out.println("We cannot pull enough funding..." +
+                    " we will pull the greatest possible amount: "+totalFundingThatCanBePulled);
             amount = totalFundingThatCanBePulled;
         }
 
-        if (!(amount > 0)) return 0.0;
+        if (!(amount > 0)) return 0.0; //Either we are calling this function with argument zero,
+        // or we cannot pull any funding.
 
 
         for (Action action : pullFundingActions) {
@@ -155,17 +167,21 @@ public abstract class Behaviour {
             amount = totalAssetsThatCanBeSold + totalFundingThatCanBePulled;
         }
 
-        double amountToPullFunding = min(totalFundingThatCanBePulled, amount);
+        System.out.println("I am raising "+amount+" liquidity, and can pull "+totalFundingThatCanBePulled);
+        double amountToPullFunding = Math.min(totalFundingThatCanBePulled, amount);
+        System.out.println("I'll try to pull "+amountToPullFunding);
         if (amountToPullFunding > 0) {
             fundingPulled = pullFundingProportionally(amountToPullFunding);
+            System.out.println("I succeeded in pulling "+fundingPulled);
             amount -= fundingPulled;
+            System.out.println("I still need to raise "+amount);
         }
 
         if (!(amount >0)) {
             return fundingPulled;
         }
 
-        double assetsToSell = min(amount, totalAssetsThatCanBeSold);
+        double assetsToSell = Math.min(amount, totalAssetsThatCanBeSold);
         if (assetsToSell>0) {
             firesales = sellAssetsProportionally(assetsToSell);
             amount -= firesales;

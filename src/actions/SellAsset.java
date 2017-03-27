@@ -24,7 +24,7 @@ public class SellAsset extends Action {
             // Only unencumbered assets can be sold!
             return ((AssetCollateral)asset).getUnencumberedValue() - asset.getPutForSale();
         } else {
-            return asset.getValue();
+            return asset.getValue(null);
         }
     }
     //Todo: should this be here, or should it be with the AssetCollateral?

@@ -31,23 +31,22 @@ public class Bank extends Agent implements CanPledgeCollateral {
 
     @Override
     public void putMoreCollateral(double total, Repo repo) {
-        //TODO: THIS SHOULD BE BEHAVIOUR
         // First, get a set of all my Assets that can be pledged as collateral
         HashSet<Contract> potentialCollateral = mainLedger.getAssetsOfType(AssetCollateral.class);
 
         double maxHaircutValue = getMaxUnencumberedHaircuttedCollateral();
-        double pledgedSoFar = 0.0;
+        double haircuttedValuePledgedSoFar = 0.0;
 
         for (Contract contract : potentialCollateral) {
             CanBeCollateral asset = (CanBeCollateral) contract;
 
-            double quantityToPledge = asset.getUnencumberedValue() * (1.0 - asset.getHaircut()) * total / maxHaircutValue;
+            double quantityToPledge = asset.getUnencumberedQuantity() * total / maxHaircutValue;
             repo.pledgeCollateral(asset, quantityToPledge);
-            pledgedSoFar += quantityToPledge;
+            haircuttedValuePledgedSoFar += quantityToPledge * asset.getPrice() * (1.0 - asset.getHaircut());
 
         }
 
-        repo.pledgeCashCollateral(total - pledgedSoFar);
+        repo.pledgeCashCollateral(total - haircuttedValuePledgedSoFar);
     }
 
     @Override
@@ -72,8 +71,12 @@ public class Bank extends Agent implements CanPledgeCollateral {
         return bankLeverageConstraint;
     }
 
-    public LCR_Constraint getLCR_constraint() {
-        return lcr_constraint;
+    public double getCashBuffer() {return lcr_constraint.getCashBuffer();}
+    public double getCashTarget() {return lcr_constraint.getCashTarget();}
+
+    @Override
+    public double getLCR() {
+        return isAlive()? lcr_constraint.getLCR() : getLcrAtDefault();
     }
 
     public void setLCR_constraint(LCR_Constraint lcr_constraint) {
@@ -111,8 +114,12 @@ public class Bank extends Agent implements CanPledgeCollateral {
 
         for (Action action : pullFundingActions) {
             action.setAmount(action.getMax());
-            action.perform();
+            if (action.getAmount() > 0) action.perform();
         }
 
+    }
+
+    public void revalueAllLoans() {
+        mainLedger.getAssetsOfType(Loan.class).forEach(loan -> ((Loan) loan).reValueLoan());
     }
 }

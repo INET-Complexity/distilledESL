@@ -16,11 +16,13 @@ public class Loan extends Contract {
     protected Agent liabilityParty;
     protected double principal;
     private double fundingAlreadyPulled = 0;
+    private double previousNekoValuation; //Todo very messy!
 
     public Loan(Agent assetParty, Agent liabilityParty, double principal) {
         this.assetParty = assetParty;
         this.liabilityParty = liabilityParty;
         this.principal = principal;
+        this.previousNekoValuation = getValue(assetParty);
     }
 
     @Override
@@ -43,18 +45,21 @@ public class Loan extends Contract {
     private void reducePrincipal(double amount) {
         assert (amount <= principal);
         principal -= amount;
-        fundingAlreadyPulled -= amount;
 
         if (principal < 0.01) {
             System.out.println("This loan has been fully repaid.");
             //Todo: and now what shall we do? Destroy the loan?
         }
+    }
 
+    public void reducePullFundingAmount(double amount) {
+        fundingAlreadyPulled -= amount;
     }
 
     @Override
     public List<Action> getAvailableActions(Agent me) {
         if (!(principal > 0) || !(principal > fundingAlreadyPulled)) return Collections.emptyList();
+        if (!(assetParty.isAlive() || !(liabilityParty.isAlive()))) return Collections.emptyList();
 
         ArrayList<Action> availableActions = new ArrayList<>();
         if (assetParty == me) {
@@ -75,10 +80,13 @@ public class Loan extends Contract {
         return liabilityParty;
     }
 
+    @Override
     public double getValue(Agent me) {
-        if (Parameters.NEKO_MODEL && me==assetParty) {
-            return NEKO_Model.getValuation(this);
-        } else return principal;
+//        if (me==assetParty && Parameters.NEKO_MODEL) {
+//            return NEKO_Model.getValuation(this);
+//        } else {
+      return principal;
+
     }
 
     public void liquidate() {
@@ -98,6 +106,22 @@ public class Loan extends Contract {
     @Override
     public double getRWAweight() {
         return Parameters.INTERBANK_RWAWEIGHT;
+    }
+
+
+    public double getPrincipal() {
+        return principal;
+    }
+
+    public void reValueLoan() {
+
+        double newValue = Parameters.NEKO_MODEL ?
+                NEKO_Model.getValuation(this) : principal;
+
+        if (newValue < previousNekoValuation) {
+            assetParty.devalueAsset(this, previousNekoValuation - newValue);
+            previousNekoValuation = newValue;
+        }
     }
 }
 

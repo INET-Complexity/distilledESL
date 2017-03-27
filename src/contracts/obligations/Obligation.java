@@ -2,7 +2,7 @@ package contracts.obligations;
 
 import agents.Agent;
 import contracts.Contract;
-import demos.BoEDemo;
+import demos.Model;
 
 
 public abstract class Obligation {
@@ -12,6 +12,7 @@ public abstract class Obligation {
     private Agent to;
     private int timeToOpen;
     private int timeToPay;
+    private int timeToReceive;
 
     Obligation(Contract contract, double amount, int timeLeftToPay) {
         this.amount = amount;
@@ -19,8 +20,9 @@ public abstract class Obligation {
         this.from = contract.getLiabilityParty();
         this.to = contract.getAssetParty();
 
-        this.timeToPay = BoEDemo.getTime() + timeLeftToPay;
-        this.timeToOpen = BoEDemo.getTime() + 1;
+        this.timeToOpen = Model.getTime() + 1;
+        this.timeToPay = Model.getTime() + timeLeftToPay;
+        this.timeToReceive = timeToPay + 1;
 
         assert(timeToPay >= timeToOpen);
     }
@@ -36,11 +38,11 @@ public abstract class Obligation {
     }
 
     boolean hasArrived() {
-        return BoEDemo.getTime() == timeToOpen;
+        return Model.getTime() == timeToOpen;
     }
 
     boolean isDue() {
-        return BoEDemo.getTime() == timeToPay;
+        return Model.getTime() == timeToPay;
     }
 
     public Agent getFrom() {
@@ -61,9 +63,11 @@ public abstract class Obligation {
 
     public int getTimeToPay() {return timeToPay;}
 
+    public int getTimeToReceive() { return timeToReceive;}
+
     public void printObligation() {
         System.out.println("Obligation from "+getFrom().getName()+" to pay "+getTo().getName() +
-        " an amount "+getAmount()+" on timestep "+getTimeToPay());
+        " an amount "+getAmount()+" on timestep "+getTimeToPay()+" to arrive by timestep "+getTimeToReceive());
     }
 
 }
