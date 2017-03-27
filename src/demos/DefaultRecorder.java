@@ -19,7 +19,7 @@ public class DefaultRecorder {
         try {
             defaultsFile = new PrintWriter("defaultsFile.csv");
 
-            defaultsFile.println("Agent, timestep_of_default, equity_at_default, lcr_at_default, leverage_at_default");
+            defaultsFile.println("Simulation number, Agent, timestep_of_default, type_of_default, equity_at_default, lcr_at_default, leverage_at_default");
         } catch (FileNotFoundException e) {
             //todo: empty catch block
         }
@@ -27,8 +27,10 @@ public class DefaultRecorder {
 
 
     public void recordDefault(DefaultException defaultException) {
-        defaultsFile.print(defaultException.getAgent().getName());
+        defaultsFile.print(Integer.toString(Model.simulationNumber));
+        defaultsFile.print(", " + defaultException.getAgent().getName());
         defaultsFile.print(", " + defaultException.getTimestep());
+        defaultsFile.print(", " + defaultException.getTypeOfDefault());
         defaultsFile.print(", " + defaultException.getAgent().getEquityValue());
         defaultsFile.print(", " + defaultException.getAgent().getLCR());
         defaultsFile.print(", " + defaultException.getAgent().getLeverage());
