@@ -1,7 +1,5 @@
 package accounting;
 
-import contracts.Contract;
-
 class Account {
 
     private double balance;

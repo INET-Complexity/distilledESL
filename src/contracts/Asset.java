@@ -30,7 +30,7 @@ public class Asset extends Contract {
     }
 
     private Agent assetParty;
-    private double quantity;
+    protected double quantity;
     private AssetType assetType;
     protected AssetMarket assetMarket;
     private double price;
@@ -77,6 +77,7 @@ public class Asset extends Contract {
         }
 
         // Update the quantity remaining
+        assert(quantitySold <= quantity);
         this.quantity -= quantitySold;
         this.putForSale -= quantitySold;
 
@@ -135,23 +136,6 @@ public class Asset extends Contract {
 
     public double getQuantity() {
         return quantity;
-    }
-
-    public Asset changeOwnership(Agent newOwner, double quantity) {
-        assert(this.quantity >= quantity);
-
-        // First, reduce the quantity of this asset
-        this.quantity -= quantity;
-
-        // Have the owner lose the value of the asset
-        assetParty.devalueAsset(this, quantity * price);
-
-        Asset newAsset = new Asset(newOwner, assetType, assetMarket, quantity);
-        // Create a new Asset of the same type and give it to the new Owner
-        newOwner.add(newAsset);
-        //todo: side effects.
-
-        return newAsset;
     }
 
     public double getPutForSale() {
