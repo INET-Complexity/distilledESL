@@ -12,6 +12,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 /**
@@ -34,6 +35,8 @@ public class Recorder {
     private String marketHeader;
 
     public Recorder() {
+        Locale.setDefault(Locale.UK);
+
         try {
             marketFile = new PrintWriter("marketFile.csv");
             banksFile = new PrintWriter("banks.csv");

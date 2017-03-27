@@ -21,27 +21,25 @@ public class Model {
     public static int getTime() { return timeStep; }
 
     public static void main(String[] args) {
-        Locale.setDefault(Locale.UK);
-
         // Simulation one, set parameters
         // First simulation runs with the default parameters
         runSimulation();
 
         // Simulation two, set parameters
         // Second simulation runs without the HF
-        Parameters.ASSET_MANAGER_ON = true;
-        Parameters.HEDGEFUNDS_ON = false;
-        runSimulation();
-
-        // Third simulation runs without the Asset Manager
-        Parameters.ASSET_MANAGER_ON = false;
-        Parameters.HEDGEFUNDS_ON = true;
-        runSimulation();
-
-        // Fourth simulation runs without either HF or Asset Manager
-        Parameters.ASSET_MANAGER_ON = false;
-        Parameters.HEDGEFUNDS_ON = false;
-        runSimulation();
+//        Parameters.ASSET_MANAGER_ON = true;
+//        Parameters.HEDGEFUNDS_ON = false;
+//        runSimulation();
+//
+//        // Third simulation runs without the Asset Manager
+//        Parameters.ASSET_MANAGER_ON = false;
+//        Parameters.HEDGEFUNDS_ON = true;
+//        runSimulation();
+//
+//        // Fourth simulation runs without either HF or Asset Manager
+//        Parameters.ASSET_MANAGER_ON = false;
+//        Parameters.HEDGEFUNDS_ON = false;
+//        runSimulation();
 
 
         finish();

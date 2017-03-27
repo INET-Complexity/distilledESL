@@ -17,7 +17,7 @@ public class Parameters {
     public static boolean FUNDING_CONTAGION_HEDGEFUND = true;
     public static boolean FUNDING_CONTAGION_INTERBANK = true;
     public static boolean INVESTOR_REDEMPTION = true;
-    public static boolean FIRESALE_CONTAGION = false;
+    public static boolean FIRESALE_CONTAGION = true;
     public static boolean CASH_PROVIDER_RUNS = true;
     public static boolean NEKO_MODEL = false;
     public static boolean FIRESALES_UPON_DEFAULT = true;
@@ -36,7 +36,7 @@ public class Parameters {
 
 
 
-    public static double INITIAL_SHOCK = 0.10;
+    public static double INITIAL_SHOCK = 0.14;
     public static Asset.AssetType ASSET_TO_SHOCK = Asset.AssetType.EXTERNAL2;
 
     // Cash Provider
@@ -45,7 +45,7 @@ public class Parameters {
 
     public static double LCR_THRESHOLD_TO_RUN = -3.0;
     public static double LEVERAGE_THRESHOLD_TO_RUN = 0.0075;
-    public static double CP_FRACTION_TO_RUN = 0.5;
+    public static double CP_FRACTION_TO_RUN = 0.3;
 
     public static int TRIAL_PERIOD = 5;
 
@@ -130,9 +130,9 @@ public class Parameters {
     public static double MATCH_BOOK_LCR = 0.00;
 
 
-    public static double BANK_LCR_MIN = 0.10;
-    public static double BANK_LCR_BUFFER = 0.15;
-    public static double BANK_LCR_TARGET = 0.20;
+    public static double BANK_LCR_MIN = 0.05;
+    public static double BANK_LCR_BUFFER = 0.10;
+    public static double BANK_LCR_TARGET = 0.15;
 
     public static double BANK_LEVERAGE_MIN = 0.00;
     public static double BANK_LEVERAGE_BUFFER = 0.015;

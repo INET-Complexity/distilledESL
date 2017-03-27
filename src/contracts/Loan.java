@@ -59,6 +59,7 @@ public class Loan extends Contract {
     @Override
     public List<Action> getAvailableActions(Agent me) {
         if (!(principal > 0) || !(principal > fundingAlreadyPulled)) return Collections.emptyList();
+        if (!(assetParty.isAlive() || !(liabilityParty.isAlive()))) return Collections.emptyList();
 
         ArrayList<Action> availableActions = new ArrayList<>();
         if (assetParty == me) {

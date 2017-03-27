@@ -4,12 +4,14 @@ import behaviours.DefaultException;
 
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.util.Locale;
 
 public class DefaultRecorder {
 
     private PrintWriter defaultsFile;
 
     public DefaultRecorder() {
+        Locale.setDefault(Locale.UK);
         init();
     }
 
