@@ -5,7 +5,9 @@ import agents.Bank;
 import agents.CashProvider;
 import agents.Investor;
 import contracts.Asset;
+import contracts.AssetCollateral;
 import contracts.AssetMarket;
+import contracts.CanBeCollateral;
 
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
@@ -24,6 +26,7 @@ public class Recorder {
     private PrintWriter marketFile;
     private PrintWriter banksFile;
     private PrintWriter lossesFile;
+    private PrintWriter collateralFile;
     private ArrayList<Asset.AssetType> assetTypes;
     private Agent[] banks;
 
@@ -41,6 +44,7 @@ public class Recorder {
             marketFile = new PrintWriter("marketFile.csv");
             banksFile = new PrintWriter("banks.csv");
             lossesFile = new PrintWriter("losses.csv");
+            collateralFile = new PrintWriter("collateral.csv");
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -63,6 +67,9 @@ public class Recorder {
         this.market = market;
 
         assetTypes = market.getAssetTypes();
+
+
+        // MARKET ///////////////////////
         marketHeader = "Simulation number, Timestep";
 
         for (Asset.AssetType assetType : assetTypes) {
@@ -79,6 +86,8 @@ public class Recorder {
 
         marketFile.println(marketHeader);
 
+
+        // BANKS ///////////////////////
 
         String bankLine = "Simulation number, Timestep";
         for (Agent agent : banks) {
@@ -99,6 +108,9 @@ public class Recorder {
 
         banksFile.println(bankLine);
 
+
+        // LOSSES ///////////////////////
+
         String lossesLine = "Simulation number, Timestep";
         for (Agent agent : allAgents) {
             lossesLine = lossesLine + ", " +
@@ -117,6 +129,18 @@ public class Recorder {
         }
 
         System.out.println("Total initial equity is :"+ totalInitialEquity);
+
+
+        // COLLATERAL ///////////////////////
+
+        String collateralLine = "Simulation number, Timestep";
+        for (Agent agent: allAgents) {
+            for (Asset.AssetType assetType : assetTypes) {
+                collateralLine = collateralLine + ", "+agent.getName()+"_"+assetType+"_total_quantity";
+                collateralLine = collateralLine + ", "+agent.getName()+"_"+assetType+"_encumbered_quantity";
+            }
+        }
+        collateralFile.println(collateralLine);
 
     }
 
@@ -183,6 +207,23 @@ public class Recorder {
         lossesFile.println(lossesLine);
 
 
+        String collateralLine = Integer.toString(Model.simulationNumber);
+        collateralLine = collateralLine + ", "+ Integer.toString(Model.getTime());
+        for (Agent agent: allAgents) {
+            for (Asset.AssetType assetType : assetTypes) {
+                collateralLine = collateralLine + ", " + Double.toString(agent.getMainLedger()
+                        .getAssetsOfType(AssetCollateral.class).stream()
+                        .filter(asset -> ((Asset) asset).getAssetType()==assetType)
+                        .mapToDouble(asset -> ((Asset) asset).getQuantity()).sum());
+                collateralLine = collateralLine + ", " + Double.toString(agent.getMainLedger()
+                        .getAssetsOfType(AssetCollateral.class).stream()
+                        .filter(asset -> ((Asset) asset).getAssetType()==assetType)
+                        .mapToDouble(asset -> ((CanBeCollateral) asset).getUnencumberedQuantity()).sum());            }
+        }
+        collateralFile.println(collateralLine);
+
+
+
         //todo: equity and assets and cash for banks and hF
         // todo: redemptions from asset manager.
 
@@ -190,6 +231,7 @@ public class Recorder {
         marketFile.flush();
         banksFile.flush();
         lossesFile.flush();
+        collateralFile.flush();
 
     }
 
@@ -199,6 +241,7 @@ public class Recorder {
         marketFile.close();
         banksFile.close();
         lossesFile.close();
+        collateralFile.close();
     }
 
 

@@ -29,7 +29,7 @@ public class HedgefundBehaviour extends Behaviour {
         // 1) Pay matured cash commitments or default.
         double maturedPullFunding = me.getMaturedObligations();
         System.out.println("We have matured payment contracts.obligations for a total of " + String.format("%.2f", maturedPullFunding));
-        if (me.getCash() >= maturedPullFunding) {
+        if (me.getCash() >= maturedPullFunding - 0.02) {
             me.fulfilMaturedRequests();
         } else {
             System.out.println("A matured obligation was not fulfilled.");
@@ -46,13 +46,13 @@ public class HedgefundBehaviour extends Behaviour {
             throw new DefaultException(me, DefaultException.TypeOfDefault.FAILED_MARGIN_CALL);
         }
 
-        // 3) If I'm insolvent, default.
-        if (me.getLeverage() < me.getEffectiveMinLeverage()) {
-            System.out.println("My leverage is "+me.getLeverage()+
-                    " which is below the effective minimum "+me.getEffectiveMinLeverage());
-            System.out.println("I'm dead.");
-            throw new DefaultException(me, DefaultException.TypeOfDefault.SOLVENCY);
-        }
+//        // 3) If I'm insolvent, default.
+//        if (me.getLeverage() < me.getEffectiveMinLeverage()) {
+//            System.out.println("My leverage is "+me.getLeverage()+
+//                    " which is below the effective minimum "+me.getEffectiveMinLeverage());
+//            System.out.println("I'm dead.");
+//            throw new DefaultException(me, DefaultException.TypeOfDefault.SOLVENCY);
+//        }
 
         // Compute amount to DeLever
         double amountToDelever =
@@ -166,6 +166,14 @@ public class HedgefundBehaviour extends Behaviour {
                         "\nand we expect our cash balance after paying approaching obligations to be "+balance +
                         ",\n we can use an amount "+deLever+" to delever.");
                 payOffLiabilities(deLever);
+            }
+
+            balance -= deLever;
+            if (balance < me.getCashBuffer()) {
+                System.out.println("We expect our balance "+balance+" in the end to be below the cash buffer." +
+                        " We will replenish to the target of "+me.getCashTarget());
+                double liquidityToRaise = me.getCashTarget() - balance;
+                raiseLiquidityWithPeckingOrder(liquidityToRaise);
             }
 
         }

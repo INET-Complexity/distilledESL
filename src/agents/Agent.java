@@ -97,10 +97,16 @@ public abstract class Agent {
     }
 
     public double getCash() {
-        // Todo: important! We only return the unencumbered cash.
         return mainLedger.getCash() - encumberedCash;
     }
 
+    public double getTotalCash() {
+        return mainLedger.getCash();
+    }
+
+    public double getEncumberedCash() {
+        return encumberedCash;
+    }
 
     public ArrayList<Action> getAvailableActions(Agent me) {
         return mainLedger.getAvailableActions(this);
@@ -244,7 +250,4 @@ public abstract class Agent {
         mainLedger.setInitialValues();
     }
 
-    public double getEncumberedCash() {
-        return encumberedCash;
-    }
 }

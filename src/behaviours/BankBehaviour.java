@@ -24,7 +24,7 @@ public class BankBehaviour extends Behaviour {
         double maturedPullFunding = me.getMaturedObligations();
         if (maturedPullFunding > 0) {
             System.out.println("We have matured payment obligations for a total of " + String.format("%.2f", maturedPullFunding));
-            if (me.getCash() >= maturedPullFunding) {
+            if (me.getCash() >= maturedPullFunding - 0.02) {
                 me.fulfilMaturedRequests();
             } else {
                 System.out.println("A matured obligation was not fulfilled.\nDEFAULT DUE TO LACK OF LIQUIDITY");
@@ -44,7 +44,7 @@ public class BankBehaviour extends Behaviour {
         if (Parameters.NEKO_MODEL) me.revalueAllLoans();
 
         // 3) If I'm insolvent, default.
-        if (me.getLeverage() < Parameters.BANK_LEVERAGE_MIN) {
+        if (me.getLeverage() <= Parameters.BANK_LEVERAGE_MIN) {
             System.out.println("My leverage is "+me.getLeverage()+
                     " which is below the minimum "+Parameters.BANK_LEVERAGE_MIN);
             System.out.println("DEFAULT DUE TO INSOLVENCY.");
@@ -164,6 +164,14 @@ public class BankBehaviour extends Behaviour {
                         "\nand we expect our cash balance after paying approaching obligations to be "+balance +
                         ",\n we can use an amount "+deLever+" to delever.");
                 payOffLiabilities(deLever);
+            }
+
+            balance -= deLever;
+            if (balance < me.getCashBuffer()) {
+                System.out.println("We expect our balance "+balance+" in the end to be below the cash buffer." +
+                        " We will replenish to the target of "+me.getCashTarget());
+                double liquidityToRaise = me.getCashTarget() - balance;
+                raiseLiquidityWithPeckingOrder(liquidityToRaise);
             }
 
         }

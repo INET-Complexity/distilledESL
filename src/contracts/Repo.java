@@ -34,8 +34,7 @@ public class Repo extends Loan {
     public String getName(Agent me) {
         if (me==assetParty) return (liabilityParty!=null) ?
                 "Reverse-repo to "+liabilityParty.getName() : "Reverse-repo to uninitialised Agent";
-        //Todo: deal with null parties?
-        else return "Repo from "+assetParty.getName();
+        else return "Repo from "+assetParty.getName()+" to "+liabilityParty.getName();
     }
 
     public void pledgeCollateral(CanBeCollateral asset, double quantity) {
@@ -74,7 +73,7 @@ public class Repo extends Loan {
         CanPledgeCollateral borrower = (CanPledgeCollateral) liabilityParty;
 
         if (currentValue < valueNeeded) {
-            System.out.println("This Repo is short of collateral for an amount "+(valueNeeded - currentValue));
+            System.out.println(getName(liabilityParty)+" is short of collateral for an amount "+(valueNeeded - currentValue));
 
             if ((valueNeeded - currentValue) > borrower.getMaxUnencumberedHaircuttedCollateral()) {
                 System.out.println("The margin call on Repo"+getName(liabilityParty)+" failed." +
@@ -83,6 +82,7 @@ public class Repo extends Loan {
 
                 throw new FailedMarginCallException();
             }
+            System.out.println("We can put in the necessary collateral -> Margin call succeeds.");
 
             borrower.putMoreCollateral(valueNeeded - currentValue, this);
 
@@ -167,7 +167,9 @@ public class Repo extends Loan {
             double amountEncumbered = entry.getValue();
 
             // 2. Change the ownership of the asset
-            Asset newAsset = ((Asset) asset).changeOwnership(assetParty, amountEncumbered);
+            AssetCollateral newAsset = asset.changeOwnership(assetParty, amountEncumbered);
+            // Give the new asset to the new owner
+            assetParty.add(newAsset);
 
             // 3. Reduce the value of this repo to zero.
             assetParty.devalueAsset(this, principal);
