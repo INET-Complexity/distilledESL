@@ -7,7 +7,6 @@ import demos.Parameters;
 
 import java.util.ArrayList;
 
-import static java.lang.Math.max;
 import static java.lang.Math.min;
 
 public class BankBehaviour extends Behaviour {

@@ -21,11 +21,16 @@ public class Model {
     public static int getTime() { return timeStep; }
 
     public static void main(String[] args) {
-        // Simulation one, set parameters
+        // Simulation one
         // First simulation runs with the default parameters
         runSimulation();
 
-        // Simulation two, set parameters
+        // From here, you can run more simulations.
+        // simply replace the parameters you wish to change with the new value,
+        // and then call 'runSimulation()'
+
+        // See below for some examples
+
         // Second simulation runs without the HF
 //        Parameters.ASSET_MANAGER_ON = true;
 //        Parameters.HEDGEFUNDS_ON = false;
@@ -42,6 +47,7 @@ public class Model {
 //        runSimulation();
 
 
+        // Important: call finish at the end so that the files get written.
         finish();
 
     }
