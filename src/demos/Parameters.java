@@ -6,11 +6,6 @@ import contracts.Deposit;
 
 public class Parameters {
 
-    public void makeCoherent() {
-        if (!HEDGEFUNDS_ON) {
-            FUNDING_CONTAGION_HEDGEFUND = false;
-        }
-    }
 
     // Contagion Channels
     public static boolean HAIRCUT_CONTAGION = true;
@@ -36,7 +31,7 @@ public class Parameters {
 
 
 
-    public static double INITIAL_SHOCK = 0.14;
+    public static double INITIAL_SHOCK = 0.16;
     public static Asset.AssetType ASSET_TO_SHOCK = Asset.AssetType.EXTERNAL2;
 
     // Cash Provider

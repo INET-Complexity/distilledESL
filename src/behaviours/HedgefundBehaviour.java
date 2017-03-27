@@ -83,15 +83,16 @@ public class HedgefundBehaviour extends Behaviour {
         for (int timeIndex = 0; timeIndex < Parameters.TIMESTEPS_TO_PAY+1; timeIndex++) {
             balance += cashInflows.get(timeIndex);
             balance -= cashCommitments.get(timeIndex);
-            System.out.println("At timestep "+(timeIndex+ Model.getTime()+1)+", our expected balance " +
-                    "will be "+balance);
+
 
             if (balance < 0) {
-                System.out.println("We will be short of liquidity at that time.");
+                System.out.println("At timestep "+(timeIndex+ Model.getTime()+1)+", we will be short of liquidity, since our expected balance " +
+                        "will be "+balance);
+                System.out.println("We must firesale assets now.");
                 double sellAssetsAmount = -1.0 * balance;
                 double amountSold = sellAssetsProportionally(sellAssetsAmount);
                 balance += amountSold;
-                if (balance < 0) System.out.println("We won't be able to firesale enough assets. We'll wait and see.");
+                if (balance < 0) System.out.println("We won't be able to firesale enough assets. We'll wait and see but might default.");
             }
 
             miniumSpareBalanceInThePeriod = Math.min(miniumSpareBalanceInThePeriod, balance);
@@ -118,23 +119,40 @@ public class HedgefundBehaviour extends Behaviour {
 
 
         // Second loop
+        miniumSpareBalanceInThePeriod = balance;
         for (int timeIndex = Parameters.TIMESTEPS_TO_PAY+1; timeIndex < cashCommitments.size(); timeIndex++) {
             balance += cashInflows.get(timeIndex);
             balance -= cashCommitments.get(timeIndex);
+
+            if (balance < 0) {
+                System.out.println("At timestep "+(timeIndex+ Model.getTime()+1)+", we will be short of liquidity, since our expected balance " +
+                        "will be "+balance);
+                System.out.println("We must raise liquidity with pecking order now.");
+                double peckingOrderAmount = -1.0 * balance;
+                double amountRaised = raiseLiquidityWithPeckingOrder(peckingOrderAmount);
+                balance += amountRaised;
+
+                if (balance < 0) System.out.println("We won't be able to raise enough liquidity. We'll wait and see.");
+            }
+
+            miniumSpareBalanceInThePeriod = Math.min(miniumSpareBalanceInThePeriod, balance);
+
         }
 
         System.out.println("\nOur expected balance after delevering and including long term obligations is now "+balance +
-                "\n\twe have "+amountToDelever+" left to delever" +
-                "\n\tand our LCR target is "+me.getCashTarget());
+                "\n\twe have "+amountToDelever+" left to delever");
+
         balance -= amountToDelever;
-        balance -= me.getCashTarget();
 
         if (balance < 0) {
             double liquidityToRaise = -1.0 * balance;
+            liquidityToRaise += me.getCashTarget();
+            System.out.println("We will use up all our remaining liquidity to delever, so will also replenish up to the cash target of "+me.getCashTarget());
+
+
             System.out.println("In order to meet our long-term cash commitments and non-urgent liquidity needs, " +
                     "we will raise liquidity: "+liquidityToRaise);
-//            raiseLiquidityWithPeckingOrder(liquidityToRaise);
-            sellAssetsProportionally(liquidityToRaise);
+            raiseLiquidityWithPeckingOrder(liquidityToRaise);
 
 
         } else {
@@ -149,8 +167,8 @@ public class HedgefundBehaviour extends Behaviour {
                         ",\n we can use an amount "+deLever+" to delever.");
                 payOffLiabilities(deLever);
             }
-        }
 
+        }
     }
 
 }
