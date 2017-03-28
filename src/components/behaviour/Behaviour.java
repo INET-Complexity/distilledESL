@@ -1,6 +1,6 @@
 package components.behaviour;
 
-import components.FinancialInstitution;
+import components.agents.FinancialInstitution;
 import components.items.Stock;
 
 import java.util.ArrayList;
