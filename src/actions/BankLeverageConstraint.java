@@ -1,41 +1,24 @@
 package actions;
 
-import agents.Agent;
+import agents.Bank;
+import demos.Parameters;
 
 public class BankLeverageConstraint {
-    private Agent agent;
-    private double leverageTarget;
-    private double leverageBuffer;
-    private double leverageMin;
+    private Bank bank;
 
-    private static final double DEFAULT_LEVERAGE_TARGET = 4.0/100;
-    private static final double DEFAULT_LEVERAGE_BUFFER = 3.0/100;
-    private static final double DEFAULT_LEVERAGE_MIN = 1.0/100;
-
-
-
-    public BankLeverageConstraint(Agent agent, double leverageTarget, double leverageBuffer, double leverageMin) {
-        this.agent = agent;
-        this.leverageTarget = leverageTarget;
-        this.leverageBuffer = leverageBuffer;
-        this.leverageMin = leverageMin;
-
-        assert((leverageTarget >= leverageBuffer) && (leverageBuffer >= leverageMin));
-    }
-
-    public BankLeverageConstraint(Agent agent) {
-        this(agent, DEFAULT_LEVERAGE_TARGET, DEFAULT_LEVERAGE_BUFFER, DEFAULT_LEVERAGE_MIN);
+    public BankLeverageConstraint(Bank bank) {
+        this.bank = bank;
     }
 
     public boolean isBelowBuffer() {
-        return (agent.getLeverage() < leverageBuffer);
+        return (bank.getLeverage() < Parameters.BANK_LEVERAGE_BUFFER);
     }
 
     public boolean isBelowMin() {
-        return (agent.getLeverage() < leverageMin);
+        return (bank.getLeverage() < Parameters.BANK_LEVERAGE_MIN);
     }
 
     public double getAmountToDelever() {
-        return (agent.getMainLedger().getAssetValue() * (1 - (agent.getLeverage() / leverageTarget) ));
+        return (bank.getEquityValue() * (1.0 / bank.getLeverage() - 1.0 / Parameters.BANK_LEVERAGE_TARGET));
     }
 }

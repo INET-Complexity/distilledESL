@@ -1,6 +1,9 @@
 package actions;
 
+import agents.Agent;
+import contracts.FailedMarginCallException;
 import contracts.Loan;
+import contracts.Repo;
 
 /**
  * the Payloan action represents the chance to pay back a loan that the agent has on its liability side.
@@ -11,18 +14,27 @@ public class PayLoan extends Action {
 
     private Loan loan;
 
-    public PayLoan(Loan loan) {
+    public PayLoan(Agent me, Loan loan) {
+        super(me);
         this.loan = loan;
         setAmount(0.0);
     }
 
     @Override
     public void perform() {
+        super.perform();
         loan.payLoan(getAmount());
+        if (loan instanceof Repo) {
+            try {
+                ((Repo) loan).marginCall();
+            } catch (FailedMarginCallException e) {
+                //Todo
+            }
+        }
     }
 
     public double getMax() {
-        return loan.getValue();
+        return loan.getValue(null) - loan.getFundingAlreadyPulled();
     }
 
     @Override

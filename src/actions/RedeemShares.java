@@ -1,24 +1,36 @@
 package actions;
 
+import agents.Agent;
 import contracts.Shares;
+import contracts.obligations.RedeemSharesObligation;
+import demos.Model;
+import demos.Parameters;
 
 public class RedeemShares extends Action {
 
     private Shares shares;
 
-    public RedeemShares(Shares shares) {
-        // We must send a request to pay to redeem the shares.
+    public RedeemShares(Agent me, Shares shares)
+    {
+        super(me);
         this.shares = shares;
     }
 
     @Override
     public void perform() {
-        shares.redeem((int) getAmount());
+        super.perform();
+        shares.addSharesPendingToRedeem((int) getAmount());
+        RedeemSharesObligation obligation = new RedeemSharesObligation(shares, (int) getAmount(),
+                Model.getTime() + Parameters.TIMESTEPS_TO_REDEEM_SHARES);
+        shares.getAssetParty().sendMessage(shares.getLiabilityParty(), obligation);
+
+        Model.redemptionsRecorder.recordRedemption(shares.getAssetParty(), shares.getLiabilityParty(), (int) getAmount());
     }
 
     @Override
     public double getMax() {
-        return shares.getNumberOfShares();
+
+        return shares.getnShares() - shares.getnSharesPendingToRedeem();
     }
 
     @Override

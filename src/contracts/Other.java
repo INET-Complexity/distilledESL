@@ -19,6 +19,11 @@ public class Other extends Contract {
     }
 
     @Override
+    public String getName(Agent me) {
+        return "Other";
+    }
+
+    @Override
     public Agent getAssetParty() {
         return assetParty;
     }
@@ -28,12 +33,15 @@ public class Other extends Contract {
         return liabilityParty;
     }
 
-    public double getValue() {
+    @Override
+    public double getValue(Agent me) {
         return amount;
     }
+
 
     @Override
     public List<Action> getAvailableActions(Agent me) {
         return Collections.emptyList();
     }
+
 }

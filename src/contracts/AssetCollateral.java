@@ -32,4 +32,19 @@ public class AssetCollateral extends Asset implements CanBeCollateral {
 
     public double getUnencumberedValue() {return getUnencumberedQuantity() * getPrice();}
 
+    @Override
+    public AssetCollateral changeOwnership(Agent newOwner, double quantity) {
+        assert(this.quantity >= quantity);
+
+        // First, reduce the quantity of this asset
+        this.quantity -= quantity;
+        this.encumberedQuantity -= quantity;
+
+        // Have the owner lose the value of the asset
+        getAssetParty().devalueAsset(this, quantity * getPrice());
+
+        AssetCollateral newAsset = new AssetCollateral(newOwner, getAssetType(), assetMarket, quantity);
+
+        return newAsset;
+    }
 }

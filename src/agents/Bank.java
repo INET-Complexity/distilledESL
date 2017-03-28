@@ -1,12 +1,13 @@
 package agents;
 
-import actions.LCR_Constraint;
-import actions.BankLeverageConstraint;
+import actions.*;
 import behaviours.BankBehaviour;
 import behaviours.Behaviour;
 import contracts.*;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.stream.Collectors;
 
 /**
  * This class represents a simple me with a single Ledger, called 'general Ledger'.
@@ -18,12 +19,14 @@ public class Bank extends Agent implements CanPledgeCollateral {
     private BankLeverageConstraint bankLeverageConstraint;
     private LCR_Constraint lcr_constraint;
     private BankBehaviour behaviour;
+    private RWA_Constraint rwa_constraint;
 
     public Bank(String name) {
         super(name);
         this.bankLeverageConstraint = new BankLeverageConstraint(this);
-        this.lcr_constraint = new LCR_Constraint(this, 1.0, 1.0, 1.0, 20.0);
+        this.lcr_constraint = new LCR_Constraint(this);
         this.behaviour = new BankBehaviour(this);
+        this.rwa_constraint = new RWA_Constraint(this);
     }
 
     @Override
@@ -31,22 +34,29 @@ public class Bank extends Agent implements CanPledgeCollateral {
         // First, get a set of all my Assets that can be pledged as collateral
         HashSet<Contract> potentialCollateral = mainLedger.getAssetsOfType(AssetCollateral.class);
 
-        double maxHaircutValue = 0.0;
-        for (Contract contract : potentialCollateral) {
-            assert(contract instanceof CanBeCollateral);
-            CanBeCollateral asset = (CanBeCollateral) contract;
-            maxHaircutValue += asset.getUnencumberedValue() * (1.0 - asset.getHaircut());
-        }
+        double maxHaircutValue = getMaxUnencumberedHaircuttedCollateral();
+        double haircuttedValuePledgedSoFar = 0.0;
 
         for (Contract contract : potentialCollateral) {
             CanBeCollateral asset = (CanBeCollateral) contract;
 
-            double quantityToPledge = total * asset.getUnencumberedValue() * (1.0 - asset.getHaircut()) / maxHaircutValue;
+            double quantityToPledge = asset.getUnencumberedQuantity() * total / maxHaircutValue;
             repo.pledgeCollateral(asset, quantityToPledge);
+            haircuttedValuePledgedSoFar += quantityToPledge * asset.getPrice() * (1.0 - asset.getHaircut());
 
         }
+
+        repo.pledgeCashCollateral(total - haircuttedValuePledgedSoFar);
     }
 
+    @Override
+    public double getMaxUnencumberedHaircuttedCollateral() {
+        return mainLedger.getAssetsOfType(AssetCollateral.class).stream()
+                .mapToDouble(asset ->
+                        ((CanBeCollateral) asset).getUnencumberedValue() *
+                                (1.0 - ((CanBeCollateral) asset).getHaircut()))
+                .sum() + getCash();
+    }
 
     public void withdrawCollateral(double excessValue, Repo repo) {
         repo.unpledgeProportionally(excessValue);
@@ -61,8 +71,12 @@ public class Bank extends Agent implements CanPledgeCollateral {
         return bankLeverageConstraint;
     }
 
-    public LCR_Constraint getLCR_constraint() {
-        return lcr_constraint;
+    public double getCashBuffer() {return lcr_constraint.getCashBuffer();}
+    public double getCashTarget() {return lcr_constraint.getCashTarget();}
+
+    @Override
+    public double getLCR() {
+        return isAlive()? lcr_constraint.getLCR() : getLcrAtDefault();
     }
 
     public void setLCR_constraint(LCR_Constraint lcr_constraint) {
@@ -72,5 +86,44 @@ public class Bank extends Agent implements CanPledgeCollateral {
     @Override
     public Behaviour getBehaviour() {
         return behaviour;
+    }
+
+    @Override
+    public void printBalanceSheet() {
+        super.printBalanceSheet();
+        System.out.println("Risk Weighted Asset ratio: "+String.format("%.2f", rwa_constraint.getRWAratio()*100.0) + "%");
+        System.out.println("LCR is: "+String.format("%.2f", lcr_constraint.getLCR()*100) + "%");
+    }
+
+    public double getRWAratio() {
+        return rwa_constraint.getRWAratio();
+    }
+
+    @Override
+    public void triggerDefault() {
+        super.triggerDefault();
+
+        System.out.println("First, liquidate all loans (in the liability side).");
+        HashSet<Contract> loansAndRepos = mainLedger.getLiabilitiesOfType(Loan.class);
+        for (Contract loan : loansAndRepos) {
+            ((Loan) loan).liquidate();
+        }
+
+        System.out.println(getAvailableActions(this));
+
+        ArrayList<Action> pullFundingActions = getAvailableActions(this).stream()
+                .filter(action -> action instanceof PullFunding)
+                .collect(Collectors.toCollection(ArrayList::new));
+
+        System.out.println(pullFundingActions);
+        for (Action action : pullFundingActions) {
+            action.setAmount(action.getMax());
+            if (action.getAmount() > 0) action.perform();
+        }
+
+    }
+
+    public void revalueAllLoans() {
+        mainLedger.getAssetsOfType(Loan.class).forEach(loan -> ((Loan) loan).reValueLoan());
     }
 }

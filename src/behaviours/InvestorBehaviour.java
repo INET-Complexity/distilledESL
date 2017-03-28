@@ -12,12 +12,10 @@ import java.util.HashMap;
 
 public class InvestorBehaviour extends Behaviour {
     private Investor me;
-    private HashMap<CanIssueShares, Double> previousNAVs;
 
     public InvestorBehaviour(Investor me) {
         super(me);
         this.me = me;
-        this.previousNAVs = new HashMap<>();
     }
 
     @Override
@@ -33,22 +31,38 @@ public class InvestorBehaviour extends Behaviour {
             Shares shares =  redeemAction.getShares();
             CanIssueShares firm = (CanIssueShares) shares.getLiabilityParty();
 
-            // We only redeem shares if we have a value for the 'previous NAV'.
-            if (previousNAVs.containsKey(firm)) {
-                double previousNAV = previousNAVs.get(firm);
-                double currentNAV = firm.getNetAssetValue();
+            double originalNAV = shares.getOriginalNAV();
+            double currentNAV = firm.getNetAssetValue();
 
-                // We use the previous NAV and the current NAV to compute the fraction of shares to redeem
-                double fractionToRedeem = Parameters.REDEMPTIONS_C1 * (
-                        Math.exp(Parameters.REDEMPTIONS_C2
-                                * Math.min(-100.0 * (currentNAV-previousNAV) / currentNAV, 0.0)) - 1)
-                        / (Math.E - 1);
+            // We use the original NAV and the current NAV to compute the fraction of shares to redeem
+//            double fractionToRedeem = Parameters.REDEMPTIONS_C1 * (
+//                    Math.exp(Parameters.REDEMPTIONS_C2
+//                            * Math.min( (currentNAV-originalNAV) / originalNAV, 0.0)) - 1)
+//                    / (Math.E - 1);
 
-                // Work out how many shares I must redeem given that fraction
-                int sharesToRedeem = (int) Math.floor(fractionToRedeem * shares.getNumberOfShares());
+            double lossInNAV = (1.0*(originalNAV - currentNAV) / originalNAV);
+            System.out.println("Loss in NAV is "+lossInNAV);
+
+            double f = Parameters.REDEMPTIONS_FRACTION;
+            double fractionToRedeem = lossInNAV < 0.005 ? 0.0 :
+                    lossInNAV < 0.05 ? f :
+                            lossInNAV < 0.10 ? 2*f :
+                                    lossInNAV< 0.15 ? 3*f : 4*f;
+
+            System.out.println("Fraction to redeem "+fractionToRedeem);
+
+            // Work out how many shares I must redeem given that fraction
+            int sharesToRedeem = (int) Math.floor(fractionToRedeem * shares.getOriginalNumberOfShares());
+            sharesToRedeem = Math.max(0, shares.getnShares() - shares.getnSharesPendingToRedeem() - (shares.getOriginalNumberOfShares() - sharesToRedeem));
+
+            if (sharesToRedeem > 0) {
+                System.out.println("The NAV of "+shares.getLiabilityParty().getName()+
+                        " has dropped from its original value of "+originalNAV+" to "+currentNAV +
+                " so I am redeeming "+sharesToRedeem+" shares.");
+
 
                 redeemAction.setAmount(sharesToRedeem);
-                addAction(redeemAction);
+                redeemAction.perform();
             }
 
         }

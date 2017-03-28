@@ -2,6 +2,7 @@ package contracts;
 
 import actions.Action;
 import agents.Agent;
+import demos.Parameters;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +18,16 @@ public class LongTermUnsecured extends Contract {
     }
 
     @Override
+    public double getLCRweight() {
+        return Parameters.LONG_TERM_LCR;
+    }
+
+    @Override
+    public String getName(Agent me) {
+        return "Long term unsecured liabilities";
+    }
+
+    @Override
     public Agent getAssetParty() {
         return null;
     }
@@ -26,13 +37,14 @@ public class LongTermUnsecured extends Contract {
         return liabilityParty;
     }
 
-    public double getValue() {
-        return amount;
-    }
+
+    @Override
+    public double getValue(Agent me) {return amount;}
 
     @Override
     public List<Action> getAvailableActions(Agent me) {
 
         return new ArrayList<>();
     }
+
 }

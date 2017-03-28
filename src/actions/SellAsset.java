@@ -1,5 +1,6 @@
 package actions;
 
+import agents.Agent;
 import contracts.Asset;
 import contracts.AssetCollateral;
 
@@ -7,13 +8,15 @@ public class SellAsset extends Action {
 
     private Asset asset;
 
-    public SellAsset(Asset asset) {
+    public SellAsset(Agent me, Asset asset) {
+        super(me);
         this.asset = asset;
         setAmount(0.0);
     }
 
     @Override
     public void perform() {
+        super.perform();
         double quantityToSell = getAmount() / asset.getPrice();
         asset.putForSale(quantityToSell);
     }
@@ -22,9 +25,9 @@ public class SellAsset extends Action {
     public double getMax() {
         if (asset instanceof AssetCollateral) {
             // Only unencumbered assets can be sold!
-            return ((AssetCollateral)asset).getUnencumberedValue();
+            return ((AssetCollateral)asset).getUnencumberedValue() - asset.getPutForSale();
         } else {
-            return asset.getValue();
+            return asset.getValue(null);
         }
     }
     //Todo: should this be here, or should it be with the AssetCollateral?

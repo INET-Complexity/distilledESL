@@ -21,6 +21,11 @@ public class Bond extends Contract {
         liabilityParty.add(this);
     }
 
+    @Override
+    public String getName(Agent me) {
+        return "Bond. NOT IMPLEMENTED WHY ARE YOU USING ME???";
+    }
+
     /**
      * Available actions for a bond include:
      * if this bond is encumbered, or if agent is not a party, none.
@@ -43,9 +48,11 @@ public class Bond extends Contract {
         return availableActions;
     }
 
-    public double getValue() {
+    @Override
+    public double getValue(Agent me) {
         return principal;
     }
+
 
     // Setters and Getters
     public Agent getAssetParty() {
@@ -93,4 +100,5 @@ public class Bond extends Contract {
     private MaturityType maturityType;
     private double principal;
     private double rate;
+
 }

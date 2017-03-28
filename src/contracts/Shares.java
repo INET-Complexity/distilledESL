@@ -15,23 +15,43 @@ import java.util.List;
 public class Shares extends Contract {
     private Agent owner;
     private CanIssueShares issuer;
-    private int numberOfShares;
+    private int nShares;
+    private double previousValueOfShares;
+    private double originalNAV;
+    private int nSharesPendingToRedeem;
+    private int originalNumberOfShares;
 
-    public Shares(Agent owner, CanIssueShares issuer, int numberOfShares) {
+    public Shares(Agent owner, CanIssueShares issuer, int nShares, double originalNAV) {
         this.owner = owner;
         this.issuer = issuer;
-        this.numberOfShares = numberOfShares;
+        this.nShares = nShares;
+        this.originalNumberOfShares = nShares;
+        this.previousValueOfShares = getNewValue();
+        this.originalNAV = originalNAV;
+        this.nSharesPendingToRedeem = 0;
 
         assert(issuer instanceof Agent);
     }
 
-    public void redeem(int numberToRedeem) {
-        assert(numberToRedeem <= numberOfShares);
-        numberOfShares -= numberToRedeem;
-        if (numberOfShares == 0) {//todo: finite precision
-            // todo: destroy shares?
+    @Override
+    public String getName(Agent me) {
+        if (me==owner) {
+            return "Shares of the firm: "+((Agent) issuer).getName();
+        } else {
+            return "Shares owned by our shareholder "+owner.getName();
         }
     }
+
+    public void redeem(int numberToRedeem) {
+        assert(numberToRedeem <= nShares);
+        double nav = getNAV();
+        ((Agent) issuer).payLiability(numberToRedeem * nav, this);
+        owner.sellAssetForValue(this, numberToRedeem * nav);
+        nShares -= numberToRedeem;
+        nSharesPendingToRedeem -= numberToRedeem;
+    }
+
+
 
     @Override
     public Agent getAssetParty() {
@@ -43,19 +63,53 @@ public class Shares extends Contract {
         return (Agent) issuer;
     }
 
-    public double getValue() {
-        return numberOfShares * issuer.getNetAssetValue();
-    }
+    @Override
+    public double getValue(Agent me) {
+        return previousValueOfShares;}
 
-    public int getNumberOfShares() {return numberOfShares;}
+    private double getNewValue() {return nShares * issuer.getNetAssetValue();}
+
+    public double getNAV() { return issuer.getNetAssetValue(); }
+
+    public int getnShares() {return nShares;}
 
     @Override
     public List<Action> getAvailableActions(Agent me) {
-        if (!(me==owner) || !(numberOfShares > 0)) return Collections.emptyList();
+        if (!(me==owner) || !(nShares > 0)) return Collections.emptyList();
 
         ArrayList<Action> availableActions = new ArrayList<>();
-        availableActions.add(new RedeemShares(this));
+        availableActions.add(new RedeemShares(me, this));
         return availableActions;
+    }
+
+    public void updateValue() {
+        double valueChange = getNewValue() - previousValueOfShares;
+        previousValueOfShares = getNewValue();
+
+        if (valueChange > 0) {
+            owner.appreciateAsset(this, valueChange);
+            ((Agent) issuer).appreciateLiability(this, valueChange);
+        } else if (valueChange < 0) {
+            System.out.println("value of shares fell.");
+            owner.devalueAsset(this, -1.0 * valueChange);
+            ((Agent) issuer).devalueLiability(this, -1.0 * valueChange);
+        }
+    }
+
+    public double getOriginalNAV() {
+        return originalNAV;
+    }
+
+    public void addSharesPendingToRedeem(int number) {
+        nSharesPendingToRedeem += number;
+    }
+
+    public int getnSharesPendingToRedeem() {
+        return nSharesPendingToRedeem;
+    }
+
+    public int getOriginalNumberOfShares() {
+        return originalNumberOfShares;
     }
 }
 

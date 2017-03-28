@@ -3,6 +3,7 @@ package contracts;
 import agents.Agent;
 import actions.Action;
 import actions.SellAsset;
+import demos.Parameters;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -10,35 +11,45 @@ import java.util.List;
 
 public class Asset extends Contract {
 
-    public Asset(Agent assetParty, AssetType assetType, AssetMarket assetMarket, double amount) {
+    public Asset(Agent assetParty, AssetType assetType, AssetMarket assetMarket, double quantity) {
         this.assetParty = assetParty;
         this.assetType = assetType;
         this.assetMarket = assetMarket;
         this.price = assetMarket.getPrice(assetType);
-        this.quantity = 1.0 * amount / this.price;
+        this.quantity = quantity;
+        this.putForSale = 0.0;
     }
 
     public Asset(Agent assetParty, AssetType assetType, AssetMarket assetMarket) {
         this(assetParty,assetType, assetMarket, 0.0);
     }
 
+    @Override
+    public String getName(Agent me) {
+        return "Asset of type "+assetType;
+    }
 
     private Agent assetParty;
-    private double quantity;
+    protected double quantity;
     private AssetType assetType;
     protected AssetMarket assetMarket;
     private double price;
+    private double putForSale;
 
     @Override
     public List<Action> getAvailableActions(Agent me) {
-        if (!(assetParty==me) || !(quantity >0) || assetType==AssetType.EXTERNAL) return Collections.emptyList();
+        if (!(assetParty==me) || !(quantity > putForSale)
+                || (assetType==AssetType.EXTERNAL1)
+                || (assetType==AssetType.EXTERNAL2)
+                || (assetType==AssetType.EXTERNAL3)) return Collections.emptyList();
 
         ArrayList<Action> availableActions = new ArrayList<>();
-        availableActions.add(new SellAsset(this));
+        availableActions.add(new SellAsset(me, this));
         return availableActions;
     }
 
     public void putForSale(double quantity) {
+        putForSale += quantity;
         assetMarket.putForSale(this, quantity);
     }
 
@@ -55,22 +66,27 @@ public class Asset extends Contract {
         // Sell the asset at the mid-point price
         assetParty.sellAssetForValue(this, quantitySold * 0.5 * (price + newPrice));
 
-        // Take the loss on devaluation.
+        // Take the loss on the sale.
         if (newPrice < price) {
-            // Value lost is the sum of the value lost from the transaction and the devaluation of the asset that is left.
-            double totalValueLost = quantitySold * 0.5 * (price - newPrice) + (quantity - quantitySold) * (price - newPrice);
+            // Value lost is the value lost from the transaction.
+            double totalValueLost = quantitySold * 0.5 * (price - newPrice);
+
+//            double totalValueLost = quantitySold * 0.5 * (price - newPrice) + (quantity - quantitySold) * (price - newPrice);
+            System.out.println(assetParty.getName() + " made a loss of " + String.format("%.2f", totalValueLost) + " from the sale of " + getAssetType());
             assetParty.devalueAsset(this, totalValueLost);
         }
 
         // Update the quantity remaining
+        assert(quantitySold <= quantity);
         this.quantity -= quantitySold;
+        this.putForSale -= quantitySold;
 
         // Update the price
         updatePrice();
     }
 
 
-    public double getValue() {
+    public double getValue(Agent me) {
         return quantity*price;
     }
 
@@ -98,7 +114,10 @@ public class Asset extends Contract {
         MBS,
         EQUITIES,
         CORPORATE_BONDS,
-        EXTERNAL
+        EXTERNAL1,
+        EXTERNAL2,
+        EXTERNAL3
+        //TODO: mark the three external assets as non tradable.
     }
 
     public AssetType getAssetType() {
@@ -115,8 +134,19 @@ public class Asset extends Contract {
         return null;
     } //An Asset does not have a liability party
 
-    protected double getQuantity() {
+    public double getQuantity() {
         return quantity;
     }
+
+    public double getPutForSale() {
+        return putForSale;
+    }
+
+    @Override
+    public double getRWAweight() {
+        return Parameters.getRWAWeight(assetType);
+    }
+
+
 }
 

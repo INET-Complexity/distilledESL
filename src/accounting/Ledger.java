@@ -4,6 +4,7 @@ import agents.Agent;
 import actions.Action;
 import contracts.Asset;
 import contracts.Contract;
+import contracts.Repo;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,7 +29,9 @@ import java.util.stream.Collectors;
 public class Ledger implements LedgerAPI {
     //TODO: We need to do valuation differently!!
 
-    public Ledger(Agent owner) {
+    private Agent me;
+    public Ledger(Agent me) {
+        this.me = me;
         // A Ledger is a list of accounts (for quicker searching)
         assetAccounts = new HashSet<>();
         liabilityAccounts = new HashSet<>();
@@ -61,6 +64,7 @@ public class Ledger implements LedgerAPI {
     private HashMap<Class<? extends contracts.Contract>, Account> contractsToLiabilityAccounts;
     private Account cashAccount;
     private Account equityAccount;
+    private double initialEquity;
 
     public double getAssetValue() {
         double assetTotal = 0;
@@ -90,7 +94,7 @@ public class Ledger implements LedgerAPI {
 //        return contractsToAssetAccounts.get(contractType).getBalance();
         return allAssets.stream()
                 .filter(contractType::isInstance)
-                .mapToDouble(Contract::getValue)
+                .mapToDouble(contract -> contract.getValue(me))
                 .sum();
     }
 
@@ -98,9 +102,17 @@ public class Ledger implements LedgerAPI {
 //        return contractsToLiabilityAccounts.get(contractType).getBalance();
         return allLiabilities.stream()
                 .filter(contractType::isInstance)
-                .mapToDouble(Contract::getValue)
+                .mapToDouble(contract -> contract.getValue(me))
                 .sum();
 
+    }
+
+    public HashSet<Contract> getAllAssets() {
+        return allAssets;
+    }
+
+    public HashSet<Contract> getAllLiabilities() {
+        return allLiabilities;
     }
 
     public HashSet<Contract> getAssetsOfType(Class<?> contractType) {
@@ -157,7 +169,7 @@ public class Ledger implements LedgerAPI {
         }
 
         // (dr asset, cr equity)
-        Account.doubleEntry(assetAccount, equityAccount, contract.getValue());
+        Account.doubleEntry(assetAccount, equityAccount, contract.getValue(me));
 
         // Add to the general inventory?
         allAssets.add(contract);
@@ -178,7 +190,7 @@ public class Ledger implements LedgerAPI {
         }
 
         // (dr equity, cr liability)
-        Account.doubleEntry(equityAccount, liabilityAccount, contract.getValue());
+        Account.doubleEntry(equityAccount, liabilityAccount, contract.getValue(me));
 
         // Add to the general inventory?
         allLiabilities.add(contract);
@@ -260,7 +272,7 @@ public class Ledger implements LedgerAPI {
         for (Contract contract : allAssets) {
             Asset asset = (Asset) contract;
             if (asset.priceFell()) {
-                devalueAsset(asset.valueLost(), asset);
+                devalueAsset(asset, asset.valueLost());
                 asset.updatePrice();
             }
         }
@@ -270,44 +282,44 @@ public class Ledger implements LedgerAPI {
      * if an Asset loses value, I must debit equity and credit asset
      * @param valueLost the value lost
      */
-    public void devalueAsset(double valueLost, Contract asset) {
+    public void devalueAsset(Contract asset, double valueLost) {
         Account assetAccount = contractsToAssetAccounts.get(asset.getClass());
 
         // (dr equityAccounts, cr assetAccounts)
         Account.doubleEntry(equityAccount, assetAccount, valueLost);
 
         //Todo: perform a check here that the Asset account balances match the value of the assets. (?)
-
     }
 
-    /**
-     * This mimics the default on a loan. If I lend money to someone and they default on me, at the moment
-     * I assume that I lose a 'valueFraction' of its value. There are two double-entry operations:
-     *
-     * First I take a hit on equity for the lost value of the loan (dr equity, cr asset)
-     * Then I cash in the loan (dr cash, cr asset)
-     *
-     * @param initialValue the original value of the loan
-     * @param valueFraction the fraction of the loan that will be lost due to the default
-     */
-    public void liquidateLoan(double initialValue, double valueFraction, Contract loan) {
-        Account assetLoanAccount = contractsToAssetAccounts.get(loan.getClass());
-
-        double valueLost = (1 - valueFraction) * initialValue;
-
-        // First, we devalue the loan
-        // (dr equity, cr asset)
-        Account.doubleEntry(equityAccount, assetLoanAccount, valueLost);
-
-        // Then, we liquidate it
-        // (dr cash, cr asset)
-        Account.doubleEntry(cashAccount, assetLoanAccount, initialValue - valueLost);
+    public void appreciateAsset(Contract asset, double valueLost) {
+        Account assetAccount = contractsToAssetAccounts.get(asset.getClass());
+        Account.doubleEntry(assetAccount, equityAccount, valueLost);
     }
 
-    public void printBalanceSheet() {
+    public void devalueLiability(Contract liability, double valueLost) {
+        Account liabilityAccount = contractsToLiabilityAccounts.get(liability.getClass());
+
+        // (dr equityAccounts, cr assetAccounts)
+        Account.doubleEntry(liabilityAccount, equityAccount, valueLost);
+    }
+
+    public void appreciateLiability(Contract liability, double valueLost) {
+        Account liabilityAccount = contractsToLiabilityAccounts.get(liability.getClass());
+
+        // (dr equityAccounts, cr assetAccounts)
+        Account.doubleEntry(equityAccount, liabilityAccount, valueLost);
+    }
+
+
+    public void printBalanceSheet(Agent me) {
         System.out.println("Asset accounts:\n---------------");
         for (Account account : assetAccounts) {
             System.out.println(account.getName()+" -> "+ String.format( "%.2f", account.getBalance()));
+        }
+
+        System.out.println("Breakdown: ");
+        for (Contract contract : allAssets) {
+            System.out.println("\t"+contract.getName(me)+" > "+contract.getValue(me));
         }
         System.out.println("TOTAL ASSETS: "+ String.format( "%.2f", getAssetValue()));
 
@@ -315,8 +327,27 @@ public class Ledger implements LedgerAPI {
         for (Account account : liabilityAccounts) {
             System.out.println(account.getName()+" -> "+ String.format( "%.2f", account.getBalance()));
         }
+        for (Contract contract : allLiabilities) {
+            System.out.println("\t"+contract.getName(me)+" > "+contract.getValue(me));
+        }
         System.out.println("TOTAL LIABILITIES: "+ String.format( "%.2f", getLiabilityValue()));
         System.out.println("\nTOTAL EQUITY: "+String.format("%.2f", getEquityValue()));
+
+        System.out.println("\nSummary of encumbered collateral:");
+        for (Contract contract : getLiabilitiesOfType(Repo.class)) {
+            ((Repo) contract).printCollateral();
+        }
+        System.out.println("\n\nTotal cash: "+cashAccount.getBalance());
+        System.out.println("Encumbered cash: "+me.getEncumberedCash());
+        System.out.println("Unencumbered cash: "+me.getCash());
+    }
+
+    public double getInitialEquity() {
+        return initialEquity;
+    }
+
+    public void setInitialValues() {
+        initialEquity = getEquityValue();
     }
 
 

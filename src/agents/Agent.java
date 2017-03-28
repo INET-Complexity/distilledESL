@@ -5,68 +5,28 @@ import actions.Action;
 import behaviours.Behaviour;
 import contracts.Asset;
 import contracts.Contract;
+import contracts.FailedMarginCallException;
+import contracts.Repo;
+import contracts.obligations.Mailbox;
+import contracts.obligations.Obligation;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.stream.Collectors;
 
 public abstract class Agent {
     Ledger mainLedger;
     private String name;
-    private HashSet<Request> requestInbox;
-    private HashSet<Request> requestOutbox;
-
+    private boolean alive = true;
+    private double encumberedCash;
+    private Mailbox mailbox;
+    private double equityAtDefault;
+    private double lcrAtDefault;
 
     public Agent(String name) {
         this.name = name;
         mainLedger = new Ledger(this);
-        requestInbox = new HashSet<>();
-        requestOutbox = new HashSet<>();
-    }
-
-    public void addToInbox(Request request) {
-        requestInbox.add(request);
-    }
-
-    public void addToOutbox(Request request) {
-        requestOutbox.add(request);
-    }
-
-    public double getTotalPullFunding() {
-        return requestInbox.stream()
-                .mapToDouble(Request::getAmount).sum();
-    }
-
-    public double getMaturedPayments() {
-        return requestInbox.stream()
-                .filter(Request::isDue)
-                .mapToDouble(Request::getAmount).sum();
-    }
-
-    public double getPendingPayments() {
-        return requestInbox.stream()
-                .mapToDouble(Request::getAmount).sum();
-    }
-
-    public void fulfilAllRequests() {
-        for (Request request : requestInbox) {
-            request.fulfil();
-            requestInbox.remove(request);
-        }
-    }
-
-    public void fulfilMaturedRequests() {
-        for (Request request : requestInbox) {
-            if (request.isDue()) {
-                request.fulfil();
-                requestInbox.remove(request);
-            }
-        }
-    }
-
-    public void tick() {
-        for (Request request : requestInbox) {
-            request.tick();
-        }
+        this.mailbox = new Mailbox();
     }
 
     public String getName() {
@@ -83,18 +43,43 @@ public abstract class Agent {
      * @param amount the amount to pay back of this loan
      * @param loan   the loan we are paying back
      */
-    public void payLoan(double amount, Contract loan) {
+    public void payLiability(double amount, Contract loan) {
+        assert (getCash() >= amount);
         mainLedger.payLiability(amount, loan);
-        //Todo: throw an exception
     }
 
-    public void sellAssetForValue(Asset asset, double value) {
+    public void sellAssetForValue(Contract asset, double value) {
         mainLedger.sellAsset(value, asset.getClass());
     }
 
-    public void devalueAsset(Asset asset, double valueLost) {
-        System.out.println(getName() + " made a loss of " + String.format("%.2f", valueLost) + " from the sale of " + asset.getAssetType());
-        mainLedger.devalueAsset(valueLost, asset);
+    public void devalueAsset(Contract asset, double valueLost) {
+        mainLedger.devalueAsset(asset, valueLost);
+
+    }
+
+    public void devalueAssetOfType(Asset.AssetType assetType, double priceLost) {
+        mainLedger.getAssetsOfType(Asset.class).stream()
+                .filter(asset -> ((Asset) asset).getAssetType()==assetType)
+                .forEach(asset ->
+                devalueAsset(asset, ((Asset) asset).getQuantity()*priceLost));
+
+        //Update their prices too
+        mainLedger.getAssetsOfType(Asset.class).stream()
+                .filter(asset -> ((Asset) asset).getAssetType()==assetType)
+                .forEach(asset -> ((Asset) asset).updatePrice());
+
+    }
+
+    public void appreciateAsset(Contract asset, double valueLost) {
+        mainLedger.appreciateAsset(asset, valueLost);
+    }
+
+    public void devalueLiability(Contract asset, double valueLost) {
+        mainLedger.devalueLiability(asset, valueLost);
+    }
+
+    public void appreciateLiability(Contract asset, double valueLost) {
+        mainLedger.appreciateLiability(asset, valueLost);
     }
 
     public void add(Contract contract) {
@@ -112,9 +97,16 @@ public abstract class Agent {
     }
 
     public double getCash() {
+        return mainLedger.getCash() - encumberedCash;
+    }
+
+    public double getTotalCash() {
         return mainLedger.getCash();
     }
 
+    public double getEncumberedCash() {
+        return encumberedCash;
+    }
 
     public ArrayList<Action> getAvailableActions(Agent me) {
         return mainLedger.getAvailableActions(this);
@@ -130,16 +122,8 @@ public abstract class Agent {
         getBehaviour().act();
     }
 
-    public void updateAssetPrices() {
-        mainLedger.updateAssetPrices();
-    }
-
     public double getLeverage() {
         return (1.0 * getEquityValue() / getAssetValue());
-    }
-
-    public void liquidateLoan(double initialValue, double valueFraction, Contract loan) {
-        mainLedger.liquidateLoan(initialValue, valueFraction, loan);
     }
 
     public double getAssetValue() {
@@ -151,18 +135,119 @@ public abstract class Agent {
     }
 
     public double getEquityValue() {
-        return mainLedger.getEquityValue();
+        return isAlive() ? mainLedger.getEquityValue() : equityAtDefault;
     }
-
 
     public void printBalanceSheet() {
-        System.out.println();
-        System.out.println("Balance Sheet of " + getName());
-        System.out.println("**************************");
-        mainLedger.printBalanceSheet();
-        System.out.println("Leverage ratio: " + String.format("%.2f", 100 * getLeverage()) + "%");
-        System.out.println();
+        System.out.println("\nBalance Sheet of " + getName() + "\n**************************");
+        mainLedger.printBalanceSheet(this);
+        System.out.println("\nLeverage ratio: " + String.format("%.2f", 100 * getLeverage()) + "%");
     }
 
+    public void runMarginCalls() throws FailedMarginCallException {
+        HashSet<Contract> repoContracts = mainLedger.getLiabilitiesOfType(Repo.class);
+        for (Contract contract : repoContracts) {
+            Repo repo = (Repo) contract;
+            repo.marginCall(); // Throws exception if it fails.
+        }
+    }
+
+    public boolean isAlive() {
+        return alive;
+    }
+
+    public void triggerDefault() {
+        alive = false;
+        equityAtDefault = getEquityValue();
+        lcrAtDefault = getLCR();
+        System.out.println("Trigger default!");
+    }
+
+    public void encumberCash(double amount) {
+        assert (getCash() >= amount);
+
+        encumberedCash += amount;
+    }
+
+    public void unencumberCash(double amount) {
+        assert (encumberedCash >= amount);
+        encumberedCash -= amount;
+    }
+
+    public void receiveShockToAsset(Asset.AssetType assetType, double fractionLost) {
+        HashSet<Contract> assetsShocked = mainLedger.getAssetsOfType(Asset.class).stream()
+                .filter(asset -> ((Asset) asset).getAssetType() == assetType)
+                .collect(Collectors.toCollection(HashSet::new));
+
+        if (!(assetsShocked.isEmpty())) {
+            System.out.println(getName() + " received a shock!! Asset type " + assetType + " lost "
+                    + String.format("%.2f", fractionLost * 100.0) + "% of value.");
+            for (Contract asset : assetsShocked) {
+                devalueAsset(asset, asset.getValue(null) * fractionLost);
+                ((Asset) asset).updatePrice();
+            }
+        }
+    }
+
+    public void step() {
+        mailbox.step();
+    }
+
+    public void sendMessage(Agent recipient, Obligation obligation) {
+        recipient.receiveMessage(obligation);
+        mailbox.addToOutbox(obligation);
+    }
+
+    public void receiveMessage(Obligation obligation) {
+        mailbox.receiveMessage(obligation);
+    }
+
+    public double getMaturedObligations() {
+        return mailbox.getMaturedObligations();
+    }
+
+    public double getAllPendingObligations() {
+        return mailbox.getAllPendingObligations();
+    }
+
+    public double getPendingPaymentsToMe() {
+        return mailbox.getPendingPaymentsToMe();
+    }
+
+    public void fulfilAllRequests() {
+        mailbox.fulfilAllRequests();
+    }
+
+    public void fulfilMaturedRequests() {
+        mailbox.fulfilMaturedRequests();
+    }
+
+    public ArrayList<Double> getCashCommitments() {
+        return mailbox.getCashCommitments();
+    }
+
+    public ArrayList<Double> getCashInflows() {
+        return mailbox.getCashInflows();
+    }
+
+    public void printMailbox() {
+        mailbox.printMailbox();
+    }
+
+    public double getLCR() {
+        return isAlive()? getCash() : lcrAtDefault;
+    }
+
+    public double getLcrAtDefault() {
+        return lcrAtDefault;
+    }
+
+    public double getEquityLoss() {
+        return ( getEquityValue() - mainLedger.getInitialEquity() ) / mainLedger.getInitialEquity();
+    }
+
+    public void setInitialValues() {
+        mainLedger.setInitialValues();
+    }
 
 }
