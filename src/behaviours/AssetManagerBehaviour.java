@@ -14,6 +14,8 @@ public class AssetManagerBehaviour extends Behaviour {
 
     @Override
     protected void chooseActions() throws DefaultException {
+        // Plot net asset value?
+        System.out.println("\nMy NAV is "+me.getNetAssetValue());
         // 1) Pay matured cash commitments or default.
         double maturedPullFunding = me.getMaturedObligations();
         if (maturedPullFunding > 0) {
@@ -28,10 +30,10 @@ public class AssetManagerBehaviour extends Behaviour {
 
         // Sell assets to pay off all the other cash commitments.
         double liquidityNeeded = (1 + Parameters.AM_EXTRA_LIQUIDITY_FRACTION_WHEN_REDEMPTION)
-                * me.getAllPendingObligations();
+                * me.getAllPendingObligations() - me.getCash();
 
         // Firesale to raise that liquidity
-        sellAssetsProportionally(liquidityNeeded);
+        if (liquidityNeeded > 0) sellAssetsProportionally(liquidityNeeded);
 
 }
 

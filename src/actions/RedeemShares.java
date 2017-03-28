@@ -1,5 +1,6 @@
 package actions;
 
+import agents.Agent;
 import contracts.Shares;
 import contracts.obligations.RedeemSharesObligation;
 import demos.Model;
@@ -9,16 +10,21 @@ public class RedeemShares extends Action {
 
     private Shares shares;
 
-    public RedeemShares(Shares shares) {
+    public RedeemShares(Agent me, Shares shares)
+    {
+        super(me);
         this.shares = shares;
     }
 
     @Override
     public void perform() {
+        super.perform();
         shares.addSharesPendingToRedeem((int) getAmount());
         RedeemSharesObligation obligation = new RedeemSharesObligation(shares, (int) getAmount(),
                 Model.getTime() + Parameters.TIMESTEPS_TO_REDEEM_SHARES);
         shares.getAssetParty().sendMessage(shares.getLiabilityParty(), obligation);
+
+        Model.redemptionsRecorder.recordRedemption(shares.getAssetParty(), shares.getLiabilityParty(), (int) getAmount());
     }
 
     @Override

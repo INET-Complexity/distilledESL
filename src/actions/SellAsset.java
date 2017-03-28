@@ -1,5 +1,6 @@
 package actions;
 
+import agents.Agent;
 import contracts.Asset;
 import contracts.AssetCollateral;
 
@@ -7,13 +8,15 @@ public class SellAsset extends Action {
 
     private Asset asset;
 
-    public SellAsset(Asset asset) {
+    public SellAsset(Agent me, Asset asset) {
+        super(me);
         this.asset = asset;
         setAmount(0.0);
     }
 
     @Override
     public void perform() {
+        super.perform();
         double quantityToSell = getAmount() / asset.getPrice();
         asset.putForSale(quantityToSell);
     }

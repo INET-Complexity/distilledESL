@@ -61,15 +61,16 @@ public class BankBehaviour extends Behaviour {
         ArrayList<Double> cashCommitments = me.getCashCommitments();
         ArrayList<Double> cashInflows = me.getCashInflows();
 
-        System.out.println("\nLiquidity management for this timestep");
-        System.out.println("Current unencumbered cash -> "+me.getCash());
-        System.out.println("LCR buffer -> "+me.getCashBuffer());
-        System.out.println("Needed to delever -> "+amountToDelever);
+        if (Parameters.PRINT_LIQUIDITY) {
+            System.out.println("\nLiquidity management for this timestep");
+            System.out.println("Current unencumbered cash -> " + me.getCash());
+            System.out.println("LCR buffer -> " + me.getCashBuffer());
+            System.out.println("Needed to delever -> " + amountToDelever);
 //        System.out.println("Needed to replenish the LCR buffer -> "+liquidityBufferToReplenish);
-        System.out.println("Needed to fulfil obligations -> "+cashCommitments.stream().mapToDouble(Double::doubleValue).sum());
-        System.out.println("Expected cash inflows -> "+cashInflows.stream().mapToDouble(Double::doubleValue).sum());
-        System.out.println();
-
+            System.out.println("Needed to fulfil obligations -> " + cashCommitments.stream().mapToDouble(Double::doubleValue).sum());
+            System.out.println("Expected cash inflows -> " + cashInflows.stream().mapToDouble(Double::doubleValue).sum());
+            System.out.println();
+        }
 
 
         // ST PATRICK'S ALGORITHM

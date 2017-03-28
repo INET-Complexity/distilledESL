@@ -103,15 +103,19 @@ public class Bank extends Agent implements CanPledgeCollateral {
     public void triggerDefault() {
         super.triggerDefault();
 
+        System.out.println("First, liquidate all loans (in the liability side).");
         HashSet<Contract> loansAndRepos = mainLedger.getLiabilitiesOfType(Loan.class);
         for (Contract loan : loansAndRepos) {
             ((Loan) loan).liquidate();
         }
 
+        System.out.println(getAvailableActions(this));
+
         ArrayList<Action> pullFundingActions = getAvailableActions(this).stream()
                 .filter(action -> action instanceof PullFunding)
                 .collect(Collectors.toCollection(ArrayList::new));
 
+        System.out.println(pullFundingActions);
         for (Action action : pullFundingActions) {
             action.setAmount(action.getMax());
             if (action.getAmount() > 0) action.perform();

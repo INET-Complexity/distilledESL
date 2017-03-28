@@ -16,6 +16,9 @@ public class Model {
     private static HashMap<String, Agent> allAgents;
     private static Recorder recorder = new Recorder();
     public static DefaultRecorder defaultRecorder = new DefaultRecorder();
+    public static RedemptionsRecorder redemptionsRecorder = new RedemptionsRecorder();
+    public static ActionsRecorder actionsRecorder = new ActionsRecorder();
+
     public static int timeStep = 0;
 
     public static int getTime() { return timeStep; }
@@ -25,26 +28,10 @@ public class Model {
         // First simulation runs with the default parameters
         runSimulation();
 
-        // From here, you can run more simulations.
-        // simply replace the parameters you wish to change with the new value,
-        // and then call 'runSimulation()'
+        Parameters.INVESTOR_REDEMPTION = false;
+        runSimulation();
 
-        // See below for some examples
 
-        // Second simulation runs without the HF
-//        Parameters.ASSET_MANAGER_ON = true;
-//        Parameters.HEDGEFUNDS_ON = false;
-//        runSimulation();
-//
-//        // Third simulation runs without the Asset Manager
-//        Parameters.ASSET_MANAGER_ON = false;
-//        Parameters.HEDGEFUNDS_ON = true;
-//        runSimulation();
-//
-//        // Fourth simulation runs without either HF or Asset Manager
-//        Parameters.ASSET_MANAGER_ON = false;
-//        Parameters.HEDGEFUNDS_ON = false;
-//        runSimulation();
 
 
         // Important: call finish at the end so that the files get written.
@@ -78,6 +65,8 @@ public class Model {
     private static void finish() {
         recorder.finish();
         defaultRecorder.finish();
+        redemptionsRecorder.finish();
+        actionsRecorder.finish();
     }
 
     private static void initialise() {
@@ -114,7 +103,7 @@ public class Model {
         initAgent(hf1, 35, 107, 107, 107, 0,
                     0, 0, 0);
 
-        initAgent(am1, 20, 130, 130, 130, 0,
+        initAgent(am1, 40, 260, 260, 260, 0,
                 0, 0, 0);
 
         initAgent(inv1, 0, 0, 0, 0, 0,
