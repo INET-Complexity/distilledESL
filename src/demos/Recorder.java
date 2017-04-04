@@ -22,17 +22,13 @@ import java.util.stream.Collectors;
  */
 public class Recorder {
     private AssetMarket market;
-
     private PrintWriter marketFile;
     private PrintWriter banksFile;
     private PrintWriter lossesFile;
     private PrintWriter collateralFile;
     private ArrayList<Asset.AssetType> assetTypes;
     private Agent[] banks;
-
     private Agent[] allAgents;
-
-
     private double totalInitialEquity;
 
     private String marketHeader;
@@ -128,7 +124,7 @@ public class Recorder {
             }
         }
 
-        System.out.println("Total initial equity is :"+ totalInitialEquity);
+        System.out.println("Total initial equity is :" + totalInitialEquity);
 
 
         // COLLATERAL ///////////////////////
@@ -136,8 +132,8 @@ public class Recorder {
         String collateralLine = "Simulation number, Timestep";
         for (Agent agent: allAgents) {
             for (Asset.AssetType assetType : assetTypes) {
-                collateralLine = collateralLine + ", "+agent.getName()+"_"+assetType+"_total_quantity";
-                collateralLine = collateralLine + ", "+agent.getName()+"_"+assetType+"_encumbered_quantity";
+                collateralLine = collateralLine + ", " + agent.getName() + "_" + assetType + "_total_quantity";
+                collateralLine = collateralLine + ", " + agent.getName() + "_" + assetType + "_encumbered_quantity";
             }
         }
         collateralFile.println(collateralLine);

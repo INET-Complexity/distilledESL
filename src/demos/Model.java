@@ -30,10 +30,6 @@ public class Model {
 
         Parameters.INVESTOR_REDEMPTION = false;
         runSimulation();
-
-
-
-
         // Important: call finish at the end so that the files get written.
         finish();
 
@@ -149,7 +145,7 @@ public class Model {
         agent.addCash(cash);
         // Asset side
         if (mbs > 0) agent.add(new AssetCollateral(agent, Asset.AssetType.MBS, assetMarket, mbs));
-        if (equities >0) agent.add(new AssetCollateral(agent, Asset.AssetType.EQUITIES, assetMarket, equities));
+        if (equities > 0) agent.add(new AssetCollateral(agent, Asset.AssetType.EQUITIES, assetMarket, equities));
         if (bonds > 0) agent.add(new AssetCollateral(agent, Asset.AssetType.CORPORATE_BONDS, assetMarket, bonds));
         if (otherAsset > 0) agent.add(new Other(agent, null, otherAsset));
 
@@ -157,7 +153,6 @@ public class Model {
         if (deposits > 0) agent.add(new Deposit(null, agent, deposits));
         if (longTerm > 0) agent.add(new LongTermUnsecured(agent, longTerm));
         if (otherLiability > 0) agent.add(new Other(null, agent, otherLiability));
-
 
         allAgents.put(agent.getName(), agent);
     }
