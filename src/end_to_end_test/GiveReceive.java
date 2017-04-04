@@ -1,11 +1,9 @@
-package usecases.MnlEconomicProblem;
+package end_to_end_test;
 
 import behaviours.Behaviour;
 import economicsl.NotEnoughGoods;
 import economicsl.Trade;
 
-import static java.lang.Double.min;
-import static jdk.nashorn.internal.objects.Global.print;
 
 /**
  * Created by taghawi on 28/03/17.

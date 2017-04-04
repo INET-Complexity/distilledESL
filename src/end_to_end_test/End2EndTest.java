@@ -1,7 +1,6 @@
 package end_to_end_test;
 
 import agents.Agent;
-import usecases.MnlEconomicProblem.GiveReceive;
 
 
 /**
