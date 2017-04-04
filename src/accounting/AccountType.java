@@ -5,5 +5,6 @@ public enum AccountType {
     LIABILITY,
     EQUITY,
     INCOME,
-    EXPENSES
+    EXPENSES,
+    GOOD,
 }

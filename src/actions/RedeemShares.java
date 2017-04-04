@@ -22,7 +22,7 @@ public class RedeemShares extends Action {
         shares.addSharesPendingToRedeem((int) getAmount());
         RedeemSharesObligation obligation = new RedeemSharesObligation(shares, (int) getAmount(),
                 Model.getTime() + Parameters.TIMESTEPS_TO_REDEEM_SHARES);
-        shares.getAssetParty().sendMessage(shares.getLiabilityParty(), obligation);
+        shares.getAssetParty().sendObligation(shares.getLiabilityParty(), obligation);
 
         Model.redemptionsRecorder.recordRedemption(shares.getAssetParty(), shares.getLiabilityParty(), (int) getAmount());
     }

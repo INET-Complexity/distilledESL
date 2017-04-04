@@ -32,7 +32,7 @@ public class PullFunding extends Action {
         } else {
             // If there is a counter-party AND we have funding contagion, we must send a Obligation.
             Obligation obligation = new PullFundingObligation(loan, getAmount(), Parameters.TIMESTEPS_TO_PAY);
-            loan.getAssetParty().sendMessage(loan.getLiabilityParty(), obligation);
+            loan.getAssetParty().sendObligation(loan.getLiabilityParty(), obligation);
             if (loan instanceof Repo) {
                 try {
                     System.out.println("I've pulled funding from a repo. My counterparty will perform a margin call to free up assets.");

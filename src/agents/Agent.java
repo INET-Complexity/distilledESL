@@ -8,8 +8,10 @@ import contracts.Contract;
 import contracts.FailedMarginCallException;
 import contracts.Repo;
 import contracts.obligations.Mailbox;
+import contracts.obligations.Message;
 import contracts.obligations.Obligation;
 
+import economicsl.GoodMessage;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.stream.Collectors;
@@ -19,7 +21,7 @@ public abstract class Agent {
     private String name;
     private boolean alive = true;
     private double encumberedCash;
-    private Mailbox mailbox;
+    protected Mailbox mailbox;
     private double equityAtDefault;
     private double lcrAtDefault;
 
@@ -190,16 +192,34 @@ public abstract class Agent {
     }
 
     public void step() {
+        System.out.println(mailbox.goods_inbox);
+        for (GoodMessage good_message: mailbox.goods_inbox) {
+            getMainLedger().addGoods(good_message.good_name, good_message.amount, good_message.value);
+        }
+        mailbox.goods_inbox.clear();
         mailbox.step();
     }
 
-    public void sendMessage(Agent recipient, Obligation obligation) {
-        recipient.receiveMessage(obligation);
-        mailbox.addToOutbox(obligation);
+    public void sendObligation(Agent recipient, Obligation obligation) {
+        recipient.receiveObligation(obligation);
+        mailbox.addToObligationOutbox(obligation);
     }
 
-    public void receiveMessage(Obligation obligation) {
-        mailbox.receiveMessage(obligation);
+    public void sendObligation(Agent recipient, Object message) {
+        Message msg = new Message(this, message);
+        recipient.receiveMessage(msg);
+    }
+
+    public void receiveObligation(Obligation obligation) {
+        mailbox.receiveObligation(obligation);
+    }
+
+    public void receiveMessage(Message msg) {
+        mailbox.receiveMessage(msg);
+    }
+
+    public void receiveGoodMessage(GoodMessage good_message) {
+        mailbox.receiveGoodMessage(good_message);
     }
 
     public double getMaturedObligations() {

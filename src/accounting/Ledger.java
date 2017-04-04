@@ -6,11 +6,15 @@ import contracts.Asset;
 import contracts.Contract;
 import contracts.Repo;
 
+import economicsl.NotEnoughGoods;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static accounting.AccountType.GOOD;
 
 /**
  * This is the main class implementing double entry accounting. All public operations provided by this class
@@ -35,10 +39,12 @@ public class Ledger implements LedgerAPI {
         // A Ledger is a list of accounts (for quicker searching)
         assetAccounts = new HashSet<>();
         liabilityAccounts = new HashSet<>();
+        goodsAccounts = new HashMap<>();
         equityAccounts = new HashSet<>();
 
         allAssets = new HashSet<>();
         allLiabilities = new HashSet<>();
+        allGoods = new HashMap<>();
 
         // Each Account includes an inventory to hold one type of contract.
         // These hashmaps are used to access the correct account for a given type of contract.
@@ -48,28 +54,29 @@ public class Ledger implements LedgerAPI {
         contractsToLiabilityAccounts = new HashMap<>();
 
         // A book is initially created with a cash account and an equityAccounts account (it's the simplest possible book)
-        cashAccount = new Account("cash", AccountType.ASSET);
         equityAccount = new Account("equityAccounts", AccountType.EQUITY);
-        addAccount(cashAccount, null);
         addAccount(equityAccount, null);
+
+        allGoods.put("cash", 0.0);
     }
 
 
     private HashSet<Contract> allAssets;
     private HashSet<Contract> allLiabilities;
+    private HashMap<String, Double> allGoods;
     private HashSet<Account> assetAccounts;
     private HashSet<Account> liabilityAccounts;
+    private HashMap<String, Account> goodsAccounts;
     private HashSet<Account> equityAccounts;
     private HashMap<Class<? extends contracts.Contract>, Account> contractsToAssetAccounts;
     private HashMap<Class<? extends contracts.Contract>, Account> contractsToLiabilityAccounts;
-    private Account cashAccount;
     private Account equityAccount;
     private double initialEquity;
 
     public double getAssetValue() {
         double assetTotal = 0;
         for (Account assetAccount : assetAccounts) {
-            assetTotal+=assetAccount.getBalance();
+            assetTotal += assetAccount.getBalance();
         }
         return assetTotal;
     }
@@ -128,8 +135,17 @@ public class Ledger implements LedgerAPI {
 
     }
 
+    public double getGood(String name) {
+        try {
+            return allGoods.get(name);
+        } catch (NullPointerException e){
+            allGoods.put("name", 0.0);
+            return 0.0;
+        }
+    }
+
     public double getCash() {
-        return cashAccount.getBalance();
+        return getGood("cash");
     }
 
 
@@ -196,12 +212,77 @@ public class Ledger implements LedgerAPI {
         allLiabilities.add(contract);
     }
 
-    public void addCash(double amount) {
-        // (dr cash, cr equity)
-        Account.doubleEntry(cashAccount, equityAccount, amount);
-
+    public void addGoods(String name, double amount, double value) {
+        assert(amount >= 0.0);
+        double have = allGoods.getOrDefault(name, 0.0);
+        allGoods.put(name, have + amount);
+        Account physicalthingsaccount = getGoodsAccount(name);
+        Account.doubleEntry(physicalthingsaccount, equityAccount, amount * value);
     }
 
+
+    public void subtractGoods(String name, double amount, double value) throws NotEnoughGoods {
+        assert(amount >= 0.0);
+        double have = getGood(name);
+        if (amount > have) {
+            throw new NotEnoughGoods(name, have, amount);
+        }
+        allGoods.put(name, have - amount);
+        Account.doubleEntry(equityAccount, getGoodsAccount(name), amount * value);
+    }
+
+    private Account getGoodsAccount(String name) {
+        Account account = goodsAccounts.get(name);
+        if (account == null) {
+            account = new Account(name, GOOD);
+            goodsAccounts.put(name, account);
+        }
+        return account;
+    }
+
+    public void subtractGoods(String name, double amount) throws NotEnoughGoods {
+        try {
+            double value = getPhysicalThingValue(name);
+            subtractGoods(name, amount, value);
+        } catch (NullPointerException e) {
+            throw new NotEnoughGoods(name, 0, amount);
+        }
+    }
+
+    public double getPhysicalThingValue(String name) {
+        try {
+            return getGoodsAccount(name).getBalance() / getPhysicalThings(name);
+        } catch (NullPointerException e) {
+            return 0.0;
+        }
+    }
+
+    private Double getPhysicalThings(String name) {
+        return allGoods.get(name);
+    }
+
+    /**
+     * Reevaluates the current stock of phisical goods at a specified value and books
+     * the change to accounting
+     */
+    public void revalueGoods(String name, double value) {
+        double old_value = getGoodsAccount(name).getBalance();
+        double new_value = allGoods.get(name) * value;
+        if (new_value > old_value) {
+            Account.doubleEntry(getGoodsAccount(name), equityAccount, new_value - old_value);
+        } else if (new_value < old_value) {
+            Account.doubleEntry(equityAccount, getGoodsAccount(name), old_value - new_value);
+        }
+    }
+
+    public void addCash(double amount) {
+        // (dr cash, cr equity)
+        addGoods("cash", amount, 1.0);
+    }
+
+    public void substractCash(double amount) throws NotEnoughGoods {
+        subtractGoods("cash", amount, 1.0);
+    }
 
     /**
      * Operation to cancel a Loan to someone (i.e. cash in a Loan in the Assets side).
@@ -213,7 +294,7 @@ public class Ledger implements LedgerAPI {
         Account loanAccount = contractsToAssetAccounts.get(loan.getClass());
 
         // (dr cash, cr asset )
-        Account.doubleEntry(cashAccount, loanAccount, amount);
+        Account.doubleEntry(getGoodsAccount("cash"), loanAccount, amount);
     }
 
     /**
@@ -227,9 +308,7 @@ public class Ledger implements LedgerAPI {
         assert(getCash() >= amount); // Pre-condition: liquidity has been raised.
 
         // (dr liability, cr cash )
-        Account.doubleEntry(liabilityAccount, cashAccount, amount);
-
-
+        Account.doubleEntry(liabilityAccount, getGoodsAccount("cash"), amount);
     }
 
     /**
@@ -240,7 +319,7 @@ public class Ledger implements LedgerAPI {
         Account assetAccount = contractsToAssetAccounts.get(assetType);
 
         // (dr cash, cr asset)
-        Account.doubleEntry(cashAccount, assetAccount, amount);
+        Account.doubleEntry(getGoodsAccount("cash"), assetAccount, amount);
     }
 
     /**
@@ -337,7 +416,7 @@ public class Ledger implements LedgerAPI {
         for (Contract contract : getLiabilitiesOfType(Repo.class)) {
             ((Repo) contract).printCollateral();
         }
-        System.out.println("\n\nTotal cash: "+cashAccount.getBalance());
+        System.out.println("\n\nTotal cash: "+ getGoodsAccount("cash").getBalance());
         System.out.println("Encumbered cash: "+me.getEncumberedCash());
         System.out.println("Unencumbered cash: "+me.getCash());
     }
@@ -349,6 +428,5 @@ public class Ledger implements LedgerAPI {
     public void setInitialValues() {
         initialEquity = getEquityValue();
     }
-
 
 }
