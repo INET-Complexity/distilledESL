@@ -7,11 +7,12 @@ import contracts.Asset;
 import contracts.Contract;
 import contracts.FailedMarginCallException;
 import contracts.Repo;
-import contracts.obligations.Mailbox;
-import contracts.obligations.Message;
-import contracts.obligations.Obligation;
+import contracts.obligations.*;
 
 import economicsl.GoodMessage;
+import economicsl.Mailbox;
+import economicsl.Message;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.stream.Collectors;
@@ -21,6 +22,7 @@ public abstract class Agent {
     private String name;
     private boolean alive = true;
     private double encumberedCash;
+    protected ObligationsAndGoodsMailbox obligationsAndGoodsMailbox;
     protected Mailbox mailbox;
     private double equityAtDefault;
     private double lcrAtDefault;
@@ -28,6 +30,7 @@ public abstract class Agent {
     public Agent(String name) {
         this.name = name;
         mainLedger = new Ledger(this);
+        this.obligationsAndGoodsMailbox = new ObligationsAndGoodsMailbox();
         this.mailbox = new Mailbox();
     }
 
@@ -192,66 +195,66 @@ public abstract class Agent {
     }
 
     public void step() {
-        System.out.println(mailbox.goods_inbox);
-        for (GoodMessage good_message: mailbox.goods_inbox) {
+        for (GoodMessage good_message: obligationsAndGoodsMailbox.goods_inbox) {
             getMainLedger().addGoods(good_message.good_name, good_message.amount, good_message.value);
         }
-        mailbox.goods_inbox.clear();
+        obligationsAndGoodsMailbox.goods_inbox.clear();
+        obligationsAndGoodsMailbox.step();
         mailbox.step();
     }
 
     public void sendObligation(Agent recipient, Obligation obligation) {
         recipient.receiveObligation(obligation);
-        mailbox.addToObligationOutbox(obligation);
+        obligationsAndGoodsMailbox.addToObligationOutbox(obligation);
     }
 
     public void sendObligation(Agent recipient, Object message) {
-        Message msg = new Message(this, message);
+        ObligationMessage msg = new ObligationMessage(this, message);
         recipient.receiveMessage(msg);
     }
 
     public void receiveObligation(Obligation obligation) {
-        mailbox.receiveObligation(obligation);
+        obligationsAndGoodsMailbox.receiveObligation(obligation);
     }
 
-    public void receiveMessage(Message msg) {
-        mailbox.receiveMessage(msg);
+    public void receiveMessage(ObligationMessage msg) {
+        obligationsAndGoodsMailbox.receiveMessage(msg);
     }
 
     public void receiveGoodMessage(GoodMessage good_message) {
-        mailbox.receiveGoodMessage(good_message);
+        obligationsAndGoodsMailbox.receiveGoodMessage(good_message);
     }
 
     public double getMaturedObligations() {
-        return mailbox.getMaturedObligations();
+        return obligationsAndGoodsMailbox.getMaturedObligations();
     }
 
     public double getAllPendingObligations() {
-        return mailbox.getAllPendingObligations();
+        return obligationsAndGoodsMailbox.getAllPendingObligations();
     }
 
     public double getPendingPaymentsToMe() {
-        return mailbox.getPendingPaymentsToMe();
+        return obligationsAndGoodsMailbox.getPendingPaymentsToMe();
     }
 
     public void fulfilAllRequests() {
-        mailbox.fulfilAllRequests();
+        obligationsAndGoodsMailbox.fulfilAllRequests();
     }
 
     public void fulfilMaturedRequests() {
-        mailbox.fulfilMaturedRequests();
+        obligationsAndGoodsMailbox.fulfilMaturedRequests();
     }
 
     public ArrayList<Double> getCashCommitments() {
-        return mailbox.getCashCommitments();
+        return obligationsAndGoodsMailbox.getCashCommitments();
     }
 
     public ArrayList<Double> getCashInflows() {
-        return mailbox.getCashInflows();
+        return obligationsAndGoodsMailbox.getCashInflows();
     }
 
     public void printMailbox() {
-        mailbox.printMailbox();
+        obligationsAndGoodsMailbox.printMailbox();
     }
 
     public double getLCR() {
@@ -270,4 +273,22 @@ public abstract class Agent {
         mainLedger.setInitialValues();
     }
 
+    public Message message(Agent receiver, String topic, Object content) {
+        Message message = new Message(this, topic, content);
+        receiver.receiveMessage(message);
+        return message;
+    }
+
+    private void receiveMessage(Message message) {
+        mailbox.receiveMessage(message);
+    }
+
+    public HashSet<Message> get_messages() {
+        return mailbox.get_massages();
+    }
+
+
+    private HashSet<Message> get_messages(String topic) {
+        return mailbox.get_massages(topic);
+    }
 }

@@ -9,21 +9,21 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.stream.Collectors;
 
-public class Mailbox {
+public class ObligationsAndGoodsMailbox {
     private HashSet<Obligation> obligation_unopened;
     private HashSet<Obligation> obligation_outbox;
     private HashSet<Obligation> obligation_inbox;
-    private HashSet<Message> message_inbox;
-    private HashSet<Message> message_unopened;
+    private HashSet<ObligationMessage> obligationMessage_inbox;
+    private HashSet<ObligationMessage> obligationMessage_unopened;
     public HashSet<GoodMessage> goods_inbox;
 
 
-    public Mailbox() {
+    public ObligationsAndGoodsMailbox() {
         this.obligation_unopened = new HashSet<>();
         this.obligation_outbox = new HashSet<>();
         this.obligation_inbox = new HashSet<>();
-        this.message_unopened = new HashSet<>();
-        this.message_inbox = new HashSet<>();
+        this.obligationMessage_unopened = new HashSet<>();
+        this.obligationMessage_inbox = new HashSet<>();
         this.goods_inbox = new HashSet<>();
     }
 
@@ -37,16 +37,16 @@ public class Mailbox {
                 +" on timestep "+obligation.getTimeToPay());
     }
 
-    public void receiveMessage(Message msg) {
-        message_unopened.add(msg);
-        //System.out.println("Message sent. " + msg.getSender().getName() +
+    public void receiveMessage(ObligationMessage msg) {
+        obligationMessage_unopened.add(msg);
+        //System.out.println("ObligationMessage sent. " + msg.getSender().getName() +
         //        " message: " + msg.getMessage());
     }
 
     public void receiveGoodMessage(GoodMessage good_message) {
         System.out.println(good_message);
         goods_inbox.add(good_message);
-        //System.out.println("Message sent. " + msg.getSender().getName() +
+        //System.out.println("ObligationMessage sent. " + msg.getSender().getName() +
         //        " message: " + msg.getMessage());
     }
 
@@ -108,14 +108,14 @@ public class Mailbox {
 
 
         // Remove all fulfilled requests
-        message_inbox.removeIf(Message::is_read);
+        obligationMessage_inbox.removeIf(ObligationMessage::is_read);
 
         // Move all messages in the obligation_unopened to the obligation_inbox
-        message_inbox.addAll(
-                message_unopened.stream()  // what is this
+        obligationMessage_inbox.addAll(
+                obligationMessage_unopened.stream()  // what is this
                         .collect(Collectors.toCollection(HashSet::new)));
 
-        message_unopened = new HashSet<>();
+        obligationMessage_unopened = new HashSet<>();
 
 
         // Remove all fulfilled requests
@@ -150,9 +150,9 @@ public class Mailbox {
     }
 
     public void printMailbox() {
-        if (obligation_unopened.isEmpty() && obligation_inbox.isEmpty() && obligation_outbox.isEmpty()) System.out.println("\nMailbox is empty.");
+        if (obligation_unopened.isEmpty() && obligation_inbox.isEmpty() && obligation_outbox.isEmpty()) System.out.println("\nObligationsAndGoodsMailbox is empty.");
         else {
-            System.out.println("\nMailbox contents:");
+            System.out.println("\nObligationsAndGoodsMailbox contents:");
             if (!obligation_unopened.isEmpty()) System.out.println("Unopened messages:");
             obligation_unopened.forEach(Obligation::printObligation);
 
@@ -166,8 +166,8 @@ public class Mailbox {
     }
 
 
-    public HashSet<Message> getMessageInbox() {
-        return message_inbox;
+    public HashSet<ObligationMessage> getMessageInbox() {
+        return obligationMessage_inbox;
     }
 }
 

@@ -8,8 +8,8 @@ import economicsl.Trade;
 /**
  * Created by taghawi on 28/03/17.
  */
-public class GiveReceive extends Trade {
-    public GiveReceive(String name, double teddies, double money) {
+public class GiveAgent extends Trade {
+    public GiveAgent(String name, double teddies, double money) {
         super(name);
         this.addCash(money);
         this.getMainLedger().addGoods("teddies", teddies, 100.0);
@@ -22,7 +22,7 @@ public class GiveReceive extends Trade {
     }
 
 
-    public void give(GiveReceive receiver) {
+    public void give(GiveAgent receiver) {
         try {
             this.give(receiver, "ball", 1);
             System.out.println(" gave ball ");

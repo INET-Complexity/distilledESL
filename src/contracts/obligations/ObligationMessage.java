@@ -3,12 +3,12 @@ package contracts.obligations;
 import agents.Agent;
 
 
-public class Message {
+public class ObligationMessage {
     public boolean is_read;
     private final Object message;
     public final Agent sender;
 
-    public Message(Agent sender, Object message) {
+    public ObligationMessage(Agent sender, Object message) {
         this.sender = sender;
         this.message = message;
         this.is_read = false;
@@ -23,7 +23,7 @@ public class Message {
         return message;
     }
 
-    public static boolean is_read(Message message) {
-        return message.is_read;
+    public static boolean is_read(ObligationMessage obligationMessage) {
+        return obligationMessage.is_read;
     }
 }
