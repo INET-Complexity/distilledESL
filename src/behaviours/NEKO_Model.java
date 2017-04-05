@@ -1,7 +1,7 @@
 package behaviours;
 
 import agents.StressAgent;
-import agents.Agent;
+import economicsl.Agent;
 import contracts.Loan;
 import demos.Parameters;
 

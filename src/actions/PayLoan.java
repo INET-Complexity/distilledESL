@@ -1,6 +1,6 @@
 package actions;
 
-import agents.Agent;
+import economicsl.Agent;
 import contracts.FailedMarginCallException;
 import contracts.Loan;
 import contracts.Repo;

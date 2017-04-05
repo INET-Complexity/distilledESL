@@ -1,6 +1,6 @@
 package actions;
 
-import agents.Agent;
+import economicsl.Agent;
 import demos.Model;
 
 import java.util.ArrayList;

@@ -4,7 +4,7 @@ import agents.StressAgent;
 import actions.Action;
 import actions.PullFunding;
 import actions.PayLoan;
-import agents.Agent;
+import economicsl.Agent;
 import behaviours.NEKO_Model;
 import demos.Parameters;
 

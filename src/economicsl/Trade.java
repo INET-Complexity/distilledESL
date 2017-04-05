@@ -1,7 +1,6 @@
 package economicsl;
 
 import agents.StressAgent;
-import agents.Agent;
 import behaviours.Behaviour;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 

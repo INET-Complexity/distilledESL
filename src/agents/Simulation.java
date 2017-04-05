@@ -1,5 +1,7 @@
 package agents;
 
+import economicsl.Agent;
+
 import java.util.HashSet;
 
 public class Simulation {

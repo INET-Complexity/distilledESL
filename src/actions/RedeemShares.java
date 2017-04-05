@@ -1,6 +1,6 @@
 package actions;
 
-import agents.Agent;
+import economicsl.Agent;
 import contracts.Shares;
 import contracts.obligations.RedeemSharesObligation;
 import demos.Model;

@@ -1,13 +1,10 @@
-package agents;
+package economicsl;
 
 import accounting.Ledger;
 import contracts.Contract;
 import contracts.obligations.Obligation;
 import contracts.obligations.ObligationMessage;
 import contracts.obligations.ObligationsAndGoodsMailbox;
-import economicsl.GoodMessage;
-import economicsl.Mailbox;
-import economicsl.Message;
 
 import java.util.HashSet;
 

@@ -3,7 +3,7 @@ package contracts;
 import actions.Action;
 import actions.RedeemShares;
 import agents.StressAgent;
-import agents.Agent;
+import economicsl.Agent;
 import agents.CanIssueShares;
 
 import java.util.ArrayList;

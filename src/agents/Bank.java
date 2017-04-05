@@ -32,7 +32,7 @@ public class Bank extends StressAgent implements CanPledgeCollateral {
     @Override
     public void putMoreCollateral(double total, Repo repo) {
         // First, get a set of all my Assets that can be pledged as collateral
-        HashSet<Contract> potentialCollateral = mainLedger.getAssetsOfType(AssetCollateral.class);
+        HashSet<Contract> potentialCollateral = getMainLedger().getAssetsOfType(AssetCollateral.class);
 
         double maxHaircutValue = getMaxUnencumberedHaircuttedCollateral();
         double haircuttedValuePledgedSoFar = 0.0;
@@ -51,7 +51,7 @@ public class Bank extends StressAgent implements CanPledgeCollateral {
 
     @Override
     public double getMaxUnencumberedHaircuttedCollateral() {
-        return mainLedger.getAssetsOfType(AssetCollateral.class).stream()
+        return getMainLedger().getAssetsOfType(AssetCollateral.class).stream()
                 .mapToDouble(asset ->
                         ((CanBeCollateral) asset).getUnencumberedValue() *
                                 (1.0 - ((CanBeCollateral) asset).getHaircut()))
@@ -104,7 +104,7 @@ public class Bank extends StressAgent implements CanPledgeCollateral {
         super.triggerDefault();
 
         System.out.println("First, liquidate all loans (in the liability side).");
-        HashSet<Contract> loansAndRepos = mainLedger.getLiabilitiesOfType(Loan.class);
+        HashSet<Contract> loansAndRepos = getMainLedger().getLiabilitiesOfType(Loan.class);
         for (Contract loan : loansAndRepos) {
             ((Loan) loan).liquidate();
         }
@@ -124,6 +124,6 @@ public class Bank extends StressAgent implements CanPledgeCollateral {
     }
 
     public void revalueAllLoans() {
-        mainLedger.getAssetsOfType(Loan.class).forEach(loan -> ((Loan) loan).reValueLoan());
+        getMainLedger().getAssetsOfType(Loan.class).forEach(loan -> ((Loan) loan).reValueLoan());
     }
 }

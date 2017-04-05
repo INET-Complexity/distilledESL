@@ -1,7 +1,7 @@
 package contracts;
 
 import agents.StressAgent;
-import agents.Agent;
+import economicsl.Agent;
 import agents.CanPledgeCollateral;
 import demos.Parameters;
 

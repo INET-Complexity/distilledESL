@@ -1,7 +1,7 @@
 package end_to_end_test;
 
 import agents.StressAgent;
-import agents.Agent;
+import economicsl.Agent;
 import behaviours.Behaviour;
 import economicsl.Message;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;

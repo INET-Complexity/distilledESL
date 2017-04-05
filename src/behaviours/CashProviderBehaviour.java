@@ -3,7 +3,7 @@ package behaviours;
 import actions.Action;
 import actions.PullFunding;
 import agents.StressAgent;
-import agents.Agent;
+import economicsl.Agent;
 import agents.Bank;
 import demos.Parameters;
 

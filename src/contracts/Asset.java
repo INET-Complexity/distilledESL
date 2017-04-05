@@ -3,7 +3,7 @@ package contracts;
 import agents.StressAgent;
 import actions.Action;
 import actions.SellAsset;
-import agents.Agent;
+import economicsl.Agent;
 import demos.Parameters;
 
 import java.util.ArrayList;

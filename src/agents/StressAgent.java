@@ -6,6 +6,7 @@ import contracts.Asset;
 import contracts.Contract;
 import contracts.FailedMarginCallException;
 import contracts.Repo;
+import economicsl.Agent;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -21,7 +22,7 @@ public abstract class StressAgent extends Agent {
     }
 
     public void pullFunding(double amount, Contract loan) {
-        mainLedger.pullFunding(amount, loan);
+        getMainLedger().pullFunding(amount, loan);
     }
 
     /**
@@ -32,41 +33,41 @@ public abstract class StressAgent extends Agent {
      */
     public void payLiability(double amount, Contract loan) {
         assert (getCash_() - getEncumberedCash() >= amount);
-        mainLedger.payLiability(amount, loan);
+        getMainLedger().payLiability(amount, loan);
     }
 
     public void sellAssetForValue(Contract asset, double value) {
-        mainLedger.sellAsset(value, asset.getClass());
+        getMainLedger().sellAsset(value, asset.getClass());
     }
 
     public void devalueAsset(Contract asset, double valueLost) {
-        mainLedger.devalueAsset(asset, valueLost);
+        getMainLedger().devalueAsset(asset, valueLost);
 
     }
 
     public void devalueAssetOfType(Asset.AssetType assetType, double priceLost) {
-        mainLedger.getAssetsOfType(Asset.class).stream()
+        getMainLedger().getAssetsOfType(Asset.class).stream()
                 .filter(asset -> ((Asset) asset).getAssetType()==assetType)
                 .forEach(asset ->
                 devalueAsset(asset, ((Asset) asset).getQuantity()*priceLost));
 
         //Update their prices too
-        mainLedger.getAssetsOfType(Asset.class).stream()
+        getMainLedger().getAssetsOfType(Asset.class).stream()
                 .filter(asset -> ((Asset) asset).getAssetType()==assetType)
                 .forEach(asset -> ((Asset) asset).updatePrice());
 
     }
 
     public void appreciateAsset(Contract asset, double valueLost) {
-        mainLedger.appreciateAsset(asset, valueLost);
+        getMainLedger().appreciateAsset(asset, valueLost);
     }
 
     public void devalueLiability(Contract asset, double valueLost) {
-        mainLedger.devalueLiability(asset, valueLost);
+        getMainLedger().devalueLiability(asset, valueLost);
     }
 
     public void appreciateLiability(Contract asset, double valueLost) {
-        mainLedger.appreciateLiability(asset, valueLost);
+        getMainLedger().appreciateLiability(asset, valueLost);
     }
 
     public double getEncumberedCash() {
@@ -74,7 +75,7 @@ public abstract class StressAgent extends Agent {
     }
 
     public ArrayList<Action> getAvailableActions(Agent me) {
-        return mainLedger.getAvailableActions(this);
+        return getMainLedger().getAvailableActions(this);
     }
 
     public abstract Behaviour getBehaviour(); // Make this abstract to force every implementation to provide a behaviour
@@ -88,25 +89,25 @@ public abstract class StressAgent extends Agent {
     }
 
     public double getAssetValue() {
-        return mainLedger.getAssetValue();
+        return getMainLedger().getAssetValue();
     }
 
     public double getLiabilityValue() {
-        return mainLedger.getLiabilityValue();
+        return getMainLedger().getLiabilityValue();
     }
 
     public double getEquityValue() {
-        return isAlive() ? mainLedger.getEquityValue() : equityAtDefault;
+        return isAlive() ? getMainLedger().getEquityValue() : equityAtDefault;
     }
 
     public void printBalanceSheet() {
         System.out.println("\nBalance Sheet of " + getName() + "\n**************************");
-        mainLedger.printBalanceSheet(this);
+        getMainLedger().printBalanceSheet(this);
         System.out.println("\nLeverage ratio: " + String.format("%.2f", 100 * getLeverage()) + "%");
     }
 
     public void runMarginCalls() throws FailedMarginCallException {
-        HashSet<Contract> repoContracts = mainLedger.getLiabilitiesOfType(Repo.class);
+        HashSet<Contract> repoContracts = getMainLedger().getLiabilitiesOfType(Repo.class);
         for (Contract contract : repoContracts) {
             Repo repo = (Repo) contract;
             repo.marginCall(); // Throws exception if it fails.
@@ -132,7 +133,7 @@ public abstract class StressAgent extends Agent {
     }
 
     public void receiveShockToAsset(Asset.AssetType assetType, double fractionLost) {
-        HashSet<Contract> assetsShocked = mainLedger.getAssetsOfType(Asset.class).stream()
+        HashSet<Contract> assetsShocked = getMainLedger().getAssetsOfType(Asset.class).stream()
                 .filter(asset -> ((Asset) asset).getAssetType() == assetType)
                 .collect(Collectors.toCollection(HashSet::new));
 
@@ -183,11 +184,11 @@ public abstract class StressAgent extends Agent {
     }
 
     public double getEquityLoss() {
-        return ( getEquityValue() - mainLedger.getInitialEquity() ) / mainLedger.getInitialEquity();
+        return ( getEquityValue() - getMainLedger().getInitialEquity() ) / getMainLedger().getInitialEquity();
     }
 
     public void setInitialValues() {
-        mainLedger.setInitialValues();
+        getMainLedger().setInitialValues();
     }
 
 

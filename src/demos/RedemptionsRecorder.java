@@ -1,6 +1,6 @@
 package demos;
 
-import agents.Agent;
+import economicsl.Agent;
 
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;

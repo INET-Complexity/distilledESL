@@ -2,6 +2,7 @@ package demos;
 
 import agents.*;
 import contracts.*;
+import economicsl.Agent;
 
 import java.util.HashMap;
 

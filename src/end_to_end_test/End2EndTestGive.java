@@ -1,6 +1,6 @@
 package end_to_end_test;
 
-import agents.Agent;
+import economicsl.Agent;
 
 
 /**

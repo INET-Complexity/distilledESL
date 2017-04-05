@@ -2,7 +2,7 @@ package accounting;
 
 import agents.StressAgent;
 import actions.Action;
-import agents.Agent;
+import economicsl.Agent;
 import contracts.Asset;
 import contracts.Contract;
 import contracts.Repo;

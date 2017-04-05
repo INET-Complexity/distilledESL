@@ -16,7 +16,7 @@ public class AssetManager extends StressAgent implements CanIssueShares {
     }
 
     public void updateValueOfAllShares() {
-        mainLedger.getLiabilitiesOfType(Shares.class).forEach(shares -> ((Shares) shares).updateValue());
+        getMainLedger().getLiabilitiesOfType(Shares.class).forEach(shares -> ((Shares) shares).updateValue());
     }
 
     public Shares issueShares(StressAgent owner, int quantity) {

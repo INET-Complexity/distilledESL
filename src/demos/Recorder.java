@@ -5,6 +5,7 @@ import contracts.Asset;
 import contracts.AssetCollateral;
 import contracts.AssetMarket;
 import contracts.CanBeCollateral;
+import economicsl.Agent;
 
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;

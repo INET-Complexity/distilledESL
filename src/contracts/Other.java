@@ -2,7 +2,7 @@ package contracts;
 
 import actions.Action;
 import agents.StressAgent;
-import agents.Agent;
+import economicsl.Agent;
 
 import java.util.Collections;
 import java.util.List;

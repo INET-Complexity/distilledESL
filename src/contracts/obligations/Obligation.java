@@ -1,6 +1,6 @@
 package contracts.obligations;
 
-import agents.Agent;
+import economicsl.Agent;
 import contracts.Contract;
 import demos.Model;
 

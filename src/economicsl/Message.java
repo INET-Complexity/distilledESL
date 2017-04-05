@@ -1,7 +1,5 @@
 package economicsl;
 
-import agents.Agent;
-
 
 public class Message {
     private final String topic;
