@@ -1,19 +1,16 @@
 package demos;
 
 import agents.*;
-import behaviours.DefaultException;
 import contracts.*;
 
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Locale;
 
 public class Model {
 
     public static int simulationNumber = 0;
 
     private static AssetMarket assetMarket = new AssetMarket();
-    private static HashMap<String, Agent> allAgents;
+    private static HashMap<String, StressAgent> allAgents;
     private static Recorder recorder = new Recorder();
     public static DefaultRecorder defaultRecorder = new DefaultRecorder();
     public static RedemptionsRecorder redemptionsRecorder = new RedemptionsRecorder();
@@ -49,7 +46,7 @@ public class Model {
             timeStep++;
             System.out.println("\nTime step: "+timeStep+"\n^^^^^^^^^^^^^");
 
-            for (Agent agent : allAgents.values()) {
+            for (StressAgent agent : allAgents.values()) {
                 agent.act();
             }
 
@@ -137,7 +134,7 @@ public class Model {
         recorder.record();
     }
 
-    private static void initAgent(Agent agent, double cash, double mbs, double equities, double bonds,
+    private static void initAgent(StressAgent agent, double cash, double mbs, double equities, double bonds,
                                   double otherAsset, double deposits, double longTerm, double otherLiability) {
 
         if (agent == null) return;
@@ -157,7 +154,7 @@ public class Model {
         allAgents.put(agent.getName(), agent);
     }
 
-    private static void addExternalAsset(Agent agent, Asset.AssetType assetType, double quantity) {
+    private static void addExternalAsset(StressAgent agent, Asset.AssetType assetType, double quantity) {
         if (agent == null) return;
         if (quantity > 0) agent.add(new Asset(agent, assetType, assetMarket, quantity));
     }
@@ -171,7 +168,7 @@ public class Model {
      * @param borrower liability party
      * @param principal principal
      */
-    private static void initInterBankLoan(Agent lender, Agent borrower, double principal) {
+    private static void initInterBankLoan(StressAgent lender, StressAgent borrower, double principal) {
         if (Parameters.FUNDING_CONTAGION_INTERBANK) {
             Loan loan = new Loan(lender, borrower, principal);
             lender.add(loan);
@@ -193,7 +190,7 @@ public class Model {
      * @param borrower liability party (repo party)
      * @param principal principal
      */
-    private static void initRepo(Agent lender, Agent borrower, double principal) {
+    private static void initRepo(StressAgent lender, StressAgent borrower, double principal) {
         if (principal > 0) {
             if (lender != null && borrower != null && Parameters.FUNDING_CONTAGION_HEDGEFUND) {
                 Repo repo = new Repo(lender, borrower, principal);
@@ -218,7 +215,7 @@ public class Model {
 
 
 
-    private static void initShares(Agent owner, CanIssueShares issuer, int number) {
+    private static void initShares(StressAgent owner, CanIssueShares issuer, int number) {
         if (owner == null || issuer == null) return;
         Shares shares = issuer.issueShares(owner, number);
         owner.add(shares);
@@ -228,7 +225,7 @@ public class Model {
     private static void initialShock(Asset.AssetType assetType, double fraction) {
         assetMarket.setPrice(assetType, assetMarket.getPrice(assetType) * (1.0 - fraction));
 
-        for (Agent agent : allAgents.values()) {
+        for (StressAgent agent : allAgents.values()) {
             agent.receiveShockToAsset(assetType, fraction);
         }
 

@@ -35,7 +35,7 @@ public class LCR_Constraint {
                 .mapToDouble(contract -> contract.getValue(null) * contract.getLCRweight()).sum();
     }
     public double getLCR() {
-        return 1.0 * bank.getCash() / getLCRdenominator();
+        return 1.0 * bank.getCash_() - bank.getEncumberedCash() / getLCRdenominator();
     }
 
     public double getLiquidityToRaise() {

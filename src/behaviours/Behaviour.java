@@ -4,7 +4,7 @@ import actions.Action;
 import actions.PayLoan;
 import actions.PullFunding;
 import actions.SellAsset;
-import agents.Agent;
+import agents.StressAgent;
 import demos.Model;
 import demos.Parameters;
 
@@ -12,10 +12,10 @@ import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 public abstract class Behaviour {
-    private Agent me;
+    private StressAgent me;
     private ArrayList<Action> availableActions;
 
-    Behaviour (Agent me) {
+    Behaviour (StressAgent me) {
         this.me = me;
     }
 

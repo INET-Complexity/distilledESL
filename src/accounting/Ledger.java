@@ -1,7 +1,8 @@
 package accounting;
 
-import agents.Agent;
+import agents.StressAgent;
 import actions.Action;
+import agents.Agent;
 import contracts.Asset;
 import contracts.Contract;
 import contracts.Repo;
@@ -390,7 +391,7 @@ public class Ledger implements LedgerAPI {
     }
 
 
-    public void printBalanceSheet(Agent me) {
+    public void printBalanceSheet(StressAgent me) {
         System.out.println("Asset accounts:\n---------------");
         for (Account account : assetAccounts) {
             System.out.println(account.getName()+" -> "+ String.format( "%.2f", account.getBalance()));
@@ -418,7 +419,7 @@ public class Ledger implements LedgerAPI {
         }
         System.out.println("\n\nTotal cash: "+ getGoodsAccount("cash").getBalance());
         System.out.println("Encumbered cash: "+me.getEncumberedCash());
-        System.out.println("Unencumbered cash: "+me.getCash());
+        System.out.println("Unencumbered cash: " + (me.getCash_() - me.getEncumberedCash()));
     }
 
     public double getInitialEquity() {

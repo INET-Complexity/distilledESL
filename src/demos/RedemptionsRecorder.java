@@ -1,7 +1,6 @@
 package demos;
 
 import agents.Agent;
-import behaviours.DefaultException;
 
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;

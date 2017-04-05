@@ -2,12 +2,9 @@ package agents;
 
 import behaviours.AssetManagerBehaviour;
 import behaviours.Behaviour;
-import contracts.Contract;
 import contracts.Shares;
 
-import java.util.HashSet;
-
-public class AssetManager extends Agent implements CanIssueShares {
+public class AssetManager extends StressAgent implements CanIssueShares {
 
     private AssetManagerBehaviour behaviour;
     private int nShares;
@@ -22,7 +19,7 @@ public class AssetManager extends Agent implements CanIssueShares {
         mainLedger.getLiabilitiesOfType(Shares.class).forEach(shares -> ((Shares) shares).updateValue());
     }
 
-    public Shares issueShares(Agent owner, int quantity) {
+    public Shares issueShares(StressAgent owner, int quantity) {
         nShares += quantity;
         if (nShares - quantity > 0) {
             updateValueOfAllShares();
@@ -60,7 +57,7 @@ public class AssetManager extends Agent implements CanIssueShares {
 
     @Override
     public double getLCR() {
-        return getCash();
+        return getCash_() - getEncumberedCash();
     }
 
     @Override

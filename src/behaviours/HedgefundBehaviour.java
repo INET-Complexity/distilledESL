@@ -29,7 +29,7 @@ public class HedgefundBehaviour extends Behaviour {
         // 1) Pay matured cash commitments or default.
         double maturedPullFunding = me.getMaturedObligations();
         System.out.println("We have matured payment contracts.obligations for a total of " + String.format("%.2f", maturedPullFunding));
-        if (me.getCash() >= maturedPullFunding - 0.02) {
+        if (me.getCash_() - me.getEncumberedCash() >= maturedPullFunding - 0.02) {
             me.fulfilMaturedRequests();
         } else {
             System.out.println("A matured obligation was not fulfilled.");
@@ -67,7 +67,7 @@ public class HedgefundBehaviour extends Behaviour {
 
         if (Parameters.PRINT_LIQUIDITY) {
             System.out.println("\nLiquidity management for this timestep");
-            System.out.println("Current unencumbered cash -> " + me.getCash());
+            System.out.println("Current unencumbered cash -> " + (me.getCash_() - me.getEncumberedCash()));
             System.out.println("LCR buffer -> " + me.getCashBuffer());
             System.out.println("Needed to delever -> " + amountToDelever);
 //        System.out.println("Needed to replenish the LCR buffer -> "+liquidityBufferToReplenish);
@@ -80,7 +80,7 @@ public class HedgefundBehaviour extends Behaviour {
         // First loop
         // We look at timesteps between now and the time delay of PullFunding.
 
-        double balance = me.getCash();
+        double balance = me.getCash_() - me.getEncumberedCash();
         double miniumSpareBalanceInThePeriod = balance;
         for (int timeIndex = 0; timeIndex < Parameters.TIMESTEPS_TO_PAY+1; timeIndex++) {
             balance += cashInflows.get(timeIndex);
@@ -107,11 +107,11 @@ public class HedgefundBehaviour extends Behaviour {
             System.out.println("Our minimum spare balance in the period will be "+miniumSpareBalanceInThePeriod);
         }
 
-        double deLever = Math.min(miniumSpareBalanceInThePeriod, min(me.getCash()-me.getCashBuffer(), amountToDelever));
+        double deLever = Math.min(miniumSpareBalanceInThePeriod, min(me.getCash_() - me.getEncumberedCash()-me.getCashBuffer(), amountToDelever));
 
         if (deLever > 0) {
             System.out.println("Since we would like to delever an amount "+amountToDelever +
-                    "\n\tand we have an amount of cash above the buffer of "+ (me.getCash()-me.getCashBuffer()) +
+                    "\n\tand we have an amount of cash above the buffer of "+ (me.getCash_() - me.getEncumberedCash()-me.getCashBuffer()) +
                     "\n\tand we expect our minimum spare cash balance after paying approaching obligations to be "+miniumSpareBalanceInThePeriod +
                     "\n\twe can use an amount "+deLever+" to delever.");
             deLever = payOffLiabilities(deLever);
@@ -161,10 +161,10 @@ public class HedgefundBehaviour extends Behaviour {
             System.out.println("We can meet our long-term cash commitments and non-urgent liquidity needs in the next " +
                     cashCommitments.size()+ " timesteps, and we will have a spare balance of "+balance);
 
-            deLever = min(balance, min(me.getCash()-me.getCashBuffer(), amountToDelever));
+            deLever = min(balance, min(me.getCash_() - me.getEncumberedCash()-me.getCashBuffer(), amountToDelever));
             if (deLever > 0) {
                 System.out.println("Since we would like to delever an amount "+amountToDelever +
-                        "\nand we have an amount of cash above the buffer of "+ (me.getCash()-me.getCashBuffer()) +
+                        "\nand we have an amount of cash above the buffer of "+ (me.getCash_() - me.getEncumberedCash()-me.getCashBuffer()) +
                         "\nand we expect our cash balance after paying approaching obligations to be "+balance +
                         ",\n we can use an amount "+deLever+" to delever.");
                 payOffLiabilities(deLever);

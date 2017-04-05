@@ -3,7 +3,7 @@ package agents;
 import behaviours.Behaviour;
 import behaviours.InvestorBehaviour;
 
-public class Investor extends Agent {
+public class Investor extends StressAgent {
     private InvestorBehaviour behaviour;
 
     public Investor(String name) {
@@ -18,6 +18,6 @@ public class Investor extends Agent {
 
     @Override
     public double getLCR() {
-        return getCash();
+        return getCash_() - getEncumberedCash();
     }
 }

@@ -1,18 +1,18 @@
 package contracts;
 
 import actions.Action;
+import agents.StressAgent;
 import agents.Agent;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 public class Other extends Contract {
-    private Agent assetParty;
-    private Agent liabilityParty;
+    private StressAgent assetParty;
+    private StressAgent liabilityParty;
     private double amount;
 
-    public Other(Agent assetParty, Agent liabilityParty, double amount) {
+    public Other(StressAgent assetParty, StressAgent liabilityParty, double amount) {
         this.assetParty = assetParty;
         this.liabilityParty = liabilityParty;
         this.amount = amount;
@@ -24,12 +24,12 @@ public class Other extends Contract {
     }
 
     @Override
-    public Agent getAssetParty() {
+    public StressAgent getAssetParty() {
         return assetParty;
     }
 
     @Override
-    public Agent getLiabilityParty() {
+    public StressAgent getLiabilityParty() {
         return liabilityParty;
     }
 

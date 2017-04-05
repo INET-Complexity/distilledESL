@@ -1,7 +1,5 @@
 package end_to_end_test;
 
-import agents.Agent;
-
 
 /**
  * Created by taghawi on 28/03/17.

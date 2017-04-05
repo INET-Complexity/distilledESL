@@ -1,9 +1,10 @@
 package contracts;
 
-import agents.Agent;
+import agents.StressAgent;
 import actions.Action;
 import actions.PullFunding;
 import actions.PayLoan;
+import agents.Agent;
 import behaviours.NEKO_Model;
 import demos.Parameters;
 
@@ -12,13 +13,13 @@ import java.util.Collections;
 import java.util.List;
 
 public class Loan extends Contract {
-    protected Agent assetParty;
-    protected Agent liabilityParty;
+    protected StressAgent assetParty;
+    protected StressAgent liabilityParty;
     protected double principal;
     private double fundingAlreadyPulled = 0;
     private double previousNekoValuation; //Todo very messy!
 
-    public Loan(Agent assetParty, Agent liabilityParty, double principal) {
+    public Loan(StressAgent assetParty, StressAgent liabilityParty, double principal) {
         this.assetParty = assetParty;
         this.liabilityParty = liabilityParty;
         this.principal = principal;
@@ -71,12 +72,12 @@ public class Loan extends Contract {
     }
 
     @Override
-    public Agent getAssetParty() {
+    public StressAgent getAssetParty() {
         return assetParty;
     }
 
     @Override
-    public Agent getLiabilityParty() {
+    public StressAgent getLiabilityParty() {
         return liabilityParty;
     }
 

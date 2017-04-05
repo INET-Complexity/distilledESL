@@ -1,5 +1,6 @@
 package economicsl;
 
+import agents.StressAgent;
 import agents.Agent;
 import behaviours.Behaviour;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
@@ -7,7 +8,7 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 /**
  * Created by taghawi on 30/03/17.
  */
-public class Trade extends Agent {
+public class Trade extends StressAgent {
     public Trade(String name) {
         super(name);
     }

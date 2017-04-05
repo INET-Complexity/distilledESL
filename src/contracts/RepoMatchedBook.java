@@ -1,12 +1,12 @@
 package contracts;
 
-import agents.Agent;
+import agents.StressAgent;
 import demos.Parameters;
 
 public class RepoMatchedBook extends Repo {
 
     private Repo secondRepo;
-    public RepoMatchedBook(Agent assetParty, Agent liabilityParty, double principal, Repo secondRepo) {
+    public RepoMatchedBook(StressAgent assetParty, StressAgent liabilityParty, double principal, Repo secondRepo) {
         super(assetParty, liabilityParty, principal);
         this.secondRepo = secondRepo;
     }

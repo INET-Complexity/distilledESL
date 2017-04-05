@@ -1,5 +1,6 @@
 package end_to_end_test;
 
+import agents.StressAgent;
 import agents.Agent;
 import behaviours.Behaviour;
 import economicsl.Message;
@@ -10,7 +11,7 @@ import java.util.HashSet;
 /**
  * Created by taghawi on 04/04/17.
  */
-public class MessageAgent extends Agent {
+public class MessageAgent extends StressAgent {
     private final int odd_or_even;
     private final String name;
     private Agent friend;

@@ -1,9 +1,6 @@
 package demos;
 
-import agents.Agent;
-import agents.Bank;
-import agents.CashProvider;
-import agents.Investor;
+import agents.*;
 import contracts.Asset;
 import contracts.AssetCollateral;
 import contracts.AssetMarket;
@@ -13,9 +10,7 @@ import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Locale;
-import java.util.stream.Collectors;
 
 /**
  * This class records all statistics.
@@ -27,8 +22,8 @@ public class Recorder {
     private PrintWriter lossesFile;
     private PrintWriter collateralFile;
     private ArrayList<Asset.AssetType> assetTypes;
-    private Agent[] banks;
-    private Agent[] allAgents;
+    private StressAgent[] banks;
+    private StressAgent[] allAgents;
     private double totalInitialEquity;
 
     private String marketHeader;
@@ -48,15 +43,15 @@ public class Recorder {
 
     }
 
-    public void startSimulation(HashMap<String, Agent> modelAgents, AssetMarket market) {
-        allAgents = new Agent[5];
+    public void startSimulation(HashMap<String, StressAgent> modelAgents, AssetMarket market) {
+        allAgents = new StressAgent[5];
 
         String[] names = new String[] {"Bank 1", "Bank 2", "Bank 3", "Hedgefund 1", "AssetManager 1"};
         for (int i = 0; i < names.length; i++) {
             allAgents[i] = modelAgents.containsKey(names[i]) ? modelAgents.get(names[i]) : null;
         }
 
-        banks = new Agent[3];
+        banks = new StressAgent[3];
 
         System.arraycopy(allAgents, 0, banks, 0, 3);
 
@@ -118,7 +113,7 @@ public class Recorder {
         lossesFile.println(lossesLine);
 
         totalInitialEquity = 0.0;
-        for (Agent agent : allAgents) {
+        for (StressAgent agent : allAgents) {
             if (agent != null) {
                 totalInitialEquity += agent.getEquityValue();
             }
@@ -166,16 +161,16 @@ public class Recorder {
         String bankLine = Integer.toString(Model.simulationNumber);
         bankLine = bankLine +", "+ Integer.toString(Model.getTime());
 
-        for (Agent agent : banks) {
+        for (StressAgent agent : banks) {
             bankLine = bankLine + ", "+agent.getLeverage();
         }
         for (Agent agent : banks) {
             bankLine = bankLine + ", "+((Bank) agent).getRWAratio();
         }
-        for (Agent agent : banks) {
+        for (StressAgent agent : banks) {
             bankLine = bankLine + ", "+agent.getLCR();
         }
-        for (Agent agent : banks) {
+        for (StressAgent agent : banks) {
             bankLine = bankLine + ", "+agent.getEquityValue();
         }
         for (Agent agent : banks) {
@@ -189,7 +184,7 @@ public class Recorder {
         lossesLine = lossesLine +", "+ Integer.toString(Model.getTime());
 
         double totalEquity = 0.0;
-        for (Agent agent : allAgents) {
+        for (StressAgent agent : allAgents) {
             if (agent != null) {
                 lossesLine = lossesLine + ", " + String.format("%.2f", (100.0*agent.getEquityLoss())) + "%";
                 totalEquity += Math.max(0.0, agent.getEquityValue());

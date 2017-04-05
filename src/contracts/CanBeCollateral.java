@@ -1,6 +1,6 @@
 package contracts;
 
-import agents.Agent;
+import agents.StressAgent;
 
 public interface CanBeCollateral {
     void encumber(double quantity);
@@ -9,5 +9,5 @@ public interface CanBeCollateral {
     double getHaircut();
     double getUnencumberedQuantity();
     double getUnencumberedValue();
-    AssetCollateral changeOwnership(Agent newOwner, double amount);
+    AssetCollateral changeOwnership(StressAgent newOwner, double amount);
 }

@@ -1,6 +1,7 @@
 package contracts;
 
 import actions.Action;
+import agents.StressAgent;
 import agents.Agent;
 import demos.Parameters;
 
@@ -9,10 +10,10 @@ import java.util.List;
 
 public class LongTermUnsecured extends Contract {
 
-    private Agent liabilityParty;
+    private StressAgent liabilityParty;
     private double amount;
 
-    public LongTermUnsecured(Agent liabilityParty, double amount) {
+    public LongTermUnsecured(StressAgent liabilityParty, double amount) {
         this.amount = amount;
         this.liabilityParty = liabilityParty;
     }
@@ -28,12 +29,12 @@ public class LongTermUnsecured extends Contract {
     }
 
     @Override
-    public Agent getAssetParty() {
+    public StressAgent getAssetParty() {
         return null;
     }
 
     @Override
-    public Agent getLiabilityParty() {
+    public StressAgent getLiabilityParty() {
         return liabilityParty;
     }
 

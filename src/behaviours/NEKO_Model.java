@@ -1,7 +1,7 @@
 package behaviours;
 
+import agents.StressAgent;
 import agents.Agent;
-import contracts.Contract;
 import contracts.Loan;
 import demos.Parameters;
 
@@ -19,7 +19,7 @@ public class NEKO_Model {
                 .sum();
     }
 
-    private static double getProbabilityOfDefault(Agent agent) {
+    private static double getProbabilityOfDefault(StressAgent agent) {
         double equity = agent.getEquityValue();
         if (equity < 0) return 0.0;
 

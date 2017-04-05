@@ -2,6 +2,7 @@ package contracts;
 
 import actions.Action;
 import actions.RedeemShares;
+import agents.StressAgent;
 import agents.Agent;
 import agents.CanIssueShares;
 
@@ -10,10 +11,10 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * This contract represents a bunch of shares of some Agent which can issue shares.
+ * This contract represents a bunch of shares of some StressAgent which can issue shares.
  */
 public class Shares extends Contract {
-    private Agent owner;
+    private StressAgent owner;
     private CanIssueShares issuer;
     private int nShares;
     private double previousValueOfShares;
@@ -21,7 +22,7 @@ public class Shares extends Contract {
     private int nSharesPendingToRedeem;
     private int originalNumberOfShares;
 
-    public Shares(Agent owner, CanIssueShares issuer, int nShares, double originalNAV) {
+    public Shares(StressAgent owner, CanIssueShares issuer, int nShares, double originalNAV) {
         this.owner = owner;
         this.issuer = issuer;
         this.nShares = nShares;
@@ -30,7 +31,7 @@ public class Shares extends Contract {
         this.originalNAV = originalNAV;
         this.nSharesPendingToRedeem = 0;
 
-        assert(issuer instanceof Agent);
+        assert(issuer instanceof StressAgent);
     }
 
     @Override
@@ -45,7 +46,7 @@ public class Shares extends Contract {
     public void redeem(int numberToRedeem) {
         assert(numberToRedeem <= nShares);
         double nav = getNAV();
-        ((Agent) issuer).payLiability(numberToRedeem * nav, this);
+        ((StressAgent) issuer).payLiability(numberToRedeem * nav, this);
         owner.sellAssetForValue(this, numberToRedeem * nav);
         nShares -= numberToRedeem;
         nSharesPendingToRedeem -= numberToRedeem;
@@ -54,13 +55,13 @@ public class Shares extends Contract {
 
 
     @Override
-    public Agent getAssetParty() {
+    public StressAgent getAssetParty() {
         return owner;
     }
 
     @Override
-    public Agent getLiabilityParty() {
-        return (Agent) issuer;
+    public StressAgent getLiabilityParty() {
+        return (StressAgent) issuer;
     }
 
     @Override
@@ -88,11 +89,11 @@ public class Shares extends Contract {
 
         if (valueChange > 0) {
             owner.appreciateAsset(this, valueChange);
-            ((Agent) issuer).appreciateLiability(this, valueChange);
+            ((StressAgent) issuer).appreciateLiability(this, valueChange);
         } else if (valueChange < 0) {
             System.out.println("value of shares fell.");
             owner.devalueAsset(this, -1.0 * valueChange);
-            ((Agent) issuer).devalueLiability(this, -1.0 * valueChange);
+            ((StressAgent) issuer).devalueLiability(this, -1.0 * valueChange);
         }
     }
 

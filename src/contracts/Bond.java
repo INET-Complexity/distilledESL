@@ -1,14 +1,15 @@
 package contracts;
 
-import agents.Agent;
+import agents.StressAgent;
 import actions.Action;
+import agents.Agent;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class Bond extends Contract {
 
-    public Bond(Agent assetParty, Agent liabilityParty, MaturityType maturityType, double principal, double rate) {
+    public Bond(StressAgent assetParty, StressAgent liabilityParty, MaturityType maturityType, double principal, double rate) {
         this.assetParty = assetParty;
         this.liabilityParty = liabilityParty;
         this.maturityType = maturityType;
@@ -32,7 +33,7 @@ public class Bond extends Contract {
      * if this is a Gvt bond, an interbank bond or a non-me bond, the agent gets a SellBond action with
      * the correct parameters
      *
-     * @param agent the Agent who is querying its available actions
+     * @param agent the StressAgent who is querying its available actions
      * @return an ArrayList of all possible actions for the agent involving this bond
      */
     public List<Action> getAvailableActions(Agent agent) {
@@ -55,19 +56,19 @@ public class Bond extends Contract {
 
 
     // Setters and Getters
-    public Agent getAssetParty() {
+    public StressAgent getAssetParty() {
         return assetParty;
     }
 
-    public void setAssetParty(Agent assetParty) {
+    public void setAssetParty(StressAgent assetParty) {
         this.assetParty = assetParty;
     }
 
-    public Agent getLiabilityParty() {
+    public StressAgent getLiabilityParty() {
         return liabilityParty;
     }
 
-    public void setLiabilityParty(Agent liabilityParty) {
+    public void setLiabilityParty(StressAgent liabilityParty) {
         this.liabilityParty = liabilityParty;
     }
 
@@ -95,8 +96,8 @@ public class Bond extends Contract {
         this.rate = rate;
     }
 
-    private Agent assetParty;
-    private Agent liabilityParty;
+    private StressAgent assetParty;
+    private StressAgent liabilityParty;
     private MaturityType maturityType;
     private double principal;
     private double rate;

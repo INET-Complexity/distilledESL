@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
  *
  * Every Bank has a BankBehaviour.
  */
-public class Bank extends Agent implements CanPledgeCollateral {
+public class Bank extends StressAgent implements CanPledgeCollateral {
 
     private BankLeverageConstraint bankLeverageConstraint;
     private LCR_Constraint lcr_constraint;
@@ -55,7 +55,7 @@ public class Bank extends Agent implements CanPledgeCollateral {
                 .mapToDouble(asset ->
                         ((CanBeCollateral) asset).getUnencumberedValue() *
                                 (1.0 - ((CanBeCollateral) asset).getHaircut()))
-                .sum() + getCash();
+                .sum() + getCash_() - getEncumberedCash();
     }
 
     public void withdrawCollateral(double excessValue, Repo repo) {

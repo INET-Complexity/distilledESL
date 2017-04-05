@@ -2,6 +2,7 @@ package behaviours;
 
 import actions.Action;
 import actions.PullFunding;
+import agents.StressAgent;
 import agents.Agent;
 import agents.Bank;
 import demos.Parameters;
@@ -12,7 +13,7 @@ import java.util.HashMap;
 public class CashProviderBehaviour extends Behaviour {
 
     private HashMap<Bank, Integer> trialPeriod = new HashMap<>();
-    public CashProviderBehaviour(Agent me) {
+    public CashProviderBehaviour(StressAgent me) {
         super(me);
     }
 

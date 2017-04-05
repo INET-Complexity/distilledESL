@@ -19,7 +19,7 @@ public class DefaultRecorder {
         try {
             defaultsFile = new PrintWriter("defaultsFile.csv");
 
-            defaultsFile.println("Simulation number, Agent, timestep_of_default, type_of_default, equity_at_default, lcr_at_default, leverage_at_default");
+            defaultsFile.println("Simulation number, StressAgent, timestep_of_default, type_of_default, equity_at_default, lcr_at_default, leverage_at_default");
         } catch (FileNotFoundException e) {
             //todo: empty catch block
         }

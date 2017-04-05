@@ -8,7 +8,7 @@ import demos.Parameters;
 
 import java.util.HashSet;
 
-public class Hedgefund extends Agent implements CanPledgeCollateral {
+public class Hedgefund extends StressAgent implements CanPledgeCollateral {
 
     private HedgefundBehaviour behaviour;
     private HedgefundLeverageConstraint hedgefundLeverageConstraint;
@@ -48,7 +48,7 @@ public class Hedgefund extends Agent implements CanPledgeCollateral {
                 .mapToDouble(asset ->
                         ((CanBeCollateral) asset).getUnencumberedValue() *
                                 (1.0 - ((CanBeCollateral) asset).getHaircut()))
-                .sum() + getCash();
+                .sum() + getCash_() - getEncumberedCash();
     }
 
     public double getEffectiveMinLeverage() {
@@ -103,6 +103,6 @@ public class Hedgefund extends Agent implements CanPledgeCollateral {
     @Override
     public double getLCR() {
         //the LCR for a hedgefund is just the cash...
-        return getCash();
+        return getCash_() - getEncumberedCash();
     }
 }

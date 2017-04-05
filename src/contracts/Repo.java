@@ -1,5 +1,6 @@
 package contracts;
 
+import agents.StressAgent;
 import agents.Agent;
 import agents.CanPledgeCollateral;
 import demos.Parameters;
@@ -19,7 +20,7 @@ public class Repo extends Loan {
     private double cashCollateral;
     private HashMap<CanBeCollateral, Double> collateral;
 
-    public Repo(Agent assetParty, Agent liabilityParty, double principal) {
+    public Repo(StressAgent assetParty, StressAgent liabilityParty, double principal) {
         super(assetParty, liabilityParty, principal);
         this.collateral = new HashMap<>();
         this.cashCollateral = 0.0;
@@ -33,7 +34,7 @@ public class Repo extends Loan {
     @Override
     public String getName(Agent me) {
         if (me==assetParty) return (liabilityParty!=null) ?
-                "Reverse-repo to "+liabilityParty.getName() : "Reverse-repo to uninitialised Agent";
+                "Reverse-repo to "+liabilityParty.getName() : "Reverse-repo to uninitialised StressAgent";
         else return "Repo from "+assetParty.getName()+" to "+liabilityParty.getName();
     }
 

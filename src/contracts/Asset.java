@@ -1,8 +1,9 @@
 package contracts;
 
-import agents.Agent;
+import agents.StressAgent;
 import actions.Action;
 import actions.SellAsset;
+import agents.Agent;
 import demos.Parameters;
 
 import java.util.ArrayList;
@@ -11,7 +12,7 @@ import java.util.List;
 
 public class Asset extends Contract {
 
-    public Asset(Agent assetParty, AssetType assetType, AssetMarket assetMarket, double quantity) {
+    public Asset(StressAgent assetParty, AssetType assetType, AssetMarket assetMarket, double quantity) {
         this.assetParty = assetParty;
         this.assetType = assetType;
         this.assetMarket = assetMarket;
@@ -20,7 +21,7 @@ public class Asset extends Contract {
         this.putForSale = 0.0;
     }
 
-    public Asset(Agent assetParty, AssetType assetType, AssetMarket assetMarket) {
+    public Asset(StressAgent assetParty, AssetType assetType, AssetMarket assetMarket) {
         this(assetParty,assetType, assetMarket, 0.0);
     }
 
@@ -29,7 +30,7 @@ public class Asset extends Contract {
         return "Asset of type "+assetType;
     }
 
-    private Agent assetParty;
+    private StressAgent assetParty;
     protected double quantity;
     private AssetType assetType;
     protected AssetMarket assetMarket;
@@ -125,12 +126,12 @@ public class Asset extends Contract {
     }
 
     @Override
-    public Agent getAssetParty() {
+    public StressAgent getAssetParty() {
         return assetParty;
     }
 
     @Override
-    public Agent getLiabilityParty() {
+    public StressAgent getLiabilityParty() {
         return null;
     } //An Asset does not have a liability party
 

@@ -19,7 +19,7 @@ public class ActionsRecorder {
         try {
             actionsFile = new PrintWriter("actions.csv");
 
-            actionsFile.println("Simulation number, Timestep, Agent, Action, Amount");
+            actionsFile.println("Simulation number, Timestep, StressAgent, Action, Amount");
         } catch (FileNotFoundException e) {
             //todo: empty catch block
         }

@@ -3,7 +3,7 @@ package agents;
 import behaviours.Behaviour;
 import behaviours.CashProviderBehaviour;
 
-public class CashProvider extends Agent {
+public class CashProvider extends StressAgent {
 
     private CashProviderBehaviour behaviour;
 
@@ -20,6 +20,6 @@ public class CashProvider extends Agent {
 
     @Override
     public double getLCR() {
-        return getCash();
+        return getCash_() - getEncumberedCash();
     }
 }

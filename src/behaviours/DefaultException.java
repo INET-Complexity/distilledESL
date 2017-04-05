@@ -1,16 +1,16 @@
 package behaviours;
 
-import agents.Agent;
+import agents.StressAgent;
 import demos.Model;
 
 public class DefaultException extends Exception {
-    private Agent me;
+    private StressAgent me;
     private TypeOfDefault typeOfDefault;
     private int timestep;
     private double equityAtDefault;
     private double lcrAtDefault;
 
-    public DefaultException(Agent me, TypeOfDefault typeOfDefault) {
+    public DefaultException(StressAgent me, TypeOfDefault typeOfDefault) {
         this.me = me;
         this.typeOfDefault = typeOfDefault;
         this.timestep = Model.getTime();
@@ -25,7 +25,7 @@ public class DefaultException extends Exception {
         FAILED_MARGIN_CALL
     }
 
-    public Agent getAgent() {
+    public StressAgent getAgent() {
         return me;
     }
 

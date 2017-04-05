@@ -1,13 +1,13 @@
 package contracts;
 
-import agents.Agent;
+import agents.StressAgent;
 
 public class AssetCollateral extends Asset implements CanBeCollateral {
 
     private double encumberedQuantity;
 
 
-    public AssetCollateral(Agent assetParty, AssetType assetType, AssetMarket assetMarket, double amount) {
+    public AssetCollateral(StressAgent assetParty, AssetType assetType, AssetMarket assetMarket, double amount) {
         super(assetParty, assetType, assetMarket, amount);
     }
 
@@ -33,7 +33,7 @@ public class AssetCollateral extends Asset implements CanBeCollateral {
     public double getUnencumberedValue() {return getUnencumberedQuantity() * getPrice();}
 
     @Override
-    public AssetCollateral changeOwnership(Agent newOwner, double quantity) {
+    public AssetCollateral changeOwnership(StressAgent newOwner, double quantity) {
         assert(this.quantity >= quantity);
 
         // First, reduce the quantity of this asset

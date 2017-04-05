@@ -1,6 +1,7 @@
 package contracts;
 
 import actions.Action;
+import agents.StressAgent;
 import agents.Agent;
 import demos.Parameters;
 
@@ -9,14 +10,14 @@ import java.util.List;
 
 public class Deposit extends Contract {
 
-    private Agent depositor;
-    private Agent holder;
+    private StressAgent depositor;
+    private StressAgent holder;
     private double amount;
 
     @Override
     public double getLCRweight() {return Parameters.DEPOSITS_LCR;}
 
-    public Deposit(Agent depositor, Agent holder, double amount) {
+    public Deposit(StressAgent depositor, StressAgent holder, double amount) {
         this.depositor = depositor;
         this.holder = holder;
         this.amount = amount;
@@ -28,12 +29,12 @@ public class Deposit extends Contract {
     }
 
     @Override
-    public Agent getAssetParty() {
+    public StressAgent getAssetParty() {
         return depositor;
     }
 
     @Override
-    public Agent getLiabilityParty() {
+    public StressAgent getLiabilityParty() {
         return holder;
     }
 
