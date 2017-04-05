@@ -1,6 +1,6 @@
 package economicsl.accounting;
 
-class Account {
+public class Account {
 
     private double balance;
     private AccountType accountType;
@@ -16,7 +16,7 @@ class Account {
         this(name, accountType, 0.0);
     }
 
-    static void doubleEntry(Account debitAccount, Account creditAccount, double amount) {
+    public static void doubleEntry(Account debitAccount, Account creditAccount, double amount) {
         debitAccount.debit(amount);
         creditAccount.credit(amount);
     }

@@ -11,6 +11,8 @@ import economicsl.Agent;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.stream.Collectors;
+import economicsl.accounting.Account;
+
 
 public abstract class StressAgent extends Agent {
     private double encumberedCash;
@@ -21,8 +23,16 @@ public abstract class StressAgent extends Agent {
         super(name);
     }
 
+    /**
+     * Operation to cancel a Loan to someone (i.e. cash in a Loan in the Assets side).
+     *
+     * I'm using this for simplicity but note that this is equivalent to selling an asset.
+     * @param amount the amount of loan that is cancelled
+     */
     public void pullFunding(double amount, Contract loan) {
-        getMainLedger().pullFunding(amount, loan);
+        Account loanAccount = getMainLedger().getAccontFromContract(loan);
+        // (dr cash, cr asset )
+        Account.doubleEntry(getMainLedger().getCashAccount(), loanAccount, amount);
     }
 
     /**
@@ -74,8 +84,22 @@ public abstract class StressAgent extends Agent {
         return encumberedCash;
     }
 
+    /**
+     * Behavioral stuff; not sure if it should be here
+     * @param me the owner of the StressLedger
+     * @return an ArrayList of Actions that are available to me at this moment
+     */
     public ArrayList<Action> getAvailableActions(Agent me) {
-        return getMainLedger().getAvailableActions(this);
+        ArrayList<Action> availableActions = new ArrayList<>();
+        for (Contract contract : getMainLedger().getAllAssets()) {
+            availableActions.addAll(contract.getAvailableActions(me));
+        }
+
+        for (Contract contract : getMainLedger().getAllLiabilities()) {
+            availableActions.addAll(contract.getAvailableActions(me));
+        }
+
+        return availableActions;
     }
 
     public abstract Behaviour getBehaviour(); // Make this abstract to force every implementation to provide a behaviour

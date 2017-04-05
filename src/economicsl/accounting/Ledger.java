@@ -1,15 +1,12 @@
 package economicsl.accounting;
 
 import agents.StressAgent;
-import actions.Action;
-import economicsl.Agent;
 import contracts.Asset;
 import contracts.Contract;
 import contracts.Repo;
-
+import economicsl.Agent;
 import economicsl.NotEnoughGoods;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -32,47 +29,44 @@ import static economicsl.accounting.AccountType.GOOD;
  * @author rafa
  */
 public class Ledger implements LedgerAPI {
-    //TODO: We need to do valuation differently!!
+    protected Agent me;
+    protected HashSet<Contract> allAssets;
+    protected HashSet<Contract> allLiabilities;
+    protected HashMap<String, Double> allGoods;
+    protected HashSet<Account> assetAccounts;
+    protected HashSet<Account> liabilityAccounts;
+    protected HashMap<String, Account> goodsAccounts;
+    protected HashSet<Account> equityAccounts;
+    protected HashMap<Class<? extends Contract>, Account> contractsToAssetAccounts;
+    protected HashMap<Class<? extends Contract>, Account> contractsToLiabilityAccounts;
+    protected Account equityAccount;
+    private double initialEquity;
 
-    private Agent me;
     public Ledger(Agent me) {
-        this.me = me;
-        // A Ledger is a list of accounts (for quicker searching)
-        assetAccounts = new HashSet<>();
+        contractsToAssetAccounts = new HashMap<>();
+        allAssets = new HashSet<>();
+        equityAccounts = new HashSet<>();
+        allLiabilities = new HashSet<>();
         liabilityAccounts = new HashSet<>();
         goodsAccounts = new HashMap<>();
-        equityAccounts = new HashSet<>();
-
-        allAssets = new HashSet<>();
-        allLiabilities = new HashSet<>();
         allGoods = new HashMap<>();
+        contractsToLiabilityAccounts = new HashMap<>();
+        this.me = me;
+        equityAccount = new Account("equityAccounts", AccountType.EQUITY);
+        assetAccounts = new HashSet<>();
+
+        // A StressLedger is a list of accounts (for quicker searching)
 
         // Each Account includes an inventory to hold one type of contract.
         // These hashmaps are used to access the correct account for a given type of contract.
         // Note that separate hashmaps are needed for asset accounts and liability accounts: the same contract
         // type (such as Loan) can sometimes be an asset and sometimes a liability.
-        contractsToAssetAccounts = new HashMap<>();
-        contractsToLiabilityAccounts = new HashMap<>();
 
         // A book is initially created with a cash account and an equityAccounts account (it's the simplest possible book)
-        equityAccount = new Account("equityAccounts", AccountType.EQUITY);
         addAccount(equityAccount, null);
 
         allGoods.put("cash", 0.0);
     }
-
-
-    private HashSet<Contract> allAssets;
-    private HashSet<Contract> allLiabilities;
-    private HashMap<String, Double> allGoods;
-    private HashSet<Account> assetAccounts;
-    private HashSet<Account> liabilityAccounts;
-    private HashMap<String, Account> goodsAccounts;
-    private HashSet<Account> equityAccounts;
-    private HashMap<Class<? extends contracts.Contract>, Account> contractsToAssetAccounts;
-    private HashMap<Class<? extends contracts.Contract>, Account> contractsToLiabilityAccounts;
-    private Account equityAccount;
-    private double initialEquity;
 
     public double getAssetValue() {
         double assetTotal = 0;
@@ -149,8 +143,7 @@ public class Ledger implements LedgerAPI {
         return getGood("cash");
     }
 
-
-    private void addAccount(Account account, Class<? extends Contract> contractType) {
+    protected void addAccount(Account account, Class<? extends Contract> contractType) {
         switch(account.getAccountType()) {
 
             case ASSET:
@@ -221,7 +214,6 @@ public class Ledger implements LedgerAPI {
         Account.doubleEntry(physicalthingsaccount, equityAccount, amount * value);
     }
 
-
     public void subtractGoods(String name, double amount, double value) throws NotEnoughGoods {
         assert(amount >= 0.0);
         double have = getGood(name);
@@ -232,7 +224,7 @@ public class Ledger implements LedgerAPI {
         Account.doubleEntry(equityAccount, getGoodsAccount(name), amount * value);
     }
 
-    private Account getGoodsAccount(String name) {
+    public Account getGoodsAccount(String name) {
         Account account = goodsAccounts.get(name);
         if (account == null) {
             account = new Account(name, GOOD);
@@ -286,19 +278,6 @@ public class Ledger implements LedgerAPI {
     }
 
     /**
-     * Operation to cancel a Loan to someone (i.e. cash in a Loan in the Assets side).
-     *
-     * I'm using this for simplicity but note that this is equivalent to selling an asset.
-     * @param amount the amount of loan that is cancelled
-     */
-    public void pullFunding(double amount, Contract loan) {
-        Account loanAccount = contractsToAssetAccounts.get(loan.getClass());
-
-        // (dr cash, cr asset )
-        Account.doubleEntry(getGoodsAccount("cash"), loanAccount, amount);
-    }
-
-    /**
      * Operation to pay back a liability loan; debit liability and credit cash
      * @param amount amount to pay back
      * @param loan the loan which is being paid back
@@ -321,24 +300,6 @@ public class Ledger implements LedgerAPI {
 
         // (dr cash, cr asset)
         Account.doubleEntry(getGoodsAccount("cash"), assetAccount, amount);
-    }
-
-    /**
-     * Behavioral stuff; not sure if it should be here
-     * @param me the owner of the Ledger
-     * @return an ArrayList of Actions that are available to me at this moment
-     */
-    public ArrayList<Action> getAvailableActions(Agent me) {
-        ArrayList<Action> availableActions = new ArrayList<>();
-        for (Contract contract : allAssets) {
-            availableActions.addAll(contract.getAvailableActions(me));
-        }
-
-        for (Contract contract : allLiabilities) {
-            availableActions.addAll(contract.getAvailableActions(me));
-        }
-
-        return availableActions;
     }
 
     /**
@@ -390,7 +351,6 @@ public class Ledger implements LedgerAPI {
         Account.doubleEntry(equityAccount, liabilityAccount, valueLost);
     }
 
-
     public void printBalanceSheet(StressAgent me) {
         System.out.println("Asset accounts:\n---------------");
         for (Account account : assetAccounts) {
@@ -430,4 +390,11 @@ public class Ledger implements LedgerAPI {
         initialEquity = getEquityValue();
     }
 
+    public Account getAccontFromContract(Contract contract) {
+        return contractsToAssetAccounts.get(contract.getClass());
+    }
+
+    public Account getCashAccount() {
+        return getGoodsAccount("cash");
+    }
 }

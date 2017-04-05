@@ -18,6 +18,7 @@ public class Agent {
     protected Mailbox mailbox;
     Ledger mainLedger;
 
+
     public Agent(String name) {
         this.name = name;
         this.mailbox = new Mailbox();
