@@ -1,6 +1,7 @@
 package contracts.obligations;
 
 import contracts.Shares;
+import economicsl.obligations.Obligation;
 
 public class RedeemSharesObligation extends Obligation {
 

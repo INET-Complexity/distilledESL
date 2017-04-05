@@ -1,4 +1,4 @@
-package contracts.obligations;
+package economicsl.obligations;
 
 import economicsl.Agent;
 

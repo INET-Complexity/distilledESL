@@ -1,6 +1,7 @@
 package contracts.obligations;
 
 import contracts.Loan;
+import economicsl.obligations.Obligation;
 
 public class PullFundingObligation extends Obligation {
     private Loan loan;

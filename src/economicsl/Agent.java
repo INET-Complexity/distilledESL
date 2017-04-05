@@ -2,9 +2,9 @@ package economicsl;
 
 import economicsl.accounting.Ledger;
 import contracts.Contract;
-import contracts.obligations.Obligation;
-import contracts.obligations.ObligationMessage;
-import contracts.obligations.ObligationsAndGoodsMailbox;
+import economicsl.obligations.Obligation;
+import economicsl.obligations.ObligationMessage;
+import economicsl.obligations.ObligationsAndGoodsMailbox;
 
 import java.util.HashSet;
 

@@ -4,7 +4,7 @@ import economicsl.Agent;
 import contracts.FailedMarginCallException;
 import contracts.Loan;
 import contracts.Repo;
-import contracts.obligations.Obligation;
+import economicsl.obligations.Obligation;
 import contracts.obligations.PullFundingObligation;
 import demos.Parameters;
 

@@ -1,4 +1,4 @@
-package contracts.obligations;
+package economicsl.obligations;
 
 import demos.Model;
 import demos.Parameters;

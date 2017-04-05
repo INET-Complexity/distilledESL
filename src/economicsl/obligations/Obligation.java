@@ -1,4 +1,4 @@
-package contracts.obligations;
+package economicsl.obligations;
 
 import economicsl.Agent;
 import contracts.Contract;
@@ -14,7 +14,7 @@ public abstract class Obligation {
     private int timeToPay;
     private int timeToReceive;
 
-    Obligation(Contract contract, double amount, int timeLeftToPay) {
+    public Obligation(Contract contract, double amount, int timeLeftToPay) {
         this.amount = amount;
 
         this.from = contract.getLiabilityParty();
@@ -53,7 +53,7 @@ public abstract class Obligation {
         return to;
     }
 
-    void setFulfilled() {
+    public void setFulfilled() {
         this.fulfilled = true;
     }
 
