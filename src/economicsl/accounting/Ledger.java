@@ -1,4 +1,4 @@
-package accounting;
+package economicsl.accounting;
 
 import agents.StressAgent;
 import actions.Action;
@@ -15,10 +15,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static accounting.AccountType.GOOD;
+import static economicsl.accounting.AccountType.GOOD;
 
 /**
- * This is the main class implementing double entry accounting. All public operations provided by this class
+ * This is the main class implementing double entry economicsl.accounting. All public operations provided by this class
  * are performed as a double entry operation, i.e. a pair of (dr, cr) operations.
  *
  * A Ledger contains a set of accounts, and is the interface between an agent and its accounts. Agents cannot
@@ -264,7 +264,7 @@ public class Ledger implements LedgerAPI {
 
     /**
      * Reevaluates the current stock of phisical goods at a specified value and books
-     * the change to accounting
+     * the change to economicsl.accounting
      */
     public void revalueGoods(String name, double value) {
         double old_value = getGoodsAccount(name).getBalance();

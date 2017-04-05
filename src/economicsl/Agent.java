@@ -1,6 +1,6 @@
 package economicsl;
 
-import accounting.Ledger;
+import economicsl.accounting.Ledger;
 import contracts.Contract;
 import contracts.obligations.Obligation;
 import contracts.obligations.ObligationMessage;
