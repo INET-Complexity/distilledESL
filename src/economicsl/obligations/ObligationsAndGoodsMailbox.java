@@ -1,7 +1,6 @@
 package economicsl.obligations;
 
-import demos.Model;
-import demos.Parameters;
+
 
 import economicsl.GoodMessage;
 import java.util.ArrayList;
@@ -124,7 +123,7 @@ public class ObligationsAndGoodsMailbox {
         // Move all messages in the obligation_unopened to the obligation_inbox
     }
 
-
+/*
     public ArrayList<Double> getCashCommitments() {
         ArrayList<Double> cashCommitments = new ArrayList<>(Collections.nCopies(Parameters.TIMESTEPS_TO_PAY * 3, 0.0));
 
@@ -142,13 +141,13 @@ public class ObligationsAndGoodsMailbox {
 
         for (Obligation obligation : obligation_outbox) {
             if (!(obligation.isFulfilled())) {
-                int index = obligation.getTimeToReceive() - Model.getTime() - 1;
+                int index = obligation.getTimeToReceive() - this.simulation.getTime() - 1;
                 cashInflows.set(index, cashInflows.get(index) + obligation.getAmount());
             }
         }
         return cashInflows;
     }
-
+*/
     public void printMailbox() {
         if (obligation_unopened.isEmpty() && obligation_inbox.isEmpty() && obligation_outbox.isEmpty()) System.out.println("\nObligationsAndGoodsMailbox is empty.");
         else {

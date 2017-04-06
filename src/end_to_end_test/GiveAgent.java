@@ -1,6 +1,5 @@
 package end_to_end_test;
 
-import behaviours.Behaviour;
 import economicsl.NotEnoughGoods;
 import economicsl.Trade;
 
@@ -15,12 +14,6 @@ public class GiveAgent extends Trade {
         this.getMainLedger().addGoods("teddies", teddies, 100.0);
 
     }
-
-    @Override
-    public Behaviour getBehaviour() {
-        return null;
-    }
-
 
     public void give(GiveAgent receiver) {
         try {

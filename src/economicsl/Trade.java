@@ -1,20 +1,13 @@
 package economicsl;
 
-import agents.StressAgent;
-import behaviours.Behaviour;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 /**
  * Created by taghawi on 30/03/17.
  */
-public class Trade extends StressAgent {
+public class Trade extends Agent {
     public Trade(String name) {
         super(name);
-    }
-
-    @Override
-    public Behaviour getBehaviour() {
-        return null;
     }
 
     /** Davoud

@@ -1,11 +1,11 @@
 package economicsl.obligations;
 
 import economicsl.Agent;
-import demos.Model;
 import economicsl.Contract;
 
 
 public abstract class Obligation {
+    private final Simulation simulation;
     protected double amount;
     private boolean fulfilled = false;
     private Agent from;
@@ -14,15 +14,16 @@ public abstract class Obligation {
     private int timeToPay;
     private int timeToReceive;
 
-    public Obligation(Contract contract, double amount, int timeLeftToPay) {
+    public Obligation(Contract contract, double amount, int timeLeftToPay, Simulation simulation) {
         this.amount = amount;
 
         this.from = contract.getLiabilityParty();
         this.to = contract.getAssetParty();
 
-        this.timeToOpen = Model.getTime() + 1;
-        this.timeToPay = Model.getTime() + timeLeftToPay;
+        this.timeToOpen = simulation.getTime() + 1;
+        this.timeToPay = simulation.getTime() + timeLeftToPay;
         this.timeToReceive = timeToPay + 1;
+        this.simulation = simulation;
 
         assert(timeToPay >= timeToOpen);
     }
@@ -38,11 +39,11 @@ public abstract class Obligation {
     }
 
     boolean hasArrived() {
-        return Model.getTime() == timeToOpen;
+        return this.simulation.getTime() == timeToOpen;
     }
 
     boolean isDue() {
-        return Model.getTime() == timeToPay;
+        return this.simulation.getTime() == timeToPay;
     }
 
     public Agent getFrom() {

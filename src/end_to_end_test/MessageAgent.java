@@ -1,8 +1,6 @@
 package end_to_end_test;
 
-import agents.StressAgent;
 import economicsl.Agent;
-import behaviours.Behaviour;
 import economicsl.Message;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
@@ -11,7 +9,7 @@ import java.util.HashSet;
 /**
  * Created by taghawi on 04/04/17.
  */
-public class MessageAgent extends StressAgent {
+public class MessageAgent extends Agent {
     private final int odd_or_even;
     private final String name;
     private Agent friend;
@@ -32,11 +30,6 @@ public class MessageAgent extends StressAgent {
         for (Message message: messages) {
             System.out.print(message.getMessage());
         }
-    }
-
-    @Override
-    public Behaviour getBehaviour() {
-        throw new NotImplementedException();
     }
 
     public void setFriend(MessageAgent friend) {

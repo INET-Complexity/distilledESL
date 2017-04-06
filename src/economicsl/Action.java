@@ -1,7 +1,7 @@
 package actions;
 
 import economicsl.Agent;
-import demos.Model;
+
 
 import java.util.ArrayList;
 
@@ -13,7 +13,7 @@ public abstract class Action {
     }
 
     public void perform() {
-        Model.actionsRecorder.recordAction(this);
+        System.out.println("Model.actionsRecorder.recordAction(this); not called because deleted");
     }
 
     private double amount;

@@ -1,8 +1,5 @@
 package economicsl.accounting;
 
-import agents.StressAgent;
-import contracts.Asset;
-import contracts.Repo;
 import economicsl.Agent;
 import economicsl.Contract;
 import economicsl.NotEnoughGoods;
@@ -301,10 +298,7 @@ public class Ledger implements LedgerAPI {
         // (dr cash, cr asset)
         Account.doubleEntry(getGoodsAccount("cash"), assetAccount, amount);
     }
-
-    /**
-     * Stress-testing specific.
-     */
+/*
     public void updateAssetPrices() {
         List<Contract> allAssets = this.allAssets.stream()
                 .filter(contract -> contract instanceof Asset)
@@ -318,11 +312,12 @@ public class Ledger implements LedgerAPI {
             }
         }
     }
-
+*/
     /**
      * if an Asset loses value, I must debit equity and credit asset
      * @param valueLost the value lost
      */
+    /*
     public void devalueAsset(Contract asset, double valueLost) {
         Account assetAccount = contractsToAssetAccounts.get(asset.getClass());
 
@@ -350,8 +345,8 @@ public class Ledger implements LedgerAPI {
         // (dr equityAccounts, cr assetAccounts)
         Account.doubleEntry(equityAccount, liabilityAccount, valueLost);
     }
-
-    public void printBalanceSheet(StressAgent me) {
+*/
+    public void printBalanceSheet(Agent me) {
         System.out.println("Asset accounts:\n---------------");
         for (Account account : assetAccounts) {
             System.out.println(account.getName()+" -> "+ String.format( "%.2f", account.getBalance()));
@@ -374,12 +369,12 @@ public class Ledger implements LedgerAPI {
         System.out.println("\nTOTAL EQUITY: "+String.format("%.2f", getEquityValue()));
 
         System.out.println("\nSummary of encumbered collateral:");
-        for (Contract contract : getLiabilitiesOfType(Repo.class)) {
-            ((Repo) contract).printCollateral();
-        }
+        //for (Contract contract : getLiabilitiesOfType(Repo.class)) {
+        //    ((Repo) contract).printCollateral();
+        //}
         System.out.println("\n\nTotal cash: "+ getGoodsAccount("cash").getBalance());
-        System.out.println("Encumbered cash: "+me.getEncumberedCash());
-        System.out.println("Unencumbered cash: " + (me.getCash_() - me.getEncumberedCash()));
+        //System.out.println("Encumbered cash: "+me.getEncumberedCash());
+        //System.out.println("Unencumbered cash: " + (me.getCash_() - me.getEncumberedCash()));
     }
 
     public double getInitialEquity() {
