@@ -1,8 +1,6 @@
 package demos;
 
 import contracts.Asset;
-import contracts.Contract;
-import contracts.Deposit;
 
 public class Parameters {
 

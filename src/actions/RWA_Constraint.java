@@ -1,12 +1,7 @@
 package actions;
 
 import agents.Bank;
-import contracts.Asset;
-import contracts.Contract;
-import contracts.Loan;
-import demos.Parameters;
-
-import java.util.HashSet;
+import contracts.ContractStress;
 
 public class RWA_Constraint {
     private Bank bank;
@@ -21,6 +16,6 @@ public class RWA_Constraint {
 
     public double getRWA() {
         return bank.getMainLedger().getAllAssets().stream()
-                .mapToDouble(contract -> contract.getValue(null) * contract.getRWAweight()).sum();
+                .mapToDouble(contract -> contract.getValue(null) * ((ContractStress)contract).getRWAweight()).sum();
     }
 }

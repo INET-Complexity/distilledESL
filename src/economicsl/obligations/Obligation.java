@@ -1,8 +1,8 @@
 package economicsl.obligations;
 
 import economicsl.Agent;
-import contracts.Contract;
 import demos.Model;
+import economicsl.Contract;
 
 
 public abstract class Obligation {

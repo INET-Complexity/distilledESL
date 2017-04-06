@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class Asset extends Contract {
+public class Asset extends ContractStress {
 
     public Asset(StressAgent assetParty, AssetType assetType, AssetMarket assetMarket, double quantity) {
         this.assetParty = assetParty;

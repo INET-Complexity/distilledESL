@@ -1,7 +1,7 @@
 package actions;
 
 import agents.Bank;
-import contracts.Contract;
+import contracts.ContractStress;
 import demos.Parameters;
 
 import static java.lang.Math.max;
@@ -32,7 +32,7 @@ public class LCR_Constraint {
 
     private double getLCRdenominator() {
         return bank.getMainLedger().getAllLiabilities().stream()
-                .mapToDouble(contract -> contract.getValue(null) * contract.getLCRweight()).sum();
+                .mapToDouble(contract -> contract.getValue(null) * ((ContractStress)contract).getLCRweight()).sum();
     }
     public double getLCR() {
         return 1.0 * bank.getCash_() - bank.getEncumberedCash() / getLCRdenominator();

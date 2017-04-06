@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class Loan extends Contract {
+public class Loan extends ContractStress {
     protected StressAgent assetParty;
     protected StressAgent liabilityParty;
     protected double principal;

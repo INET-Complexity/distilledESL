@@ -8,7 +8,7 @@ import demos.Parameters;
 import java.util.Collections;
 import java.util.List;
 
-public class Deposit extends Contract {
+public class Deposit extends ContractStress {
 
     private StressAgent depositor;
     private StressAgent holder;

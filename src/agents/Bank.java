@@ -4,6 +4,7 @@ import actions.*;
 import behaviours.BankBehaviour;
 import behaviours.Behaviour;
 import contracts.*;
+import economicsl.Contract;
 
 import java.util.ArrayList;
 import java.util.HashSet;

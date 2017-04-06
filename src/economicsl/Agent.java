@@ -1,7 +1,6 @@
 package economicsl;
 
 import economicsl.accounting.Ledger;
-import contracts.Contract;
 import economicsl.obligations.Obligation;
 import economicsl.obligations.ObligationMessage;
 import economicsl.obligations.ObligationsAndGoodsMailbox;

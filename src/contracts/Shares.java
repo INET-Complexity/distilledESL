@@ -13,7 +13,7 @@ import java.util.List;
 /**
  * This contract represents a bunch of shares of some StressAgent which can issue shares.
  */
-public class Shares extends Contract {
+public class Shares extends ContractStress {
     private StressAgent owner;
     private CanIssueShares issuer;
     private int nShares;

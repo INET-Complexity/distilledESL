@@ -5,6 +5,7 @@ import behaviours.Behaviour;
 import behaviours.HedgefundBehaviour;
 import contracts.*;
 import demos.Parameters;
+import economicsl.Contract;
 
 import java.util.HashSet;
 

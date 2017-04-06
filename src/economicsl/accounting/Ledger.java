@@ -2,9 +2,9 @@ package economicsl.accounting;
 
 import agents.StressAgent;
 import contracts.Asset;
-import contracts.Contract;
 import contracts.Repo;
 import economicsl.Agent;
+import economicsl.Contract;
 import economicsl.NotEnoughGoods;
 
 import java.util.HashMap;

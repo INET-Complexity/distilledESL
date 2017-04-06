@@ -8,7 +8,7 @@ import demos.Parameters;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LongTermUnsecured extends Contract {
+public class LongTermUnsecured extends ContractStress {
 
     private StressAgent liabilityParty;
     private double amount;

@@ -7,7 +7,7 @@ import economicsl.Agent;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Bond extends Contract {
+public class Bond extends ContractStress {
 
     public Bond(StressAgent assetParty, StressAgent liabilityParty, MaturityType maturityType, double principal, double rate) {
         this.assetParty = assetParty;

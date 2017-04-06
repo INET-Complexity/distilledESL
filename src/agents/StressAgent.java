@@ -3,7 +3,6 @@ package agents;
 import actions.Action;
 import behaviours.Behaviour;
 import contracts.Asset;
-import contracts.Contract;
 import contracts.FailedMarginCallException;
 import contracts.Repo;
 import economicsl.Agent;
@@ -11,6 +10,8 @@ import economicsl.Agent;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.stream.Collectors;
+
+import economicsl.Contract;
 import economicsl.accounting.Account;
 
 
