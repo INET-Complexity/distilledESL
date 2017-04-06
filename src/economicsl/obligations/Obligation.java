@@ -2,6 +2,7 @@ package economicsl.obligations;
 
 import economicsl.Agent;
 import economicsl.Contract;
+import economicsl.Simulation;
 
 
 public abstract class Obligation {

@@ -1,6 +1,7 @@
 package end_to_end_test;
 
 import economicsl.Agent;
+import economicsl.Simulation;
 
 
 /**
@@ -9,10 +10,12 @@ import economicsl.Agent;
 public class End2EndTestGive {
     public static final int NUM_AGENTS = 15;
     public static final int ROUNDS = 16;
-    private MessageAgent[] children;
     private GiveAgent[] giveandreceives;
+    private Simulation simulation;
+
 
     public void init() {
+        simulation = new Simulation();
         giveandreceives = new GiveAgent[NUM_AGENTS];
         for(int i = 0; i < NUM_AGENTS; i++) {
             giveandreceives[i] = new GiveAgent(Integer.toString(i), 1, 0);
@@ -38,7 +41,7 @@ public class End2EndTestGive {
             for (Agent undergrad: giveandreceives) {
                 undergrad.step();
             }
-
+            simulation.advance_time();
         }
     }
 

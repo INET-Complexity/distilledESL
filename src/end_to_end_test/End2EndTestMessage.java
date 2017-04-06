@@ -1,6 +1,8 @@
 package end_to_end_test;
 
 
+import economicsl.Simulation;
+
 /**
  * Created by taghawi on 28/03/17.
  */
@@ -8,10 +10,11 @@ public class End2EndTestMessage {
     public static final int NUM_AGENTS = 15;
     public static final int ROUNDS = 16;
     private MessageAgent[] agent;
+    private Simulation simulation;
 
     public void init() {
 
-
+        simulation = new Simulation();
         agent = new MessageAgent[NUM_AGENTS];
         agent[0] = new MessageAgent(Integer.toString(0), null, 0 % 2);
         for(int i = 1; i < NUM_AGENTS; i++) {
@@ -33,6 +36,7 @@ public class End2EndTestMessage {
             for (MessageAgent child: agent) {
                 child.step();
             }
+            simulation.advance_time();
         }
     }
 

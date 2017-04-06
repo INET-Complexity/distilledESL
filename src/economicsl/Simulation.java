@@ -1,4 +1,4 @@
-package economicsl.obligations;
+package economicsl;
 
 /**
  * Created by taghawi on 06/04/17.
