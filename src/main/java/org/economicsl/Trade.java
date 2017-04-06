@@ -1,4 +1,4 @@
-package economicsl;
+package org.economicsl;
 
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
@@ -6,8 +6,8 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
  * Created by taghawi on 30/03/17.
  */
 public class Trade extends Agent {
-    public Trade(String name) {
-        super(name);
+    public Trade(String name, Simulation simulation) {
+        super(name, simulation);
     }
 
     /** Davoud

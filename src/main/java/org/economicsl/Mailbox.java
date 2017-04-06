@@ -1,4 +1,4 @@
-package economicsl;
+package org.economicsl;
 
 import java.util.HashSet;
 import java.util.stream.Collectors;

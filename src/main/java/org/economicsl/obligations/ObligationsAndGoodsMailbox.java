@@ -1,10 +1,9 @@
-package economicsl.obligations;
+package org.economicsl.obligations;
 
 
 
-import economicsl.GoodMessage;
-import java.util.ArrayList;
-import java.util.Collections;
+import org.economicsl.GoodMessage;
+
 import java.util.HashSet;
 import java.util.stream.Collectors;
 
@@ -123,31 +122,6 @@ public class ObligationsAndGoodsMailbox {
         // Move all messages in the obligation_unopened to the obligation_inbox
     }
 
-/*
-    public ArrayList<Double> getCashCommitments() {
-        ArrayList<Double> cashCommitments = new ArrayList<>(Collections.nCopies(Parameters.TIMESTEPS_TO_PAY * 3, 0.0));
-
-        for (Obligation obligation : obligation_inbox) {
-            if (!(obligation.isFulfilled())) {
-                int index = obligation.getTimeToPay() - Model.getTime() - 1;
-                cashCommitments.set(index, cashCommitments.get(index) + obligation.getAmount());
-            }
-        }
-        return cashCommitments;
-    }
-
-    public ArrayList<Double> getCashInflows() {
-        ArrayList<Double> cashInflows = new ArrayList<>(Collections.nCopies(Parameters.TIMESTEPS_TO_PAY * 3, 0.0));
-
-        for (Obligation obligation : obligation_outbox) {
-            if (!(obligation.isFulfilled())) {
-                int index = obligation.getTimeToReceive() - this.simulation.getTime() - 1;
-                cashInflows.set(index, cashInflows.get(index) + obligation.getAmount());
-            }
-        }
-        return cashInflows;
-    }
-*/
     public void printMailbox() {
         if (obligation_unopened.isEmpty() && obligation_inbox.isEmpty() && obligation_outbox.isEmpty()) System.out.println("\nObligationsAndGoodsMailbox is empty.");
         else {
@@ -164,9 +138,15 @@ public class ObligationsAndGoodsMailbox {
         }
     }
 
-
     public HashSet<ObligationMessage> getMessageInbox() {
         return obligationMessage_inbox;
+    }
+    public HashSet<Obligation> getObligation_outbox() {
+        return obligation_outbox;
+    }
+
+    public HashSet<Obligation> getObligation_inbox() {
+        return obligation_inbox;
     }
 }
 

@@ -1,7 +1,4 @@
-package actions;
-
-import economicsl.Agent;
-
+package org.economicsl;
 
 import java.util.ArrayList;
 
@@ -40,4 +37,12 @@ public abstract class Action {
     public abstract void print();
 
     public Agent getAgent() {return me;}
+
+    public int getTime() {
+        return me.getTime();
+    }
+
+    public Simulation getSimulation() {
+        return me.getSimulation();
+    }
 }

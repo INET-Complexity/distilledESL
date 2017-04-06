@@ -1,4 +1,4 @@
-package economicsl;
+package org.economicsl;
 
 import static java.lang.Math.abs;
 

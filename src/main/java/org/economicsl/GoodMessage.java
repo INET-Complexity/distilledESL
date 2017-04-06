@@ -1,4 +1,4 @@
-package economicsl;
+package org.economicsl;
 
 /**
  * Created by taghawi on 30/03/17.

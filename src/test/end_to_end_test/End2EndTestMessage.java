@@ -1,7 +1,7 @@
 package end_to_end_test;
 
 
-import economicsl.Simulation;
+import org.economicsl.Simulation;
 
 /**
  * Created by taghawi on 28/03/17.
@@ -16,9 +16,9 @@ public class End2EndTestMessage {
 
         simulation = new Simulation();
         agent = new MessageAgent[NUM_AGENTS];
-        agent[0] = new MessageAgent(Integer.toString(0), null, 0 % 2);
+        agent[0] = new MessageAgent(Integer.toString(0), null, 0 % 2, simulation);
         for(int i = 1; i < NUM_AGENTS; i++) {
-            agent[i] = new MessageAgent(Integer.toString(i), agent[i - 1], i % 2);
+            agent[i] = new MessageAgent(Integer.toString(i), agent[i - 1], i % 2, simulation);
         }
         agent[0].setFriend(agent[NUM_AGENTS - 1]);
     }

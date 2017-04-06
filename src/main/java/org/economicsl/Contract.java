@@ -1,6 +1,5 @@
-package economicsl;
+package org.economicsl;
 
-import actions.Action;
 
 import java.util.List;
 

@@ -1,6 +1,6 @@
-package economicsl.obligations;
+package org.economicsl.obligations;
 
-import economicsl.Agent;
+import org.economicsl.Agent;
 
 
 public class ObligationMessage {

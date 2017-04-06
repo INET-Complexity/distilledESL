@@ -1,8 +1,8 @@
-package economicsl.obligations;
+package org.economicsl.obligations;
 
-import economicsl.Agent;
-import economicsl.Contract;
-import economicsl.Simulation;
+import org.economicsl.Agent;
+import org.economicsl.Contract;
+import org.economicsl.Simulation;
 
 
 public abstract class Obligation {
@@ -35,7 +35,7 @@ public abstract class Obligation {
         return amount;
     }
 
-    boolean isFulfilled() {
+    public boolean isFulfilled() {
         return fulfilled;
     }
 

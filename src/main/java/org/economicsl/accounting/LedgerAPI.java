@@ -1,6 +1,6 @@
-package economicsl.accounting;
+package org.economicsl.accounting;
 
-import economicsl.Contract;
+import org.economicsl.Contract;
 
 /**
  * Interface for a Ledger (operations that must be provided at the very least by a Ledger implementation).

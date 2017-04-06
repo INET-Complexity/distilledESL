@@ -1,4 +1,4 @@
-package economicsl.accounting;
+package org.economicsl.accounting;
 
 public enum AccountType {
     ASSET,

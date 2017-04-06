@@ -1,8 +1,8 @@
 package end_to_end_test;
 
-import economicsl.Agent;
-import economicsl.Message;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+import org.economicsl.Agent;
+import org.economicsl.Message;
+import org.economicsl.Simulation;
 
 import java.util.HashSet;
 
@@ -14,8 +14,8 @@ public class MessageAgent extends Agent {
     private final String name;
     private Agent friend;
 
-    public MessageAgent(String name, Agent friend, int odd_or_even) {
-        super(name);
+    public MessageAgent(String name, Agent friend, int odd_or_even, Simulation simulation) {
+        super(name, simulation);
         this.name = name;
         this.odd_or_even = odd_or_even;
         this.friend = friend;

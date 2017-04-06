@@ -1,4 +1,4 @@
-package economicsl;
+package org.economicsl;
 
 
 public class Message {

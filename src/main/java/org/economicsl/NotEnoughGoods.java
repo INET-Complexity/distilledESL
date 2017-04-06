@@ -1,4 +1,4 @@
-package economicsl;
+package org.economicsl;
 
 /**
  * Exception thrown to indicate that there is insufficient

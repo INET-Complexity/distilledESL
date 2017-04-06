@@ -1,18 +1,17 @@
-package economicsl.accounting;
+package org.economicsl.accounting;
 
-import economicsl.Agent;
-import economicsl.Contract;
-import economicsl.NotEnoughGoods;
+import org.economicsl.Agent;
+import org.economicsl.Contract;
+import org.economicsl.NotEnoughGoods;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.stream.Collectors;
 
-import static economicsl.accounting.AccountType.GOOD;
+import static org.economicsl.accounting.AccountType.GOOD;
 
 /**
- * This is the main class implementing double entry economicsl.accounting. All public operations provided by this class
+ * This is the main class implementing double entry org.economicsl.accounting. All public operations provided by this class
  * are performed as a double entry operation, i.e. a pair of (dr, cr) operations.
  *
  * A Ledger contains a set of accounts, and is the interface between an agent and its accounts. Agents cannot
@@ -34,7 +33,9 @@ public class Ledger implements LedgerAPI {
     protected HashSet<Account> liabilityAccounts;
     protected HashMap<String, Account> goodsAccounts;
     protected HashSet<Account> equityAccounts;
+
     protected HashMap<Class<? extends Contract>, Account> contractsToAssetAccounts;
+
     protected HashMap<Class<? extends Contract>, Account> contractsToLiabilityAccounts;
     protected Account equityAccount;
     private double initialEquity;
@@ -253,7 +254,7 @@ public class Ledger implements LedgerAPI {
 
     /**
      * Reevaluates the current stock of phisical goods at a specified value and books
-     * the change to economicsl.accounting
+     * the change to org.economicsl.accounting
      */
     public void revalueGoods(String name, double value) {
         double old_value = getGoodsAccount(name).getBalance();
@@ -298,54 +299,7 @@ public class Ledger implements LedgerAPI {
         // (dr cash, cr asset)
         Account.doubleEntry(getGoodsAccount("cash"), assetAccount, amount);
     }
-/*
-    public void updateAssetPrices() {
-        List<Contract> allAssets = this.allAssets.stream()
-                .filter(contract -> contract instanceof Asset)
-                .collect(Collectors.toList());
 
-        for (Contract contract : allAssets) {
-            Asset asset = (Asset) contract;
-            if (asset.priceFell()) {
-                devalueAsset(asset, asset.valueLost());
-                asset.updatePrice();
-            }
-        }
-    }
-*/
-    /**
-     * if an Asset loses value, I must debit equity and credit asset
-     * @param valueLost the value lost
-     */
-    /*
-    public void devalueAsset(Contract asset, double valueLost) {
-        Account assetAccount = contractsToAssetAccounts.get(asset.getClass());
-
-        // (dr equityAccounts, cr assetAccounts)
-        Account.doubleEntry(equityAccount, assetAccount, valueLost);
-
-        //Todo: perform a check here that the Asset account balances match the value of the assets. (?)
-    }
-
-    public void appreciateAsset(Contract asset, double valueLost) {
-        Account assetAccount = contractsToAssetAccounts.get(asset.getClass());
-        Account.doubleEntry(assetAccount, equityAccount, valueLost);
-    }
-
-    public void devalueLiability(Contract liability, double valueLost) {
-        Account liabilityAccount = contractsToLiabilityAccounts.get(liability.getClass());
-
-        // (dr equityAccounts, cr assetAccounts)
-        Account.doubleEntry(liabilityAccount, equityAccount, valueLost);
-    }
-
-    public void appreciateLiability(Contract liability, double valueLost) {
-        Account liabilityAccount = contractsToLiabilityAccounts.get(liability.getClass());
-
-        // (dr equityAccounts, cr assetAccounts)
-        Account.doubleEntry(equityAccount, liabilityAccount, valueLost);
-    }
-*/
     public void printBalanceSheet(Agent me) {
         System.out.println("Asset accounts:\n---------------");
         for (Account account : assetAccounts) {
@@ -391,5 +345,17 @@ public class Ledger implements LedgerAPI {
 
     public Account getCashAccount() {
         return getGoodsAccount("cash");
+    }
+
+    public HashMap<Class<? extends org.economicsl.Contract>, Account> getContractsToAssetAccounts() {
+        return contractsToAssetAccounts;
+    }
+
+    public HashMap<Class<? extends org.economicsl.Contract>, Account> getContractsToLiabilityAccounts() {
+        return contractsToLiabilityAccounts;
+    }
+
+    public Account getEquityAccount() {
+        return equityAccount;
     }
 }

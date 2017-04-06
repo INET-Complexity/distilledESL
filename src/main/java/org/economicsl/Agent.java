@@ -1,9 +1,9 @@
-package economicsl;
+package org.economicsl;
 
-import economicsl.accounting.Ledger;
-import economicsl.obligations.Obligation;
-import economicsl.obligations.ObligationMessage;
-import economicsl.obligations.ObligationsAndGoodsMailbox;
+import org.economicsl.accounting.Ledger;
+import org.economicsl.obligations.Obligation;
+import org.economicsl.obligations.ObligationMessage;
+import org.economicsl.obligations.ObligationsAndGoodsMailbox;
 
 import java.util.HashSet;
 
@@ -12,14 +12,16 @@ import java.util.HashSet;
  */
 public class Agent {
     protected String name;
+    private Simulation simulation;
     protected boolean alive = true;
     protected ObligationsAndGoodsMailbox obligationsAndGoodsMailbox;
     protected Mailbox mailbox;
     Ledger mainLedger;
 
 
-    public Agent(String name) {
+    public Agent(String name, Simulation simulation) {
         this.name = name;
+        this.simulation = simulation;
         this.mailbox = new Mailbox();
         mainLedger = new Ledger(this);
         this.obligationsAndGoodsMailbox = new ObligationsAndGoodsMailbox();
@@ -37,6 +39,10 @@ public class Agent {
             // This contract is a liability for me
             mainLedger.addLiability(contract);
         }
+    }
+
+    public int getTime() {
+        return this.simulation.getTime();
     }
 
     public void addCash(double amount) {
@@ -110,5 +116,17 @@ public class Agent {
 
     private HashSet<Message> get_messages(String topic) {
         return mailbox.get_massages(topic);
+    }
+
+    public HashSet<Obligation> get_obligation_inbox() {
+        return obligationsAndGoodsMailbox.getObligation_inbox();
+    }
+
+    public HashSet<Obligation> get_obligation_outbox() {
+        return obligationsAndGoodsMailbox.getObligation_outbox();
+    }
+
+    public Simulation getSimulation() {
+        return simulation;
     }
 }
