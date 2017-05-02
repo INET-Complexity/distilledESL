@@ -1,0 +1,14 @@
+dist: trusty
+
+sudo: false  # builds will run on Docker infrastructure!
+
+language: java
+
+jdk:
+  - oraclejdk8
+  - openjdk8
+  
+branches:
+  only:
+    - master
+    - develop
