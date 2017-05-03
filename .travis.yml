@@ -12,3 +12,9 @@ branches:
   only:
     - master
     - develop
+
+before_install:  # might need to version bump this plugin from time to time...
+  - wget -O ~/codacy-coverage-reporter-assembly-latest.jar https://github.com/codacy/codacy-coverage-reporter/releases/download/1.0.13/codacy-coverage-reporter-1.0.13-assembly.jar
+  
+after_success:
+  - java -cp ~/codacy-coverage-reporter-assembly-latest.jar com.codacy.CodacyCoverageReporter -l Java -r jacoco.xml
