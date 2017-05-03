@@ -18,3 +18,7 @@ before_install:  # might need to version bump this plugin from time to time...
   
 after_success:
   - java -cp ~/codacy-coverage-reporter-assembly-latest.jar com.codacy.CodacyCoverageReporter -l Java -r jacoco.xml
+  
+env:
+  global:
+    - secure: "Eventually this will be an encrypted Codacy token!"
