@@ -13,12 +13,13 @@ branches:
     - master
     - develop
 
-before_install:  # might need to version bump this plugin from time to time...
-  - wget -O ~/codacy-coverage-reporter-assembly-latest.jar https://github.com/codacy/codacy-coverage-reporter/releases/download/1.0.13/codacy-coverage-reporter-1.0.13-assembly.jar
-  
+before_install:
+  - sudo apt-get install jq
+  - wget -O ~/codacy-coverage-reporter-assembly-latest.jar $(curl https://api.github.com/repos/codacy/codacy-coverage-reporter/releases/latest | jq -r .assets[0].browser_download_url)
+
 after_success:
-  - java -cp ~/codacy-coverage-reporter-assembly-latest.jar com.codacy.CodacyCoverageReporter -l Java -r jacoco.xml
-  
+  - java -cp ~/codacy-coverage-reporter-assembly-latest.jar com.codacy.CodacyCoverageReporter -l Java -r build/reports/jacoco/test/jacocoTestReport.xml
+
 env:
   global:
     - secure: "WxfSyMxDiAAHqCoqnG9KXw85YhtC1a7JoN99cdM7VJ2crl8PTK8Pe1o9EPVffnydNKxWES2ewFN+kVKUkWZEH+K8ZPaVpOZ1rPiC0+dNl6P8loT8ft/ii6B+WReLIfWm5jA7xevuhJGSNlDGIJJ/HCdS/JNMQoViOV7ffSs8BuKHy3FcgfusnFNyUvkJCVEKQV+l8Wu3+6f0GrQaNHBFZRqPNETWU4sQnz4GksU6OCLubC8DTNH9ktFFN+isndWl0J+ixBrcQ/uQHtRMhz9s3/Lc92cQJkHP4O/AyOtPqbceBAE2wSEPzZzIv7Kp2SdTIq72G5aNowts7Y0RLPBPwsiG7ujgyeNUTEzV/RdyMo2k83OuQcIKNQdw/T8XUnnpwCz18OmuO416UHHtoaFJlHtbmwjZQfLdkhTos2t+0axGFKHQC4IVW+EwxCSwGnPHRgfueBWptEpjQvWFv/pg43wfPCmNjN5HnFfGQ9JIkwc6O7efZF4hNSXAZjUABAqvDjONuuzN7OnQuK1LCwaVR1SXB9WzO1F7csfllKM1aeSxTDfwXmQ4ZvvHUaZjytqsZic1rfW7YgyE71Qb3jXcBl6c9kzsPzz142l6OS5iroCA3oppqqXMn8uqwif0Y9DgNvvpcqApg8GSMaESewyqRkmyGpdUqYYRHTk2LRhd1nc="
